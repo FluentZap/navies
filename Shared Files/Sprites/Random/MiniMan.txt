@@ -1,0 +1,8 @@
+Force_Friction.x
+10
+Force_Friction.y
+50
+Force_Gravity
+0.3
+Ground_Level
+510
