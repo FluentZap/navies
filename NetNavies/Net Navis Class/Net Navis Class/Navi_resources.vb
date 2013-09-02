@@ -25,7 +25,7 @@
                 N.Weight = 50
                 N.GroundSpeed = 1
                 N.AirSpeed = 0.1
-                N.DashSpeed = 3
+                N.DashSpeed = 6
                 N.Acrobatics = 30
 
             Case Is = "Barnabus"
@@ -43,12 +43,12 @@
 
             Case Is = "Rebel"
                 N.NaviID = 3
-                N.HitBox = New Rectangle(3, 5, 27, 27)
-                N.SpriteSheet = My.Resources.Barnabus
+                N.HitBox = New Rectangle(3, 5, 42, 42)
+                N.SpriteSheet = My.Resources.Rebel_pull_sheet
                 N.SpriteSize = New Point(48, 48)
                 N.HealthMax = 100
                 N.EnergyMax = 100
-                N.Weight = 50
+                N.Weight = 30
                 N.GroundSpeed = 1
                 N.AirSpeed = 0.1
                 N.DashSpeed = 2
@@ -156,9 +156,35 @@
                     b = b + 1
                 Next
                 Ani.Frame = frames
-                Ani.Hold_Index = 3
+                Ani.Hold_Index = 2
 
                 '---------------Rebel--------------
+
+            Case Is = Animation_Name_Enum.Rebel_Standing
+                Dim frames(0) As Ani_Frame
+                frames(0) = New Ani_Frame(New Point(0, 0), 0)
+                Ani.Frame = frames
+                Ani.Hold_Index = 0
+            Case Is = Animation_Name_Enum.Rebel_Runing
+
+                Dim frames(9) As Ani_Frame
+
+                For a = 0 To 9
+                    frames(a) = New Ani_Frame(New Point(a + 1, 0), 5)
+
+                Next
+                Ani.Frame = frames
+                Ani.RepeatFrame = 0
+
+            Case Is = Animation_Name_Enum.Rebel_Jumping
+                Dim frames(3) As Ani_Frame
+
+                For a = 0 To 3
+                    frames(a) = New Ani_Frame(New Point(a + 10, 0), 7)
+
+                Next
+                Ani.Frame = frames
+                Ani.Hold_Index = 3
 
         End Select
 
@@ -193,6 +219,7 @@
         Vex_Standing
         Vex_Dash_Start
         Vex_Dash_End
+        Vex_Fallfast
         Raven_Runing
         Raven_Jumping
         Raven_Standing
@@ -204,6 +231,7 @@
         Rebel_Standing
         Rebel_Dash_Start
         Rebel_Dash_End
+        Rebel_Fallfast
     End Enum
 
 
@@ -272,12 +300,12 @@
             Case Is = "Rebel"
                 If Navi.OnGround = True Then
                     If Navi.Running = True Then
-                        If Not Navi.Current_Animation = Animation_Name_Enum.Barnabus_Runing Then Navi.set_Animation(Animation_Name_Enum.Barnabus_Runing)
+                        If Not Navi.Current_Animation = Animation_Name_Enum.Rebel_Runing Then Navi.set_Animation(Animation_Name_Enum.Rebel_Runing)
                     Else
-                        If Not Navi.Current_Animation = Animation_Name_Enum.Barnabus_Standing Then Navi.set_Animation(Animation_Name_Enum.Barnabus_Standing)
+                        If Not Navi.Current_Animation = Animation_Name_Enum.Rebel_Standing Then Navi.set_Animation(Animation_Name_Enum.Rebel_Standing)
                     End If
                 Else
-                    If Not Navi.Current_Animation = Animation_Name_Enum.Barnabus_Jumping Then Navi.set_Animation(Animation_Name_Enum.Barnabus_Jumping)
+                    If Not Navi.Current_Animation = Animation_Name_Enum.Rebel_Jumping Then Navi.set_Animation(Animation_Name_Enum.Rebel_Jumping)
                 End If
 
 
