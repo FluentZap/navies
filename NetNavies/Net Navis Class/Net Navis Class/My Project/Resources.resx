@@ -124,6 +124,9 @@
   <data name="Raven" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Raven.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Rebel_pull_sheet" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Rebel pull sheet.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Shot2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Shot2.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
