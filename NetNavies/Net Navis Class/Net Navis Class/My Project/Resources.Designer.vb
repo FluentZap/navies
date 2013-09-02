@@ -74,6 +74,13 @@ Namespace My.Resources
             End Get
         End Property
         
+        Public ReadOnly Property Rebel_pull_sheet() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("Rebel_pull_sheet", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
         Public ReadOnly Property Shot2() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("Shot2", resourceCulture)
