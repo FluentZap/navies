@@ -1,29 +1,39 @@
 ﻿'Main Sub's go into Navi Main
-'Navi Resources is for any Navi spasific Data
+'Navi Resources is for any Navi specific Data
+'Host app calls Initialise then runs DoEvents
+'DXon if switched on changes rendering to a directx window rendering is then done in Draw_DX
 
 
-
-
-
-
-
-
-
-
-Public Class Navi_Main
+Partial Public Class Navi_Main
     Private WithEvents NaviForm As NaviForm
     Private WithEvents MenuForm As MenuForm
+    Private WithEvents NaviDX As NaviDX
+
+    Public pressedkeys As New HashSet(Of Windows.Forms.Keys)
+
+    'DirectX
+    Dim DXDevice As Device
+    Dim DXPP As PresentParameters
+    Dim DXSprite As Sprite
+    Dim DXNaviTexture() As Texture
+    Dim DXProjectileTexture() As Texture
+
+    Dim Init_DirectX As Boolean
+    Dim DXOn As Boolean ' = True
+
 
     Dim NormalImage As New Imaging.ImageAttributes
     Dim BlueImage As New Imaging.ImageAttributes
     Dim RedImage As New Imaging.ImageAttributes
     Dim GreenImage As New Imaging.ImageAttributes
 
-    Public Gravity As PointF = New PointF(0, 1)
+    Public Gravity As PointF = New PointF(0, 0.5)
     Public AirFriction As New PointF(0.01, 0.01)
     Public GroundFriction As New PointF(0.15, 0)
 
-    Private Host_Navi As NetNavi_Type
+    Public Host_Navi As NetNavi_Type
+    Dim Direct_Control As Boolean = True
+
 
     Private Physics_Timer As Double
     Private Physics_Rate As Double
@@ -33,15 +43,17 @@ Public Class Navi_Main
     Class Projectiles_Type
         Public Location As Point
         Public Speed As PointF
+        Public Life As Integer
 
-        Sub New(ByVal Location As Point, ByVal Speed As PointF)
+        Sub New(ByVal Location As Point, ByVal Speed As PointF, ByVal Life As Integer)
             Me.Location = Location
             Me.Speed = Speed
+            Me.Life = Life
         End Sub
 
     End Class
 
-    Private Projectile_List As HashSet(Of Projectiles_Type) = New HashSet(Of Projectiles_Type)
+    Public Projectile_List As HashSet(Of Projectiles_Type) = New HashSet(Of Projectiles_Type)
 
 
     Sub New(ByVal Navi_Name As String, ByVal NaviID As Long)
@@ -57,25 +69,16 @@ Public Class Navi_Main
         NaviForm = New NaviForm
         MenuForm = New MenuForm
         NaviForm.Show()
-        NaviForm.Show()
+        NaviForm.TopMost = True
         NaviForm.Width = Host_Navi.Size.X
         NaviForm.Height = Host_Navi.Size.Y
+        NaviForm.Left = Int(Host_Navi.Location.X)
+        NaviForm.Top = Int(Host_Navi.Location.Y)
+
+        'Initialise_Network()
 
         'Initialise defaults
         Set_color_filters()
-
-        'Dim ip As Net.IPAddress = Net.IPAddress.Parse("127.0.0.1")
-        'Dim Net_Client As New Net.Sockets.TcpClient
-        'Dim Net_Host As New Net.Sockets.TcpListener(ip, 52525)
-
-
-        'Try
-        '   Net_Client.Connect(ip, 52525)
-        'Catch
-        '   Net_Host.Start()
-        'End Try
-
-
 
         Physics_Timer = DateAndTime.Timer
         Physics_Rate = 1 / 60
@@ -101,6 +104,8 @@ Public Class Navi_Main
             Update_Physics()
             Set_Correct_Animation(Host_Navi)
             Host_Navi.Update_Sprite()
+            'DoNetworkEvents()
+
             Physics_Timer = DateAndTime.Timer + Physics_Rate
             Physics_Step += 1
         End If
@@ -110,64 +115,91 @@ Public Class Navi_Main
 
 
     Sub Handle_UI()
-
-        If NaviForm.pressedkeys.Contains(Keys.W) Then
-
+        If pressedkeys.Contains(Keys.W) Then
+            Host_Navi.Scale += 0.5
+            Host_Navi.OldSprite = New Point(500, 500)
         End If
 
-        If NaviForm.pressedkeys.Contains(Keys.S) Then
-
+        If pressedkeys.Contains(Keys.S) Then
+            Host_Navi.Scale -= 0.5
+            Host_Navi.OldSprite = New Point(500, 500)
         End If
 
 
-        If NaviForm.pressedkeys.Contains(Keys.A) Then
+        If pressedkeys.Contains(Keys.A) Then
             Host_Navi.FaceLeft = True
             Host_Navi.Running = True
-            If NaviForm.pressedkeys.Contains(Keys.ShiftKey) Then Host_Navi.Dashing = True : Host_Navi.HasDashed = True Else Host_Navi.Dashing = False
+            If pressedkeys.Contains(Keys.ShiftKey) Then Host_Navi.Dashing = True : Host_Navi.HasDashed = True Else Host_Navi.Dashing = False
         End If
 
-        If NaviForm.pressedkeys.Contains(Keys.D) Then
+        If pressedkeys.Contains(Keys.D) Then
             Host_Navi.FaceLeft = False
             Host_Navi.Running = True
-            If NaviForm.pressedkeys.Contains(Keys.ShiftKey) Then Host_Navi.Dashing = True : Host_Navi.HasDashed = True Else Host_Navi.Dashing = False
+            If pressedkeys.Contains(Keys.ShiftKey) Then Host_Navi.Dashing = True : Host_Navi.HasDashed = True Else Host_Navi.Dashing = False
         End If
 
-        If Not NaviForm.pressedkeys.Contains(Keys.D) AndAlso Not NaviForm.pressedkeys.Contains(Keys.A) Then
+        If Not pressedkeys.Contains(Keys.ShiftKey) Then Host_Navi.Dashing = False
+
+        If Not pressedkeys.Contains(Keys.D) AndAlso Not pressedkeys.Contains(Keys.A) Then
             Host_Navi.Running = False
         End If
 
 
-        If NaviForm.pressedkeys.Contains(Keys.Space) Then
+        If pressedkeys.Contains(Keys.Space) Then
             If Host_Navi.OnGround = True Then
                 Host_Navi.Jumping = True
                 Host_Navi.HasJumped = True
             End If
         End If
 
+        If pressedkeys.Contains(Keys.Tab) Then If DXOn = False Then DXOn = True Else NaviDX.Dispose()
 
 
-        If NaviForm.pressedkeys.Contains(Keys.ControlKey) Then
-            Projectile_List.Add(New Projectiles_Type(New Point(Host_Navi.GetHitBox.Left, Host_Navi.GetHitBox.Top), New PointF(5, 0)))
-            NaviForm.pressedkeys.Remove(Keys.ControlKey)
+        If pressedkeys.Contains(Keys.OemQuestion) Then
+            If Host_Navi.FaceLeft = True Then
+                Projectile_List.Add(New Projectiles_Type(New Point(Host_Navi.Navi_Location.Left, Host_Navi.Navi_Location.Top), New PointF(-20, 0), 600))
+            Else
+                Projectile_List.Add(New Projectiles_Type(New Point(Host_Navi.Navi_Location.Right, Host_Navi.Navi_Location.Top), New PointF(20, 0), 600))
+            End If
+
+            pressedkeys.Remove(Keys.OemQuestion)
         End If
 
 
     End Sub
 
     Sub Draw_All()
-        If Not Host_Navi.Sprite = Host_Navi.OldSprite OrElse Not Host_Navi.FaceLeft = Host_Navi.OldFaceLeft Then
-            NaviForm.Invalidate()
-            Host_Navi.OldSprite = Host_Navi.Sprite
-            Host_Navi.OldFaceLeft = Host_Navi.FaceLeft
+        If DXOn = False Then
+            If Not Host_Navi.Sprite = Host_Navi.OldSprite OrElse Not Host_Navi.FaceLeft = Host_Navi.OldFaceLeft Then
+                NaviForm.Invalidate()
+                Host_Navi.OldSprite = Host_Navi.Sprite
+                Host_Navi.OldFaceLeft = Host_Navi.FaceLeft
+            End If
         End If
 
-        'If Projectile_List.Count > 0 Then 'ProjectileForm.Invalidate()
-        'ProjectileForm.Refresh()
-        'ProjectileForm.PictureBox1.Invalidate()
+        If DXOn = True Then
+            If Init_DirectX = False Then Start_Directx()
+
+            Draw_DX()
+
+        End If
+
     End Sub
 
 
     Sub Process_Navi_Commands()
+
+        If Direct_Control = False Then
+            Host_Navi.Running = False
+            If Host_Navi.Navi_Location.Right <= Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox.Width Then
+                Host_Navi.FaceLeft = False
+                Host_Navi.Running = True
+            End If
+            If Host_Navi.Navi_Location.Right >= Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox.Width Then
+                Host_Navi.FaceLeft = True
+            End If
+        End If
+
 
 
         'Move Navies
@@ -196,12 +228,17 @@ Public Class Navi_Main
 
     Sub Update_Physics()
 
-
+        Dim Item_Remove_List As New HashSet(Of Projectiles_Type)
         For Each item In Projectile_List
             item.Location.X += item.Speed.X
             item.Location.Y += item.Speed.Y
+            item.Life -= 1
+            If item.Life <= 0 Then Item_Remove_List.Add(item)
         Next
 
+        For Each item In Item_Remove_List
+            Projectile_List.Remove(item)
+        Next
 
 
         'Friction
@@ -217,8 +254,8 @@ Public Class Navi_Main
         If Host_Navi.OnGround = False Then Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
         'Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
 
-        Host_Navi.Location.X = Host_Navi.Location.X + Host_Navi.Speed.X
-        Host_Navi.Location.Y = Host_Navi.Location.Y + Host_Navi.Speed.Y
+        Host_Navi.Location.X = Host_Navi.Location.X + Host_Navi.Speed.X * Host_Navi.Scale
+        Host_Navi.Location.Y = Host_Navi.Location.Y + Host_Navi.Speed.Y * Host_Navi.Scale
 
         'Bounds
         If Host_Navi.FaceLeft = True Then
@@ -227,8 +264,12 @@ Public Class Navi_Main
             If Host_Navi.Navi_Location.Left <= Screen.PrimaryScreen.WorkingArea.Left Then Host_Navi.Location.X = Screen.PrimaryScreen.WorkingArea.Left - Host_Navi.GetHitBox.Left : Host_Navi.Speed.X = 0
         End If
 
-        'If Host_Navi.Navi_Location.Left <= Screen.PrimaryScreen.WorkingArea.Left Then Host_Navi.Location.X = Screen.PrimaryScreen.WorkingArea.Left - (Host_Navi.GetSize.X - Host_Navi.GetHitBox.Right)
-        If Host_Navi.Navi_Location.Right > Screen.PrimaryScreen.WorkingArea.Right Then Host_Navi.Location.X = Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox.Right : Host_Navi.Speed.X = 0
+        If Host_Navi.FaceLeft = True Then
+            If Host_Navi.Navi_Location.Right >= Screen.PrimaryScreen.WorkingArea.Right Then Host_Navi.Location.X = Screen.PrimaryScreen.WorkingArea.Right - (Host_Navi.GetSize.X - Host_Navi.GetHitBox.Left) : Host_Navi.Speed.X = 0
+        Else
+            If Host_Navi.Navi_Location.Right >= Screen.PrimaryScreen.WorkingArea.Right Then Host_Navi.Location.X = Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox.Right : Host_Navi.Speed.X = 0
+        End If
+
         If Host_Navi.Navi_Location.Bottom > Screen.PrimaryScreen.WorkingArea.Bottom Then Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetHitBox.Bottom
         If Host_Navi.Navi_Location.Bottom = Screen.PrimaryScreen.WorkingArea.Bottom Then Host_Navi.OnGround = True : Host_Navi.Speed.Y = 0 Else Host_Navi.OnGround = False
 
@@ -248,9 +289,6 @@ Public Class Navi_Main
         yoff = CSng(-0.5 + 0.5 * Host_Navi.SpriteSize.Y / Host_Navi.GetSize.Y) + Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y
 
         If Host_Navi.FaceLeft = True Then
-            'xoff = Navi.Form.SpriteSize.X * Navi.Sprite.X
-            'yoff = Navi.Form.SpriteSize.Y * Navi.Sprite.Y
-            'e.Graphics.DrawImage(NaviSprite(0, 0), New Rectangle(Navi.Form.Size.X, 0, -Navi.Size.X, Navi.Size.Y), xoff, yoff, Navi.Form.SpriteSize.X, Navi.Form.SpriteSize.Y, GraphicsUnit.Pixel, NormalImage)
             e.Graphics.DrawImage(Host_Navi.SpriteSheet, New Rectangle(Host_Navi.GetSize.X, 0, -Host_Navi.GetSize.X - 1, Host_Navi.GetSize.Y), xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y, GraphicsUnit.Pixel, NormalImage)
         Else
             e.Graphics.DrawImage(Host_Navi.SpriteSheet, New Rectangle(0, 0, Host_Navi.GetSize.X, Host_Navi.GetSize.Y), xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y, GraphicsUnit.Pixel, NormalImage)
@@ -280,5 +318,127 @@ Public Class Navi_Main
         BlueImage.SetColorMatrix(New Imaging.ColorMatrix(BlueColorMatrixElements), Imaging.ColorMatrixFlag.Default, Imaging.ColorAdjustType.Bitmap)
 
     End Sub
+
+
+
+
+
+    Sub Start_Directx()
+        NaviDX = New NaviDX
+        NaviDX.Show()
+        NaviDX.Width = Screen.PrimaryScreen.WorkingArea.Width
+        NaviDX.Height = Screen.PrimaryScreen.WorkingArea.Height
+        'NaviDX.Location = New Point(0, Screen.PrimaryScreen.Bounds.Height - NaviDX.Height)
+        NaviForm.Hide()
+        DXPP = New PresentParameters
+        DXPP.BackBufferHeight = NaviDX.Height
+        DXPP.BackBufferWidth = NaviDX.Width
+        DXPP.SwapEffect = SwapEffect.Copy
+        DXPP.PresentationInterval = PresentInterval.Immediate
+        DXPP.Windowed = True
+
+        DXDevice = New Device(0, DeviceType.Hardware, NaviDX, CreateFlags.HardwareVertexProcessing, DXPP)
+        DXSprite = New Sprite(DXDevice)
+
+
+        ReDim DXNaviTexture(10)
+        'My.Resources.Raven.MakeTransparent(Color.FromArgb(255, 0, 255, 0))
+        DXNaviTexture(0) = New Texture(DXDevice, CType(Host_Navi.SpriteSheet.Clone, Drawing.Bitmap), Usage.None, Pool.Managed)
+
+
+        ReDim DXProjectileTexture(10)
+        DXProjectileTexture(0) = New Texture(DXDevice, CType(My.Resources.Shot2.Clone, Drawing.Bitmap), Usage.None, Pool.Managed)
+
+
+
+        Init_DirectX = True
+    End Sub
+
+
+    Sub Draw_DX()
+
+        DXDevice.Clear(ClearFlags.Target, Color.Transparent, 0, 1)
+        DXDevice.BeginScene()
+        DXSprite.Begin(SpriteFlags.AlphaBlend)
+        DXDevice.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.Point)
+        Dim xoff, yoff As Single
+        xoff = Host_Navi.SpriteSize.X * Host_Navi.Sprite.X
+        yoff = Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y
+
+        'DXSprite.Draw(DXNaviTexture(0), New Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, New Vector3(Host_Navi.Location.X, Host_Navi.Location.Y, 0), Color.White)
+
+        If Host_Navi.FaceLeft = True Then
+            DXSprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(-Host_Navi.Scale, Host_Navi.Scale), New Vector2(0, 0), 0, New Vector2(Host_Navi.Location.X + (Host_Navi.SpriteSize.X * Host_Navi.Scale), Host_Navi.Location.Y))
+            DXSprite.Draw(DXNaviTexture(0), New Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, New Vector3(0, 0, 0), Color.White)
+        Else
+            DXSprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(Host_Navi.Scale, Host_Navi.Scale), New Vector2(0, 0), 0, New Vector2(Host_Navi.Location.X, Host_Navi.Location.Y))
+            DXSprite.Draw(DXNaviTexture(0), New Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, New Vector3(0, 0, 0), Color.White)
+        End If
+
+        For Each item In Projectile_List
+            DXSprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(3, 3), New Vector2(0, 0), 0, New Vector2(item.Location.X, item.Location.Y))
+            DXSprite.Draw(DXProjectileTexture(0), New Rectangle(0, 0, 8, 6), Vector3.Empty, New Vector3(0, 0, 0), Color.White)
+        Next
+
+        DXSprite.Transform = Matrix.Identity
+        DXSprite.Draw(DXProjectileTexture(0), New Rectangle(0, 0, 8, 6), Vector3.Empty, New Vector3(0, 0, 0), Color.White)
+
+        DXSprite.End()
+
+        DXDevice.EndScene()
+        DXDevice.Present()
+
+    End Sub
+
+
+    Private Sub NaviForm_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles NaviForm.KeyDown
+        If pressedkeys.Contains(e.KeyCode) Then
+        Else
+            pressedkeys.Add(e.KeyCode)
+        End If
+    End Sub
+
+    Private Sub NaviForm_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles NaviForm.KeyUp
+        If pressedkeys.Contains(e.KeyCode) Then
+            pressedkeys.Remove(e.KeyCode)
+        End If
+    End Sub
+
+    Private Sub NaviForm_GotFocus(ByVal sender As Object, ByVal e As System.EventArgs) Handles NaviForm.GotFocus
+        Direct_Control = True
+    End Sub
+
+    Private Sub NaviForm_LostFocus(ByVal sender As Object, ByVal e As System.EventArgs) Handles NaviForm.LostFocus
+        If DXOn = False Then Direct_Control = False
+        pressedkeys.Clear()
+    End Sub
+
+    Private Sub NaviDX_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles NaviDX.KeyDown
+        If pressedkeys.Contains(e.KeyCode) Then
+        Else
+            pressedkeys.Add(e.KeyCode)
+        End If
+    End Sub
+
+    Private Sub NaviDX_KeyUp(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles NaviDX.KeyUp
+        If pressedkeys.Contains(e.KeyCode) Then
+            pressedkeys.Remove(e.KeyCode)
+        End If
+    End Sub
+
+    Private Sub NaviDX_LostFocus(ByVal sender As Object, ByVal e As System.EventArgs) Handles NaviDX.LostFocus
+        pressedkeys.Clear()
+    End Sub
+
+    Private Sub NaviDX_Disposed(ByVal sender As Object, ByVal e As System.EventArgs) Handles NaviDX.Disposed
+        DXOn = False
+        Init_DirectX = False
+        DXDevice = Nothing
+        DXSprite = Nothing
+        DXNaviTexture = Nothing
+        DXPP = Nothing
+        NaviForm.Show()
+    End Sub
+
 
 End Class

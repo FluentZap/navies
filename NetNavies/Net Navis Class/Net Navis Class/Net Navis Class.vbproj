@@ -57,6 +57,9 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="Microsoft.DirectX.Direct3D, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="Microsoft.DirectX.Direct3DX, Version=1.0.2911.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -74,6 +77,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Import Include="Microsoft.DirectX" />
+    <Import Include="Microsoft.DirectX.Direct3D" />
     <Import Include="Microsoft.VisualBasic" />
     <Import Include="System" />
     <Import Include="System.Collections" />
@@ -86,6 +91,12 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NaviDX.Designer.vb">
+      <DependentUpon>NaviDX.vb</DependentUpon>
+    </Compile>
+    <Compile Include="NaviDX.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Navi_main.vb" />
     <Compile Include="MenuForm.Designer.vb">
       <DependentUpon>MenuForm.vb</DependentUpon>
@@ -116,6 +127,7 @@
     </Compile>
     <Compile Include="Navi_resources.vb" />
     <Compile Include="NetNavi_Type.vb" />
+    <Compile Include="Network.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MenuForm.resx">
@@ -126,6 +138,9 @@
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NaviDX.resx">
+      <DependentUpon>NaviDX.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NaviForm.resx">
       <DependentUpon>NaviForm.vb</DependentUpon>
@@ -143,19 +158,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Barnabus.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Raven.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Vex.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shot2.bmp" />
+    <None Include="Resources\Barnabus.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="Resources\Shot2.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\Rebel pull sheet.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
