@@ -18,6 +18,7 @@
     <OptionStrict>Off</OptionStrict>
     <OptionInfer>On</OptionInfer>
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
+    <ApplicationIcon>Rebel.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -132,6 +133,9 @@
       <Project>{F9C62EE0-4E8E-4CAC-8584-B68B149B5FB8}</Project>
       <Name>Net Navis Class</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Rebel.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

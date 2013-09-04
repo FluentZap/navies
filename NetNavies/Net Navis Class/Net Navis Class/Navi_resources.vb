@@ -10,23 +10,23 @@
                 N.HealthMax = 100
                 N.EnergyMax = 100
                 N.Weight = 50
-                N.GroundSpeed = 1
+                N.GroundSpeed = 0.5
                 N.AirSpeed = 0.2
-                N.DashSpeed = 2
-                N.Acrobatics = 40
+                N.DashSpeed = 1
+                N.Acrobatics = 15
 
             Case Is = "Vex"
                 N.NaviID = 1
-                N.HitBox = New Rectangle(10, 18, 29, 30)
+                N.HitBox = New Rectangle(11, 18, 29, 30)
                 N.SpriteSheet = My.Resources.Vex
                 N.SpriteSize = New Point(48, 48)
                 N.HealthMax = 100
                 N.EnergyMax = 100
-                N.Weight = 50
-                N.GroundSpeed = 1
+                N.Weight = 25
+                N.GroundSpeed = 0.5
                 N.AirSpeed = 0.1
-                N.DashSpeed = 6
-                N.Acrobatics = 30
+                N.DashSpeed = 2
+                N.Acrobatics = 10
 
             Case Is = "Barnabus"
                 N.NaviID = 2
@@ -36,23 +36,23 @@
                 N.HealthMax = 100
                 N.EnergyMax = 100
                 N.Weight = 50
-                N.GroundSpeed = 1
+                N.GroundSpeed = 0.5
                 N.AirSpeed = 0.1
-                N.DashSpeed = 2
-                N.Acrobatics = 30
+                N.DashSpeed = 1
+                N.Acrobatics = 10
 
             Case Is = "Rebel"
                 N.NaviID = 3
-                N.HitBox = New Rectangle(3, 5, 42, 42)
+                N.HitBox = New Rectangle(13, 22, 22, 26)
                 N.SpriteSheet = My.Resources.Rebel_pull_sheet
                 N.SpriteSize = New Point(48, 48)
                 N.HealthMax = 100
                 N.EnergyMax = 100
                 N.Weight = 30
-                N.GroundSpeed = 1
+                N.GroundSpeed = 0.5
                 N.AirSpeed = 0.1
-                N.DashSpeed = 2
-                N.Acrobatics = 30
+                N.DashSpeed = 1
+                N.Acrobatics = 10
         End Select
 
         N.Size = N.SpriteSize
@@ -203,8 +203,8 @@
         End Sub
     End Class
 
-    Class Animation
-        Public Frame() As Ani_Frame        
+    Class Animation        
+        Public Frame() As Ani_Frame
         Public Finished As Boolean = False
         Public RepeatFrame As Integer = -1
         Public Hold_Index As Integer
