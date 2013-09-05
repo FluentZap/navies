@@ -1,5 +1,26 @@
 ﻿'This module handles all the network interaction
+
+
+'Packet Layout
+'All packets
+'4 byte Program step
+'1 byte Packet type
+
+'Full sync
+
+'CommandSend
+
+
+
 Partial Class Navi_Main
+
+
+    Public Enum Packet_Type As Byte
+        FullSync = 0
+        CommandSend = 1
+    End Enum
+
+
     Private Net_Host As Net.Sockets.TcpListener
     Private Net_Client As Net.Sockets.TcpClient
     Private IsClient As Boolean
@@ -7,17 +28,15 @@ Partial Class Navi_Main
     Private Client_List As Dictionary(Of Integer, Client_Type) = New Dictionary(Of Integer, Client_Type)
 
 
-    'Private Client_Member
-
-
-
     Class Client_Type
         Public ReSync As Boolean
         Public Socket As Net.Sockets.TcpClient
+        Public Client_Navi As NetNavi_Type
 
         Sub New(ByVal Socket As Net.Sockets.TcpClient)
             Me.Socket = Socket
             ReSync = True
+            Client_Navi = New NetNavi_Type
         End Sub
 
     End Class
@@ -75,9 +94,9 @@ Partial Class Navi_Main
     Sub Handle_Clients()
 
         For Each Client In Client_List
-            If Client.Value.ReSync = True Then
-                'Client.Value.Socket.SendBufferSize
-                Resync(Client.Value.Socket, False)
+            If Client.Value.ReSync = True Then                
+                ServerResync(Client.Value.Socket)
+                'Client.Value.ReSync = False
             End If
 
 
@@ -88,11 +107,12 @@ Partial Class Navi_Main
 
 
     Sub Update_To_Host()
+        If Net_Client.Client.Available > 0 Then
+            Dim b(71) As Byte
+            Net_Client.GetStream.Read(b, 0, 71)
+            Host_Navi.Set_Compact_buffer(b)
+        End If
 
-        Dim stream As New IO.MemoryStream
-        '       stream = 
-
-        'Net_Client.Client.Available=
     End Sub
 
 
@@ -110,17 +130,16 @@ Partial Class Navi_Main
 
 
 
-    Sub Resync(ByVal Socket As Net.Sockets.TcpClient, ByVal IsClient As Boolean)
-        If IsClient = False Then
-            Dim s As New Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            Dim stream As New IO.MemoryStream()
-            s.Serialize(stream, Host_Navi.Get_Compact)
-            'Socket.Client.BeginSend(stream.ToArray, 0, stream.Length, Net.Sockets.SocketFlags.None, Nothing, Nothing)
-            Socket.GetStream.BeginWrite(stream.ToArray, 0, stream.Length, Nothing, Nothing)
+    Sub ServerResync(ByVal Socket As Net.Sockets.TcpClient)        
+        Dim Buffer(71) As Byte
+        'Convert Data
+        BitConverter.GetBytes(Program_Step).CopyTo(Buffer, 0)
+        Buffer(4) = Packet_Type.FullSync
+        Host_Navi.Get_Compact_buffer.CopyTo(Buffer, 5) '65 bytes
+        'Send Data
+        'Socket.GetStream.BeginWrite(Buffer, 0, Buffer.Length, Nothing, Nothing)
 
-        End If
-
-
+        Socket.GetStream.Write(Buffer, 0, Buffer.Length - 1)
     End Sub
 
 

@@ -6,6 +6,7 @@
                 N.NaviID = 0
                 N.HitBox = New Rectangle(10, 22, 30, 26)
                 N.SpriteSheet = My.Resources.Raven
+                N.Icon = My.Resources.Raven_Icon
                 N.SpriteSize = New Point(48, 48)
                 N.HealthMax = 100
                 N.EnergyMax = 100
@@ -19,6 +20,7 @@
                 N.NaviID = 1
                 N.HitBox = New Rectangle(11, 18, 29, 30)
                 N.SpriteSheet = My.Resources.Vex
+                N.Icon = My.Resources.Vex_Icon
                 N.SpriteSize = New Point(48, 48)
                 N.HealthMax = 100
                 N.EnergyMax = 100
@@ -32,6 +34,7 @@
                 N.NaviID = 2
                 N.HitBox = New Rectangle(3, 5, 27, 27)
                 N.SpriteSheet = My.Resources.Barnabus
+                N.Icon = My.Resources.Barnabus_Icon
                 N.SpriteSize = New Point(32, 32)
                 N.HealthMax = 100
                 N.EnergyMax = 100
@@ -45,6 +48,7 @@
                 N.NaviID = 3
                 N.HitBox = New Rectangle(13, 22, 22, 26)
                 N.SpriteSheet = My.Resources.Rebel_pull_sheet
+                N.Icon = My.Resources.Rebel_Icon
                 N.SpriteSize = New Point(48, 48)
                 N.HealthMax = 100
                 N.EnergyMax = 100
@@ -55,7 +59,6 @@
                 N.Acrobatics = 10
         End Select
 
-        N.Size = N.SpriteSize
         N.Location = New PointF(0, 0)
         N.Sprite = New Point(0, 0)
         N.Navi_Name = Navi_Name

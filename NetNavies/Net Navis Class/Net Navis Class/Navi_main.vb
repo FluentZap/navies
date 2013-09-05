@@ -3,12 +3,11 @@
 'Host app calls Initialise then runs DoEvents
 'DXon if switched on changes rendering to a directx window rendering is then done in Draw_DX
 
-
 Partial Public Class Navi_Main
     Private WithEvents NaviForm As NaviForm
     Private WithEvents MenuForm As MenuForm
     Private WithEvents NaviDX As NaviDX
-
+    Private WithEvents NaviTray As NaviTrayIcon
     Public pressedkeys As New HashSet(Of Windows.Forms.Keys)
 
     'DirectX
@@ -32,16 +31,18 @@ Partial Public Class Navi_Main
     Public GroundFriction As New PointF(0.15, 0)
 
     Public Host_Navi As NetNavi_Type
+    Public Client_Navi As NetNavi_Type
+
     Dim Direct_Control As Boolean = True
 
 
     Private Physics_Timer As Double
     Private Physics_Rate As Double
-    Private Physics_Step As Long
+    Private Program_Step As Long
 
 
     Class Projectiles_Type
-        Public Location As Point
+        Public Location As PointF
         Public Speed As PointF
         Public Life As Integer
 
@@ -70,23 +71,27 @@ Partial Public Class Navi_Main
         MenuForm = New MenuForm
         NaviForm.Show()
         NaviForm.TopMost = True
-        NaviForm.Width = Host_Navi.Size.X
-        NaviForm.Height = Host_Navi.Size.Y
-        NaviForm.Left = Int(Host_Navi.Location.X)
-        NaviForm.Top = Int(Host_Navi.Location.Y)
+        NaviForm.Width = CInt(Host_Navi.GetSize.X)
+        NaviForm.Height = CInt(Host_Navi.GetSize.Y)
+        NaviForm.Left = CInt(Host_Navi.Location.X)
+        NaviForm.Top = CInt(Host_Navi.Location.Y)
+
+        Host_Navi.Get_Compact_buffer()
 
         'Initialise_Network()
 
         'Initialise defaults
+        'NaviTray = New NaviTrayIcon
+        'NaviTray.Initialise(Host_Navi)
         Set_color_filters()
 
         Physics_Timer = DateAndTime.Timer
         Physics_Rate = 1 / 60
-        Physics_Step = 0
+        Program_Step = 0
 
-        Host_Navi.set_Animation(Animation_Name_Enum.Vex_Runing)
+        'Host_Navi.set_Animation(Animation_Name_Enum.None)
 
-        Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.Size.Y
+        Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize.Y
         Host_Navi.Location.X = 1000
 
         Host_Navi.Scale = 3
@@ -96,7 +101,7 @@ Partial Public Class Navi_Main
 
     Sub DoEvents()
         'Slowing program down
-        System.Threading.Thread.Sleep(Physics_Rate * 1000)
+        System.Threading.Thread.Sleep(CInt(Physics_Rate * 1000))
 
         If Physics_Timer <= DateAndTime.Timer Then
             Handle_UI()
@@ -107,7 +112,7 @@ Partial Public Class Navi_Main
             'DoNetworkEvents()
 
             Physics_Timer = DateAndTime.Timer + Physics_Rate
-            Physics_Step += 1
+            Program_Step += 1
         End If
 
         Draw_All()
@@ -116,12 +121,12 @@ Partial Public Class Navi_Main
 
     Sub Handle_UI()
         If pressedkeys.Contains(Keys.W) Then
-            Host_Navi.Scale += 0.5
+            Host_Navi.Scale += 0.5F
             Host_Navi.OldSprite = New Point(500, 500)
         End If
 
         If pressedkeys.Contains(Keys.S) Then
-            Host_Navi.Scale -= 0.5
+            Host_Navi.Scale -= 0.5F
             Host_Navi.OldSprite = New Point(500, 500)
         End If
 
@@ -157,9 +162,9 @@ Partial Public Class Navi_Main
 
         If pressedkeys.Contains(Keys.OemQuestion) Then
             If Host_Navi.FaceLeft = True Then
-                Projectile_List.Add(New Projectiles_Type(New Point(Host_Navi.Navi_Location.Left, Host_Navi.Navi_Location.Top), New PointF(-20, 0), 600))
+                Projectile_List.Add(New Projectiles_Type(New Point(CInt(Host_Navi.Navi_Location.Left), CInt(Host_Navi.Navi_Location.Top)), New PointF(-20, 0), 600))
             Else
-                Projectile_List.Add(New Projectiles_Type(New Point(Host_Navi.Navi_Location.Right, Host_Navi.Navi_Location.Top), New PointF(20, 0), 600))
+                Projectile_List.Add(New Projectiles_Type(New Point(CInt(Host_Navi.Navi_Location.Right), CInt(Host_Navi.Navi_Location.Top)), New PointF(20, 0), 600))
             End If
 
             pressedkeys.Remove(Keys.OemQuestion)
@@ -274,14 +279,15 @@ Partial Public Class Navi_Main
         If Host_Navi.Navi_Location.Bottom = Screen.PrimaryScreen.WorkingArea.Bottom Then Host_Navi.OnGround = True : Host_Navi.Speed.Y = 0 Else Host_Navi.OnGround = False
 
         'Update Location
-        NaviForm.Left = Int(Host_Navi.Location.X)
-        NaviForm.Top = Int(Host_Navi.Location.Y)
+        NaviForm.Left = CInt(Host_Navi.Location.X)
+        NaviForm.Top = CInt(Host_Navi.Location.Y)
 
+        If IsClient = True Then NaviForm.Left = CInt(Host_Navi.Location.X) + 32
     End Sub
 
     Sub Navi_Redraw(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles NaviForm.Paint
-        NaviForm.Width = Host_Navi.GetSize.X
-        NaviForm.Height = Host_Navi.GetSize.Y
+        NaviForm.Width = CInt(Host_Navi.GetSize.X)
+        NaviForm.Height = CInt(Host_Navi.GetSize.Y)
         e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
 
         Dim xoff, yoff As Single
@@ -289,9 +295,9 @@ Partial Public Class Navi_Main
         yoff = CSng(-0.5 + 0.5 * Host_Navi.SpriteSize.Y / Host_Navi.GetSize.Y) + Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y
 
         If Host_Navi.FaceLeft = True Then
-            e.Graphics.DrawImage(Host_Navi.SpriteSheet, New Rectangle(Host_Navi.GetSize.X, 0, -Host_Navi.GetSize.X - 1, Host_Navi.GetSize.Y), xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y, GraphicsUnit.Pixel, NormalImage)
+            e.Graphics.DrawImage(Host_Navi.SpriteSheet, New Rectangle(CInt(Host_Navi.GetSize.X), 0, CInt(-Host_Navi.GetSize.X - 1), CInt(Host_Navi.GetSize.Y)), xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y, GraphicsUnit.Pixel, NormalImage)
         Else
-            e.Graphics.DrawImage(Host_Navi.SpriteSheet, New Rectangle(0, 0, Host_Navi.GetSize.X, Host_Navi.GetSize.Y), xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y, GraphicsUnit.Pixel, NormalImage)
+            e.Graphics.DrawImage(Host_Navi.SpriteSheet, New Rectangle(0, 0, CInt(Host_Navi.GetSize.X), CInt(Host_Navi.GetSize.Y)), xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y, GraphicsUnit.Pixel, NormalImage)
         End If
 
 
@@ -361,7 +367,7 @@ Partial Public Class Navi_Main
         DXDevice.BeginScene()
         DXSprite.Begin(SpriteFlags.AlphaBlend)
         DXDevice.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.Point)
-        Dim xoff, yoff As Single
+        Dim xoff, yoff As Integer
         xoff = Host_Navi.SpriteSize.X * Host_Navi.Sprite.X
         yoff = Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y
 
@@ -413,6 +419,11 @@ Partial Public Class Navi_Main
         pressedkeys.Clear()
     End Sub
 
+    Private Sub NaviForm_Disposed(ByVal sender As Object, ByVal e As System.EventArgs) Handles NaviForm.Disposed
+        'NaviTray.tray.Visible = True
+    End Sub
+
+
     Private Sub NaviDX_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles NaviDX.KeyDown
         If pressedkeys.Contains(e.KeyCode) Then
         Else
@@ -439,6 +450,7 @@ Partial Public Class Navi_Main
         DXPP = Nothing
         NaviForm.Show()
     End Sub
+
 
 
 End Class
