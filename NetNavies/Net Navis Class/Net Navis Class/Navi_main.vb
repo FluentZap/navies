@@ -123,11 +123,13 @@ Partial Public Class Navi_Main
         If pressedkeys.Contains(Keys.W) Then
             Host_Navi.Scale += 0.5F
             Host_Navi.OldSprite = New Point(500, 500)
+            If Host_Navi.Scale < 0.5 Then Host_Navi.Scale = 0.5
         End If
 
         If pressedkeys.Contains(Keys.S) Then
             Host_Navi.Scale -= 0.5F
             Host_Navi.OldSprite = New Point(500, 500)
+            If Host_Navi.Scale < 0.5 Then Host_Navi.Scale = 0.5
         End If
 
 
