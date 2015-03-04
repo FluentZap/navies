@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net Navis Class", "Net Navis Class\Net Navis Class.csproj", "{6D13F25D-82BF-4A16-BD97-EDCDD4B65CBF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetNavisClass", "Net Navis Class\NetNavisClass.csproj", "{6D13F25D-82BF-4A16-BD97-EDCDD4B65CBF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raven", "Raven\Raven.csproj", "{C26CC17F-A094-4860-B53A-BA0BD82413D8}"
 EndProject

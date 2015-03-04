@@ -18,8 +18,9 @@ namespace Raven
 		
         public static void Main()
 		{
-			Navi_Main Navi_Instance = new Navi_Main(Navi_Name, Navi_ID);
-
+            //Assembly not found error handeler
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+            Navi_Main Navi_Instance = new Navi_Main(Navi_Name, Navi_ID);
 			Navi_Instance.Initialise();
 			do {
 				Application.DoEvents();
@@ -27,6 +28,17 @@ namespace Raven
 			} while (true);
 
 		}
+
+        //Loads in embeded resource file as assembly
+        static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("EmbedAssembly.NetNaviClass.dll"))
+            {
+                byte[] assembltData = new byte[stream.Length];
+                stream.Read(assembltData, 0, assembltData.Length);
+                return System.Reflection.Assembly.Load(assembltData);
+            }            
+        }
 
 	}
 }
