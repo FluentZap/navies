@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>Net Navis Class</name>
+        <name>NetNavisClass</name>
     </assembly>
     <members>
         <member name="M:Net_Navis.Navi_Main.Start_GL">

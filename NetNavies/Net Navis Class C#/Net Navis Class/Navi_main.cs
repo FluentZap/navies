@@ -415,38 +415,43 @@ namespace Net_Navis
 		public void Draw_DX()
 		{            
             GL.Clear(ClearBufferMask.ColorBufferBit);
-            GL.ClearColor(Color.PaleVioletRed);
+            GL.ClearColor(Color.SkyBlue);
 
+            //int xoff = 0;
+            //int yoff = 0;
+            //xoff = Host_Navi.SpriteSize.X * Host_Navi.Sprite.X;
+            //yoff = Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y;
 
-
-            int xoff = 0;
-            int yoff = 0;
-            xoff = Host_Navi.SpriteSize.X * Host_Navi.Sprite.X;
-            yoff = Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y;
-
-
-
-
-            GL.MatrixMode(MatrixMode.Modelview);
+            GL.MatrixMode(MatrixMode.Projection);            
             GL.LoadIdentity();
+
+            GL.MatrixMode(MatrixMode.Texture);
+            GL.LoadIdentity();
+            GL.Scale(1f / (Host_Navi.SpriteSheet.Width / Host_Navi.SpriteSize.X),
+                     1f / (Host_Navi.SpriteSheet.Height / Host_Navi.SpriteSize.Y), 1);
+            GL.Translate(Host_Navi.Sprite.X, Host_Navi.Sprite.Y, 0);
             GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
 
-            GL.Begin(PrimitiveType.Quads);
-
-            GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y);
-            GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(0.6f, -0.4f);
-            GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(0.6f, 0.4f);
-            GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-0.6f, 0.4f);
-
-            GL.End();
-
-
-
-
-
-
-
-
+            if (Host_Navi.FaceLeft == true)
+            {
+                GL.Begin(PrimitiveType.Quads);
+                GL.TexCoord2(1f, 0f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y);
+                GL.TexCoord2(0f, 0f); GL.Vertex2(Host_Navi.Location.X + Host_Navi.SpriteSize.X * Host_Navi.Scale, Host_Navi.Location.Y);
+                GL.TexCoord2(0f, 1f); GL.Vertex2(Host_Navi.Location.X + Host_Navi.SpriteSize.X * Host_Navi.Scale, Host_Navi.Location.Y + Host_Navi.SpriteSize.Y * Host_Navi.Scale);
+                GL.TexCoord2(1f, 1f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y + Host_Navi.SpriteSize.Y * Host_Navi.Scale);
+                GL.End();
+            }
+            else
+            {
+                GL.Begin(PrimitiveType.Quads);
+                GL.TexCoord2(0f, 0f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y);
+                GL.TexCoord2(1f, 0f); GL.Vertex2(Host_Navi.Location.X + Host_Navi.SpriteSize.X * Host_Navi.Scale, Host_Navi.Location.Y);
+                GL.TexCoord2(1f, 1f); GL.Vertex2(Host_Navi.Location.X + Host_Navi.SpriteSize.X * Host_Navi.Scale, Host_Navi.Location.Y + Host_Navi.SpriteSize.Y * Host_Navi.Scale);
+                GL.TexCoord2(0f, 1f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y + Host_Navi.SpriteSize.Y * Host_Navi.Scale);
+                GL.End();
+            }
+            
+            
 
 
 
@@ -495,35 +500,27 @@ namespace Net_Navis
             GLC.LoadAll();
 
 
-            GL.ClearColor(Color.PaleVioletRed);
+            GL.ClearColor(Color.PaleVioletRed);            
             GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Blend);
+
+            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
+            
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
-            GL.GenTextures(1, out GLNaviTexture);
-            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            Load_Sprite_Sheet();
 
-
-
-            
-            BitmapData data = Host_Navi.SpriteSheet.LockBits(new System.Drawing.Rectangle(0, 0, Host_Navi.SpriteSheet.Width, Host_Navi.SpriteSheet.Height), 
-                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-            Host_Navi.SpriteSheet.UnlockBits(data);
-
-
-            //GL.Viewport(0, 0, 1920, 1080);
+            GL.Viewport(0, 0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
 
             //GL.MatrixMode(MatrixMode.Projection);
             //GL.LoadIdentity();
-            //GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
+            GL.Ortho(0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height, 0, -1, 1);
 
 
 
 
             //NaviDX.Location = New Point(0, Screen.PrimaryScreen.Bounds.Height - NaviDX.Height)
-            //NaviForm.Hide();
+            NaviForm.Hide();
             
             //DXNaviTexture = new Texture[11];
             //My.Resources.Raven.MakeTransparent(Color.FromArgb(255, 0, 255, 0))
@@ -534,6 +531,25 @@ namespace Net_Navis
             //DXProjectileTexture[0] = new Texture(DXDevice, Net_Navis.Resource1.Shot2, Usage.None, Pool.Managed);
 
             Init_GL = true;
+        }
+
+
+
+
+        public void Load_Sprite_Sheet()
+        {
+            int width = Host_Navi.SpriteSheet.Width / Host_Navi.SpriteSize.X;
+            int height = Host_Navi.SpriteSheet.Height / Host_Navi.SpriteSize.Y;            
+            GL.GenTextures(1, out GLNaviTexture);
+            //Load Sprite Sheet            
+            Host_Navi.SpriteSheet.MakeTransparent(Color.LimeGreen);
+                    GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);                    
+                    BitmapData data = Host_Navi.SpriteSheet.LockBits(new System.Drawing.Rectangle(0, 0, Host_Navi.SpriteSheet.Width, Host_Navi.SpriteSheet.Height),
+                                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                    Host_Navi.SpriteSheet.UnlockBits(data);                
         }
 
 
@@ -593,13 +609,9 @@ namespace Net_Navis
 		private void NaviDX_Disposed(object sender, System.EventArgs e)
 		{
 			GLOn = false;
-			Init_GL = false;
-            GL.DeleteTextures(1, ref GLNaviTexture);
-			//DXDevice = null;
-			//DXSprite = null;
-			//DXNaviTexture = null;
-			//DXPP = null;
-			//NaviForm.Show();
+			Init_GL = false;            
+            GL.DeleteTextures(1, ref GLNaviTexture);			
+			NaviForm.Show();
 		}
 
 
