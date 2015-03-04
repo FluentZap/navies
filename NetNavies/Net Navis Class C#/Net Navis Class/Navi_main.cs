@@ -32,8 +32,8 @@ namespace Net_Navis
 		//private NaviTrayIcon NaviTray;
 
         private HashSet<System.Windows.Forms.Keys> pressedkeys = new HashSet<System.Windows.Forms.Keys>();
-
-        public IGraphicsContext GLC;
+        
+        public GraphicsContext GLC;
         //public IGraphicsContext GLC;
         
         //DirectX                
@@ -471,14 +471,10 @@ namespace Net_Navis
 				//DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(3, 3), new Vector2(0, 0), 0, new Vector2(item.Location.X, item.Location.Y));
 				//DXSprite.Draw(DXProjectileTexture[0], new Rectangle(0, 0, 8, 6), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
 			}
-
-			//DXSprite.Transform = Matrix.Identity;
-			//DXSprite.Draw(DXProjectileTexture[0], new Rectangle(0, 0, 8, 6), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
-
-			//DXSprite.End();
-
-			//DXDevice.EndScene();            
-            GraphicsContext.CurrentContext.SwapBuffers(); //Swaps Front and back buffers
+            //GLC.SwapBuffers();
+            //GraphicsContext.CurrentContext.SwapBuffers(); //Swaps Front and back buffers
+            GLC.SwapBuffers();
+            //GL.Finish();
 		}
 
         /// <summary>
@@ -496,11 +492,10 @@ namespace Net_Navis
             NaviGL.Height = Screen.PrimaryScreen.WorkingArea.Height;            
             OpenTK.Platform.IWindowInfo wi = null;
             wi = OpenTK.Platform.Utilities.CreateWindowsWindowInfo(NaviGL.Handle);
-            IGraphicsContext GLC = new GraphicsContext(GraphicsMode.Default, wi);            
-            GLC.LoadAll();
+            GLC = new GraphicsContext(GraphicsMode.Default, wi);
+            GLC.LoadAll();            
 
-
-            GL.ClearColor(Color.PaleVioletRed);            
+            GL.ClearColor(Color.PaleVioletRed);
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.Blend);
 
@@ -545,7 +540,7 @@ namespace Net_Navis
             Host_Navi.SpriteSheet.MakeTransparent(Color.LimeGreen);
                     GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
                     GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);                    
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
                     BitmapData data = Host_Navi.SpriteSheet.LockBits(new System.Drawing.Rectangle(0, 0, Host_Navi.SpriteSheet.Width, Host_Navi.SpriteSheet.Height),
                                 ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                     GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
