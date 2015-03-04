@@ -61,9 +61,11 @@
     <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
-    <Reference Include="Microsoft.DirectX.Direct3D, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
-    <Reference Include="Microsoft.DirectX.Direct3DX, Version=1.0.2911.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\OpenTK\1.1\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -87,17 +89,17 @@
     <Compile Include="MenuForm.Designer.cs">
       <DependentUpon>MenuForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="NaviDX.cs">
+    <Compile Include="NaviFXF.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="NaviDX.Designer.cs">
-      <DependentUpon>NaviDX.cs</DependentUpon>
+    <Compile Include="NaviFXF.Designer.cs">
+      <DependentUpon>NaviFXF.cs</DependentUpon>
     </Compile>
-    <Compile Include="NaviForm.cs">
+    <Compile Include="NaviFormF.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="NaviForm.Designer.cs">
-      <DependentUpon>NaviForm.cs</DependentUpon>
+    <Compile Include="NaviFormF.Designer.cs">
+      <DependentUpon>NaviFormF.cs</DependentUpon>
     </Compile>
     <Compile Include="Navi_main.cs" />
     <Compile Include="Navi_resources.cs" />
@@ -128,11 +130,11 @@
     <EmbeddedResource Include="MenuForm.resx">
       <DependentUpon>MenuForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="NaviDX.resx">
-      <DependentUpon>NaviDX.cs</DependentUpon>
+    <EmbeddedResource Include="NaviFXF.resx">
+      <DependentUpon>NaviFXF.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="NaviForm.resx">
-      <DependentUpon>NaviForm.cs</DependentUpon>
+    <EmbeddedResource Include="NaviFormF.resx">
+      <DependentUpon>NaviFormF.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Resource1.resx">
       <Generator>ResXFileCodeGenerator</Generator>
