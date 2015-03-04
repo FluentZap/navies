@@ -1,6 +1,3 @@
-using Microsoft.DirectX;
-using Microsoft.DirectX.Direct3D;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,7 +9,7 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 namespace Net_Navis
 {	
-	partial class NaviDX : System.Windows.Forms.Form
+	partial class NaviFXF : System.Windows.Forms.Form
 	{
 
 		//Form overrides dispose to clean up the component list.
@@ -37,27 +34,26 @@ namespace Net_Navis
 		[System.Diagnostics.DebuggerStepThrough()]
 		private void InitializeComponent()
 		{
-			this.SuspendLayout();
-			//
-			//NaviDX
-			//
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.BackColor = System.Drawing.Color.White;
-			this.ClientSize = new System.Drawing.Size(287, 247);
-			this.DoubleBuffered = true;
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-			this.Name = "NaviDX";
-			this.ShowInTaskbar = false;
-			this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-			this.Text = "NaviDX";
-			this.TopMost = true;
-			this.ResumeLayout(false);
+            this.SuspendLayout();
+            // 
+            // NaviFXF
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(287, 247);
+            this.DoubleBuffered = true;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Name = "NaviFXF";
+            this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            this.Text = "NaviDX";
+            this.TopMost = true;
+            this.ResumeLayout(false);
 
 		}
-		public NaviDX()
+		public NaviFXF()
 		{
 			InitializeComponent();
-		}
+        }
 	}
 }

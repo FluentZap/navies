@@ -1,14 +1,17 @@
-using Microsoft.DirectX;
-using Microsoft.DirectX.Direct3D;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using System.Reflection;
 namespace Net_Navis
 {
 	//Main Sub's go into Navi Main
@@ -18,62 +21,32 @@ namespace Net_Navis
 
 	public partial class Navi_Main
 	{
-		private NaviForm withEventsField_NaviForm;
-		private NaviForm NaviForm {
-			get { return withEventsField_NaviForm; }
-			set {
-				if (withEventsField_NaviForm != null) {
-					withEventsField_NaviForm.Paint -= Navi_Redraw;
-					withEventsField_NaviForm.KeyDown -= NaviForm_KeyDown;
-					withEventsField_NaviForm.KeyUp -= NaviForm_KeyUp;
-					withEventsField_NaviForm.GotFocus -= NaviForm_GotFocus;
-					withEventsField_NaviForm.LostFocus -= NaviForm_LostFocus;
-					withEventsField_NaviForm.Disposed -= NaviForm_Disposed;
-				}
-				withEventsField_NaviForm = value;
-				if (withEventsField_NaviForm != null) {
-					withEventsField_NaviForm.Paint += Navi_Redraw;
-					withEventsField_NaviForm.KeyDown += NaviForm_KeyDown;
-					withEventsField_NaviForm.KeyUp += NaviForm_KeyUp;
-					withEventsField_NaviForm.GotFocus += NaviForm_GotFocus;
-					withEventsField_NaviForm.LostFocus += NaviForm_LostFocus;
-					withEventsField_NaviForm.Disposed += NaviForm_Disposed;
-				}
-			}
-		}
+
+        //private NaviFormF NaviFormEvents;
+        
+        private NaviFormF NaviForm;                 
 		private MenuForm MenuForm;
-		private NaviDX withEventsField_NaviDX;
-		private NaviDX NaviDX {
-			get { return withEventsField_NaviDX; }
-			set {
-				if (withEventsField_NaviDX != null) {
-					withEventsField_NaviDX.KeyDown -= NaviDX_KeyDown;
-					withEventsField_NaviDX.KeyUp -= NaviDX_KeyUp;
-					withEventsField_NaviDX.LostFocus -= NaviDX_LostFocus;
-					withEventsField_NaviDX.Disposed -= NaviDX_Disposed;
-				}
-				withEventsField_NaviDX = value;
-				if (withEventsField_NaviDX != null) {
-					withEventsField_NaviDX.KeyDown += NaviDX_KeyDown;
-					withEventsField_NaviDX.KeyUp += NaviDX_KeyUp;
-					withEventsField_NaviDX.LostFocus += NaviDX_LostFocus;
-					withEventsField_NaviDX.Disposed += NaviDX_Disposed;
-				}
-			}
-		}
-		private NaviTrayIcon NaviTray;
 
-		public HashSet<System.Windows.Forms.Keys> pressedkeys = new HashSet<System.Windows.Forms.Keys>();
-		//DirectX
-		Device DXDevice;
-		PresentParameters DXPP;
-		Sprite DXSprite;
-		Texture[] DXNaviTexture;
+        private NaviFXF NaviGL;        
+		
+		//private NaviTrayIcon NaviTray;
 
-		Texture[] DXProjectileTexture;
-		bool Init_DirectX;
+        private HashSet<System.Windows.Forms.Keys> pressedkeys = new HashSet<System.Windows.Forms.Keys>();
+
+        public IGraphicsContext GLC;
+        //public IGraphicsContext GLC;
+        
+        //DirectX                
+        //Device DXDevice;
+		//PresentParameters DXPP;
+		//Sprite DXSprite;
+		public int GLNaviTexture;
+        
+        
+		//Texture[] DXProjectileTexture;
+		bool Init_GL;
 			// = True
-		bool DXOn;
+		bool GLOn;
 
 
 		System.Drawing.Imaging.ImageAttributes NormalImage = new System.Drawing.Imaging.ImageAttributes();
@@ -81,13 +54,13 @@ namespace Net_Navis
 		System.Drawing.Imaging.ImageAttributes RedImage = new System.Drawing.Imaging.ImageAttributes();
 
 		System.Drawing.Imaging.ImageAttributes GreenImage = new System.Drawing.Imaging.ImageAttributes();
-		public PointF Gravity = new PointF(0f, 0.5f);
-		public PointF AirFriction = new PointF(0.01f, 0.01f);
+        private PointF Gravity = new PointF(0f, 0.5f);
+        private PointF AirFriction = new PointF(0.01f, 0.01f);
 
-		public PointF GroundFriction = new PointF(0.15f, 0f);
-		public NetNavi_Type Host_Navi;
+        private PointF GroundFriction = new PointF(0.15f, 0f);
+        private NetNavi_Type Host_Navi;
 
-		public NetNavi_Type Client_Navi;
+        private NetNavi_Type Client_Navi;
 
 		bool Direct_Control = true;
 
@@ -96,7 +69,7 @@ namespace Net_Navis
 
 		private long Program_Step;
 
-		public class Projectiles_Type
+        private class Projectiles_Type
 		{
 			public PointF Location;
 			public PointF Speed;
@@ -112,28 +85,43 @@ namespace Net_Navis
 		}
 
 
-		public HashSet<Projectiles_Type> Projectile_List = new HashSet<Projectiles_Type>();
+        private HashSet<Projectiles_Type> Projectile_List = new HashSet<Projectiles_Type>();
 
-		public Navi_Main(string Navi_Name, long NaviID)
+        public Navi_Main(string Navi_Name, long NaviID)
 		{
 			Host_Navi = Navi_resources.Get_Data(Navi_Name, NaviID);
-
+            
 
 		}
 
 
 
-		public void Initialise()
+        public void Initialise()
 		{
 			//Create and show forms
-			NaviForm = new NaviForm();
-			MenuForm = new MenuForm();
+			NaviForm = new NaviFormF();            
+            MenuForm = new MenuForm();
 			NaviForm.Show();
 			NaviForm.TopMost = true;
 			NaviForm.Width = Convert.ToInt32(Host_Navi.GetSize().X);
 			NaviForm.Height = Convert.ToInt32(Host_Navi.GetSize().Y);
 			NaviForm.Left = Convert.ToInt32(Host_Navi.Location.X);
 			NaviForm.Top = Convert.ToInt32(Host_Navi.Location.Y);
+
+
+            NaviForm.Paint += Navi_Redraw;
+            NaviForm.KeyDown += NaviForm_KeyDown;
+            NaviForm.KeyUp += NaviForm_KeyUp;
+            NaviForm.GotFocus += NaviForm_GotFocus;
+            NaviForm.LostFocus += NaviForm_LostFocus;
+            NaviForm.Disposed += NaviForm_Disposed;            
+
+
+            //NaviGL.KeyDown += NaviDX_KeyDown;
+            //NaviGL.KeyUp += NaviDX_KeyUp;
+            //NaviGL.LostFocus += NaviDX_LostFocus;
+            //NaviGL.Disposed += NaviDX_Disposed;
+		
 
 			Host_Navi.Get_Compact_buffer();
 
@@ -162,7 +150,7 @@ namespace Net_Navis
 		public void DoEvents()
 		{
 			//Slowing program down
-			//System.Threading.Thread.Sleep(Convert.ToInt32(Physics_Rate * 1000));
+			System.Threading.Thread.Sleep(Convert.ToInt32(Physics_Rate * 1000));
 
 			if (Physics_Timer <= DateTime.Now.TimeOfDay.TotalSeconds) {
 				Handle_UI();
@@ -229,10 +217,10 @@ namespace Net_Navis
 			}
 
 			if (pressedkeys.Contains(Keys.Tab))
-				if (DXOn == false)
-					DXOn = true;
+				if (GLOn == false)
+					GLOn = true;
 				else
-					NaviDX.Dispose();
+					NaviGL.Dispose();
 
 
 			if (pressedkeys.Contains(Keys.OemQuestion)) {
@@ -250,7 +238,7 @@ namespace Net_Navis
 
 		public void Draw_All()
 		{
-			if (DXOn == false) {
+			if (GLOn == false) {
 				if (!(Host_Navi.Sprite == Host_Navi.OldSprite) || !(Host_Navi.FaceLeft == Host_Navi.OldFaceLeft)) {
 					NaviForm.Invalidate();
 					Host_Navi.OldSprite = Host_Navi.Sprite;
@@ -258,18 +246,17 @@ namespace Net_Navis
 				}
 			}
 
-			if (DXOn == true) {
-				if (Init_DirectX == false)
-					Start_Directx();
-
-				Draw_DX();
-
+			if (GLOn == true) {
+                
+                if (Init_GL == false)
+                {
+                    Start_GL();                
+                }
+                Draw_DX();
 			}
 
 		}
-
-
-
+        
 		public void Process_Navi_Commands()
 		{
 			if (Direct_Control == false) {
@@ -405,161 +392,149 @@ namespace Net_Navis
 		public void Set_color_filters()
 		{
 			float[][] NormalColorMatrixElements = {
-				new float[] {
-					1,
-					0,
-					0,
-					0,
-					0
-				},
-				new float[] {
-					0,
-					1,
-					0,
-					0,
-					0
-				},
-				new float[] {
-					0,
-					0,
-					1,
-					0,
-					0
-				},
-				new float[] {
-					0,
-					0,
-					0,
-					1,
-					0
-				},
-				new float[] {
-					0,
-					0,
-					0,
-					0,
-					1
-				}
+				new float[] {1,0,0,0,0},
+				new float[] {0,1,0,0,0},
+				new float[] {0,0,1,0,0},
+				new float[] {0,0,0,1,0},
+				new float[] {0,0,0,0,1}
 			};
 
 			float[][] BlueColorMatrixElements = {
-				new float[] {
-					1,
-					0,
-					0,
-					0,
-					0
-				},
-				new float[] {
-					0,
-					1,
-					0,
-					0,
-					0
-				},
-				new float[] {
-					0,
-					0,
-					2,
-					0,
-					0
-				},
-				new float[] {
-					0,
-					0,
-					0,
-					1,
-					0
-				},
-				new float[] {
-					-0.2f,
-					-0.2f,
-					0,
-					0,
-					1
-				}
+				new float[] {1,0,0,0,0},
+				new float[] {0,1,0,0,0},
+				new float[] {0,0,2,0,0},
+				new float[] {0,0,0,1,0},
+				new float[] {-0.2f,-0.2f,0,0,1}
 			};
-
 
 			NormalImage.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix(NormalColorMatrixElements), System.Drawing.Imaging.ColorMatrixFlag.Default, System.Drawing.Imaging.ColorAdjustType.Bitmap);
 			BlueImage.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix(BlueColorMatrixElements), System.Drawing.Imaging.ColorMatrixFlag.Default, System.Drawing.Imaging.ColorAdjustType.Bitmap);
-
-		}
-
-
-
-
-
-		public void Start_Directx()
-		{
-			NaviDX = new NaviDX();
-			NaviDX.Show();
-			NaviDX.Width = Screen.PrimaryScreen.WorkingArea.Width;
-			NaviDX.Height = Screen.PrimaryScreen.WorkingArea.Height;
-			//NaviDX.Location = New Point(0, Screen.PrimaryScreen.Bounds.Height - NaviDX.Height)
-			NaviForm.Hide();
-			DXPP = new PresentParameters();
-			DXPP.BackBufferHeight = NaviDX.Height;
-			DXPP.BackBufferWidth = NaviDX.Width;
-			DXPP.SwapEffect = SwapEffect.Copy;
-			DXPP.PresentationInterval = PresentInterval.Immediate;
-			DXPP.Windowed = true;
-
-			DXDevice = new Device(0, DeviceType.Hardware, NaviDX, CreateFlags.HardwareVertexProcessing, DXPP);
-			DXSprite = new Sprite(DXDevice);
-
-
-			DXNaviTexture = new Texture[11];
-			//My.Resources.Raven.MakeTransparent(Color.FromArgb(255, 0, 255, 0))
-			DXNaviTexture[0] = new Texture(DXDevice, Host_Navi.SpriteSheet, Usage.None, Pool.Managed);
-
-
-			DXProjectileTexture = new Texture[11];
-			DXProjectileTexture[0] = new Texture(DXDevice, Net_Navis.Resource1.Shot2, Usage.None, Pool.Managed);
-
-
-
-			Init_DirectX = true;
-		}
-
-
+		
+        }
 
 		public void Draw_DX()
-		{
-			DXDevice.Clear(ClearFlags.Target, Color.Transparent, 0, 1);
-			DXDevice.BeginScene();
-			DXSprite.Begin(SpriteFlags.AlphaBlend);
-			DXDevice.SetSamplerState(0, SamplerStageStates.MagFilter, 1);
-			
-			int xoff = 0;
-			int yoff = 0;
-			xoff = Host_Navi.SpriteSize.X * Host_Navi.Sprite.X;
-			yoff = Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y;
+		{            
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.ClearColor(Color.PaleVioletRed);
 
+
+
+            int xoff = 0;
+            int yoff = 0;
+            xoff = Host_Navi.SpriteSize.X * Host_Navi.Sprite.X;
+            yoff = Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y;
+
+
+
+
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadIdentity();
+            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
+
+            GL.Begin(PrimitiveType.Quads);
+
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(0.6f, -0.4f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(0.6f, 0.4f);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-0.6f, 0.4f);
+
+            GL.End();
+
+
+
+
+
+
+
+
+
+
+
+
+            
 			//DXSprite.Draw(DXNaviTexture(0), New Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, New Vector3(Host_Navi.Location.X, Host_Navi.Location.Y, 0), Color.White)
-
+            
 			if (Host_Navi.FaceLeft == true) {
-				DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(-Host_Navi.Scale, Host_Navi.Scale), new Vector2(0, 0), 0, new Vector2(Host_Navi.Location.X + (Host_Navi.SpriteSize.X * Host_Navi.Scale), Host_Navi.Location.Y));
-				DXSprite.Draw(DXNaviTexture[0], new Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
+				//DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(-Host_Navi.Scale, Host_Navi.Scale), new Vector2(0, 0), 0, new Vector2(Host_Navi.Location.X + (Host_Navi.SpriteSize.X * Host_Navi.Scale), Host_Navi.Location.Y));
+				//DXSprite.Draw(DXNaviTexture[0], new Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
 			} else {
-				DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(Host_Navi.Scale, Host_Navi.Scale), new Vector2(0, 0), 0, new Vector2(Host_Navi.Location.X, Host_Navi.Location.Y));
-				DXSprite.Draw(DXNaviTexture[0], new Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
+				//DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(Host_Navi.Scale, Host_Navi.Scale), new Vector2(0, 0), 0, new Vector2(Host_Navi.Location.X, Host_Navi.Location.Y));
+				//DXSprite.Draw(DXNaviTexture[0], new Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
 			}
 
 			foreach (Navi_Main.Projectiles_Type item in Projectile_List) {				
-				DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(3, 3), new Vector2(0, 0), 0, new Vector2(item.Location.X, item.Location.Y));
-				DXSprite.Draw(DXProjectileTexture[0], new Rectangle(0, 0, 8, 6), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
+				//DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(3, 3), new Vector2(0, 0), 0, new Vector2(item.Location.X, item.Location.Y));
+				//DXSprite.Draw(DXProjectileTexture[0], new Rectangle(0, 0, 8, 6), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
 			}
 
-			DXSprite.Transform = Matrix.Identity;
-			DXSprite.Draw(DXProjectileTexture[0], new Rectangle(0, 0, 8, 6), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
+			//DXSprite.Transform = Matrix.Identity;
+			//DXSprite.Draw(DXProjectileTexture[0], new Rectangle(0, 0, 8, 6), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
 
-			DXSprite.End();
+			//DXSprite.End();
 
-			DXDevice.EndScene();
-			DXDevice.Present();
-
+			//DXDevice.EndScene();            
+            GraphicsContext.CurrentContext.SwapBuffers(); //Swaps Front and back buffers
 		}
+
+        /// <summary>
+        ///  OpenGL Start Device
+        /// </summary>
+        public void Start_GL()
+        {
+            NaviGL = new NaviFXF();
+            NaviGL.KeyDown += NaviDX_KeyDown;
+            NaviGL.KeyUp += NaviDX_KeyUp;
+            NaviGL.LostFocus += NaviDX_LostFocus;
+            NaviGL.Disposed += NaviDX_Disposed;
+            NaviGL.Show();
+            NaviGL.Width = Screen.PrimaryScreen.WorkingArea.Width;
+            NaviGL.Height = Screen.PrimaryScreen.WorkingArea.Height;            
+            OpenTK.Platform.IWindowInfo wi = null;
+            wi = OpenTK.Platform.Utilities.CreateWindowsWindowInfo(NaviGL.Handle);
+            IGraphicsContext GLC = new GraphicsContext(GraphicsMode.Default, wi);            
+            GLC.LoadAll();
+
+
+            GL.ClearColor(Color.PaleVioletRed);
+            GL.Enable(EnableCap.Texture2D);
+            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+
+            GL.GenTextures(1, out GLNaviTexture);
+            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+
+
+
+            
+            BitmapData data = Host_Navi.SpriteSheet.LockBits(new System.Drawing.Rectangle(0, 0, Host_Navi.SpriteSheet.Width, Host_Navi.SpriteSheet.Height), 
+                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+            Host_Navi.SpriteSheet.UnlockBits(data);
+
+
+            //GL.Viewport(0, 0, 1920, 1080);
+
+            //GL.MatrixMode(MatrixMode.Projection);
+            //GL.LoadIdentity();
+            //GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
+
+
+
+
+            //NaviDX.Location = New Point(0, Screen.PrimaryScreen.Bounds.Height - NaviDX.Height)
+            //NaviForm.Hide();
+            
+            //DXNaviTexture = new Texture[11];
+            //My.Resources.Raven.MakeTransparent(Color.FromArgb(255, 0, 255, 0))
+            //DXNaviTexture[0] = new Texture(DXDevice, Host_Navi.SpriteSheet, Usage.None, Pool.Managed);
+            
+
+            //DXProjectileTexture = new Texture[11];
+            //DXProjectileTexture[0] = new Texture(DXDevice, Net_Navis.Resource1.Shot2, Usage.None, Pool.Managed);
+
+            Init_GL = true;
+        }
 
 
 		private void NaviForm_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
@@ -584,7 +559,7 @@ namespace Net_Navis
 
 		private void NaviForm_LostFocus(object sender, System.EventArgs e)
 		{
-			if (DXOn == false)
+			if (GLOn == false)
 				Direct_Control = false;
 			pressedkeys.Clear();
 		}
@@ -617,16 +592,18 @@ namespace Net_Navis
 
 		private void NaviDX_Disposed(object sender, System.EventArgs e)
 		{
-			DXOn = false;
-			Init_DirectX = false;
-			DXDevice = null;
-			DXSprite = null;
-			DXNaviTexture = null;
-			DXPP = null;
-			NaviForm.Show();
+			GLOn = false;
+			Init_GL = false;
+            GL.DeleteTextures(1, ref GLNaviTexture);
+			//DXDevice = null;
+			//DXSprite = null;
+			//DXNaviTexture = null;
+			//DXPP = null;
+			//NaviForm.Show();
 		}
 
 
 
 	}
-}
+
+}		

@@ -1,4 +1,3 @@
-using Microsoft.VisualBasic;
 using Net_Navis;
 using System;
 using System.Collections;
@@ -11,15 +10,15 @@ using System.Linq;
 using System.Xml.Linq;
 namespace Raven
 {
-	static class Raven
+	class Raven
 	{
 		const string Navi_Name = "Raven";
 
-		//private static long Navi_ID = Raven.My.Settings.NaviID;
-
-		public static void Main()
+        public static long Navi_ID = Properties.Settings.Default.NaviID;
+		
+        public static void Main()
 		{
-			Navi_Main Navi_Instance = new Navi_Main(Navi_Name, 0);
+			Navi_Main Navi_Instance = new Navi_Main(Navi_Name, Navi_ID);
 
 			Navi_Instance.Initialise();
 			do {

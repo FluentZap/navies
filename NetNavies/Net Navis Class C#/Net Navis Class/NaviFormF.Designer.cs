@@ -1,6 +1,3 @@
-using Microsoft.DirectX;
-using Microsoft.DirectX.Direct3D;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,7 +9,7 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 namespace Net_Navis
 {	
-	partial class NaviForm : System.Windows.Forms.Form
+	partial class NaviFormF : System.Windows.Forms.Form
 	{
 
 		//Form overrides dispose to clean up the component list.
@@ -55,7 +52,7 @@ namespace Net_Navis
 			this.ResumeLayout(false);
 
 		}
-		public NaviForm()
+		public NaviFormF()
 		{
 			InitializeComponent();
 		}
