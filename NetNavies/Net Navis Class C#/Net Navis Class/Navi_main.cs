@@ -27,21 +27,21 @@ namespace Net_Navis
         private NaviFormF NaviForm;                 
 		private MenuForm MenuForm;
 
+        //private NaviFXF NaviGL;        
+        
         private NaviFXF NaviGL;        
 		
-		//private NaviTrayIcon NaviTray;
+        //private NaviTrayIcon NaviTray;
 
         private HashSet<System.Windows.Forms.Keys> pressedkeys = new HashSet<System.Windows.Forms.Keys>();
-        
-        public GraphicsContext GLC;
-        //public IGraphicsContext GLC;
         
         //DirectX                
         //Device DXDevice;
 		//PresentParameters DXPP;
 		//Sprite DXSprite;
 		public int GLNaviTexture;
-        
+
+        public int GLProjectileTexture;
         
 		//Texture[] DXProjectileTexture;
 		bool Init_GL;
@@ -412,8 +412,13 @@ namespace Net_Navis
 		
         }
 
+
+
 		public void Draw_DX()
-		{            
+		{
+
+            // Make the foreground context the current context            
+
             GL.Clear(ClearBufferMask.ColorBufferBit);
             GL.ClearColor(Color.SkyBlue);
 
@@ -433,7 +438,7 @@ namespace Net_Navis
             GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
 
             if (Host_Navi.FaceLeft == true)
-            {
+            {                
                 GL.Begin(PrimitiveType.Quads);
                 GL.TexCoord2(1f, 0f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y);
                 GL.TexCoord2(0f, 0f); GL.Vertex2(Host_Navi.Location.X + Host_Navi.SpriteSize.X * Host_Navi.Scale, Host_Navi.Location.Y);
@@ -450,7 +455,7 @@ namespace Net_Navis
                 GL.TexCoord2(0f, 1f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y + Host_Navi.SpriteSize.Y * Host_Navi.Scale);
                 GL.End();
             }
-            
+            GL.LoadIdentity();
             
 
 
@@ -466,15 +471,26 @@ namespace Net_Navis
 				//DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(Host_Navi.Scale, Host_Navi.Scale), new Vector2(0, 0), 0, new Vector2(Host_Navi.Location.X, Host_Navi.Location.Y));
 				//DXSprite.Draw(DXNaviTexture[0], new Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
 			}
+            GL.BindTexture(TextureTarget.Texture2D, GLProjectileTexture);
+			foreach (Navi_Main.Projectiles_Type item in Projectile_List) {
 
-			foreach (Navi_Main.Projectiles_Type item in Projectile_List) {				
+                GL.Begin(PrimitiveType.Quads);
+                GL.TexCoord2(0f, 0f); GL.Vertex2(item.Location.X, item.Location.Y);
+                GL.TexCoord2(1f, 0f); GL.Vertex2(item.Location.X + 8 * Host_Navi.Scale, item.Location.Y);
+                GL.TexCoord2(1f, 1f); GL.Vertex2(item.Location.X + 8 * Host_Navi.Scale, item.Location.Y + 6 * Host_Navi.Scale);
+                GL.TexCoord2(0f, 1f); GL.Vertex2(item.Location.X, item.Location.Y + 6 * Host_Navi.Scale);
+                GL.End();
+
 				//DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(3, 3), new Vector2(0, 0), 0, new Vector2(item.Location.X, item.Location.Y));
 				//DXSprite.Draw(DXProjectileTexture[0], new Rectangle(0, 0, 8, 6), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
 			}
             //GLC.SwapBuffers();
-            //GraphicsContext.CurrentContext.SwapBuffers(); //Swaps Front and back buffers
-            GLC.SwapBuffers();
-            //GL.Finish();
+            //GraphicsContext.CurrentContext.SwapBuffers();
+            NaviGL.glControl1.SwapBuffers();
+            //GLC.SwapBuffers();
+            //if (!GLC.IsCurrent) { GLC.MakeCurrent(wi); GLC.LoadAll(); }            
+            //GLC.SwapBuffers();
+            //GL.Finish();            
 		}
 
         /// <summary>
@@ -482,20 +498,21 @@ namespace Net_Navis
         /// </summary>
         public void Start_GL()
         {
-            NaviGL = new NaviFXF();
+
+            NaviGL = new NaviFXF();            
             NaviGL.KeyDown += NaviDX_KeyDown;
             NaviGL.KeyUp += NaviDX_KeyUp;
             NaviGL.LostFocus += NaviDX_LostFocus;
-            NaviGL.Disposed += NaviDX_Disposed;
+            NaviGL.Disposed += NaviDX_Disposed;            
+
             NaviGL.Show();
             NaviGL.Width = Screen.PrimaryScreen.WorkingArea.Width;
-            NaviGL.Height = Screen.PrimaryScreen.WorkingArea.Height;            
-            OpenTK.Platform.IWindowInfo wi = null;
-            wi = OpenTK.Platform.Utilities.CreateWindowsWindowInfo(NaviGL.Handle);
-            GLC = new GraphicsContext(GraphicsMode.Default, wi);
-            GLC.LoadAll();            
-
-            GL.ClearColor(Color.PaleVioletRed);
+            NaviGL.Height = Screen.PrimaryScreen.WorkingArea.Height;
+            GLControl control = new GLControl(new GraphicsMode(32, 24, 8, 4), 3, 0, GraphicsContextFlags.Default);            
+            NaviGL.glControl1.Width = Screen.PrimaryScreen.WorkingArea.Width;            
+            NaviGL.glControl1.Height = Screen.PrimaryScreen.WorkingArea.Height;
+            
+            GL.ClearColor(Color.Black);
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.Blend);
 
@@ -503,7 +520,7 @@ namespace Net_Navis
             
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
-            Load_Sprite_Sheet();
+            Load_Sprite_Sheets();
 
             GL.Viewport(0, 0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
 
@@ -531,21 +548,37 @@ namespace Net_Navis
 
 
 
-        public void Load_Sprite_Sheet()
+        public void Load_Sprite_Sheets()
         {
+            //Load Host Sprite Sheet
             int width = Host_Navi.SpriteSheet.Width / Host_Navi.SpriteSize.X;
-            int height = Host_Navi.SpriteSheet.Height / Host_Navi.SpriteSize.Y;            
-            GL.GenTextures(1, out GLNaviTexture);
-            //Load Sprite Sheet            
-            Host_Navi.SpriteSheet.MakeTransparent(Color.LimeGreen);
-                    GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
-                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-                    BitmapData data = Host_Navi.SpriteSheet.LockBits(new System.Drawing.Rectangle(0, 0, Host_Navi.SpriteSheet.Width, Host_Navi.SpriteSheet.Height),
-                                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-                    Host_Navi.SpriteSheet.UnlockBits(data);                
+            int height = Host_Navi.SpriteSheet.Height / Host_Navi.SpriteSize.Y;
+            GLNaviTexture = load_sprite(Host_Navi.SpriteSheet);
+            GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);            
         }
+
+
+        //Load Sprite From Bitmap
+        private int load_sprite(Bitmap bitmap)
+        {
+            int id;
+            GL.GenTextures(1, out id);
+            bitmap.MakeTransparent(Color.LimeGreen);
+            GL.BindTexture(TextureTarget.Texture2D, id);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                        ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+            bitmap.UnlockBits(data);
+            return id;
+        }
+
+
+
+
+
+
 
 
 		private void NaviForm_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
@@ -605,7 +638,8 @@ namespace Net_Navis
 		{
 			GLOn = false;
 			Init_GL = false;            
-            GL.DeleteTextures(1, ref GLNaviTexture);			
+            GL.DeleteTextures(1, ref GLNaviTexture);
+            GL.DeleteTextures(1, ref GLProjectileTexture);
 			NaviForm.Show();
 		}
 
