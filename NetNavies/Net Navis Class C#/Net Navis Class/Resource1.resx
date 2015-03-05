@@ -1824,16 +1824,11 @@
         KB+zAyfkAAAAAElFTkSuQmCC
 </value>
   </data>
-  <data name="Shot2" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAYAAAD+Bd/7AAAABGdBTUEAALGPC/xhBQAAAAd0SU1FB90J
-        BAICD0EL+woAAAAXdEVYdFNvZnR3YXJlAEdMRFBORyB2ZXIgMy40cYWk4QAAAAh0cE5HR0xEMwAAAABK
-        gCkfAAAABmJLR0QA/wD/AP+gvaeTAAAAMUlEQVQYV2Ng+M/AAMLv2kL/I2OYOIrk9zup/2EYpBisCKYL
-        WRJFEUEFyPZjtYKQIwEFAncF6ofYcQAAAABJRU5ErkJggg==
-</value>
-  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="Raven" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Raven.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Shot2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Shot2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
