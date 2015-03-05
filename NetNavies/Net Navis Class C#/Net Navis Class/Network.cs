@@ -121,11 +121,7 @@ namespace Net_Navis
 					ServerResync(Client.Value.Socket);
 					//Client.Value.ReSync = False
 				}
-
-
-
 			}
-
 		}
 
 

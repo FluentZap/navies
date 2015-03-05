@@ -155,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="OpenTK.GLControl.dll" />
+    <None Include="Resources\Vex.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

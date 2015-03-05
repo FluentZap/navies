@@ -113,9 +113,9 @@ namespace Net_Navis {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Rebel_pull_sheet {
+        internal static System.Drawing.Bitmap Rebelpullsheet {
             get {
-                object obj = ResourceManager.GetObject("Rebel pull sheet", resourceCulture);
+                object obj = ResourceManager.GetObject("Rebelpullsheet", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -131,22 +131,22 @@ namespace Net_Navis {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Vex {
+            get {
+                object obj = ResourceManager.GetObject("Vex", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
         internal static System.Drawing.Icon Vex_Icon {
             get {
                 object obj = ResourceManager.GetObject("Vex_Icon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap Vex2_0 {
-            get {
-                object obj = ResourceManager.GetObject("Vex2.0", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }
