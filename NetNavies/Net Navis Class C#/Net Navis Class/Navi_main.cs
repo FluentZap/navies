@@ -21,46 +21,32 @@ namespace Net_Navis
 
 	public partial class Navi_Main
 	{
-
-        //private NaviFormF NaviFormEvents;
         
-        private NaviFormF NaviForm;                 
-		private MenuForm MenuForm;
-
-        //private NaviFXF NaviGL;        
-        
-        private NaviFXF NaviGL;        
-		
+        private NaviFormF NaviForm;
+        private MenuForm MenuForm;                
+        private NaviFXF NaviGL;        		
         //private NaviTrayIcon NaviTray;
-
         private HashSet<System.Windows.Forms.Keys> pressedkeys = new HashSet<System.Windows.Forms.Keys>();
-        
-        //DirectX                
-        //Device DXDevice;
-		//PresentParameters DXPP;
-		//Sprite DXSprite;
+                
 		public int GLNaviTexture;
-
-        public int GLProjectileTexture;
-        
-		//Texture[] DXProjectileTexture;
+        public int GLProjectileTexture;		
 		bool Init_GL;
-			// = True
 		bool GLOn;
 
 
 		System.Drawing.Imaging.ImageAttributes NormalImage = new System.Drawing.Imaging.ImageAttributes();
 		System.Drawing.Imaging.ImageAttributes BlueImage = new System.Drawing.Imaging.ImageAttributes();
 		System.Drawing.Imaging.ImageAttributes RedImage = new System.Drawing.Imaging.ImageAttributes();
-
 		System.Drawing.Imaging.ImageAttributes GreenImage = new System.Drawing.Imaging.ImageAttributes();
+
+
         private PointF Gravity = new PointF(0f, 0.5f);
         private PointF AirFriction = new PointF(0.01f, 0.01f);
 
         private PointF GroundFriction = new PointF(0.15f, 0f);
         private NetNavi_Type Host_Navi;
-
-        private NetNavi_Type Client_Navi;
+        
+        private HashSet<NetNavi_Type> Client_Navi;
 
 		bool Direct_Control = true;
 
@@ -158,7 +144,7 @@ namespace Net_Navis
 				Update_Physics();
 				Navi_resources.Set_Correct_Animation(ref Host_Navi);
 				Host_Navi.Update_Sprite();
-				//DoNetworkEvents()
+                //DoNetworkEvents();
 
 				Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds + Physics_Rate;
 				Program_Step += 1;
@@ -508,7 +494,7 @@ namespace Net_Navis
             NaviGL.Show();
             NaviGL.Width = Screen.PrimaryScreen.WorkingArea.Width;
             NaviGL.Height = Screen.PrimaryScreen.WorkingArea.Height;
-            GLControl control = new GLControl(new GraphicsMode(32, 24, 8, 4), 3, 0, GraphicsContextFlags.Default);            
+            GLControl control = new GLControl(new GraphicsMode(32, 24, 8, 0), 3, 0, GraphicsContextFlags.Default);            
             NaviGL.glControl1.Width = Screen.PrimaryScreen.WorkingArea.Width;            
             NaviGL.glControl1.Height = Screen.PrimaryScreen.WorkingArea.Height;
             
@@ -527,7 +513,6 @@ namespace Net_Navis
             //GL.MatrixMode(MatrixMode.Projection);
             //GL.LoadIdentity();
             GL.Ortho(0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height, 0, -1, 1);
-
 
 
 
@@ -550,9 +535,7 @@ namespace Net_Navis
 
         public void Load_Sprite_Sheets()
         {
-            //Load Host Sprite Sheet
-            int width = Host_Navi.SpriteSheet.Width / Host_Navi.SpriteSize.X;
-            int height = Host_Navi.SpriteSheet.Height / Host_Navi.SpriteSize.Y;
+            //Load Host Sprite Sheet            
             GLNaviTexture = load_sprite(Host_Navi.SpriteSheet);
             GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);            
         }

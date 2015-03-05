@@ -35,7 +35,7 @@ namespace Net_Navis
 "Vex":
 					N.NaviID = 1;
 					N.HitBox = new Rectangle(11, 18, 29, 30);
-					N.SpriteSheet = Net_Navis.Resource1.Vex2_0;
+					N.SpriteSheet = Net_Navis.Resource1.Vex;
 					N.Icon = Net_Navis.Resource1.Vex_Icon;
 					N.SpriteSize = new Point(48, 48);
 					N.HealthMax = 100;
@@ -67,7 +67,7 @@ namespace Net_Navis
 "Rebel":
 					N.NaviID = 3;
 					N.HitBox = new Rectangle(13, 22, 22, 26);
-					N.SpriteSheet = Net_Navis.Resource1.Rebel_pull_sheet;	
+					N.SpriteSheet = Net_Navis.Resource1.Rebelpullsheet;	
 					N.Icon = Net_Navis.Resource1.Rebel_Icon;
 					N.SpriteSize = new Point(48, 48);
 					N.HealthMax = 100;

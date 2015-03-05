@@ -50,7 +50,7 @@
               Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
             </summary>
         </member>
-        <member name="P:Net_Navis.Resource1.Rebel_pull_sheet">
+        <member name="P:Net_Navis.Resource1.Rebelpullsheet">
             <summary>
               Looks up a localized resource of type System.Drawing.Bitmap.
             </summary>
@@ -60,14 +60,14 @@
               Looks up a localized resource of type System.Drawing.Bitmap.
             </summary>
         </member>
+        <member name="P:Net_Navis.Resource1.Vex">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
         <member name="P:Net_Navis.Resource1.Vex_Icon">
             <summary>
               Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
-            </summary>
-        </member>
-        <member name="P:Net_Navis.Resource1.Vex2_0">
-            <summary>
-              Looks up a localized resource of type System.Drawing.Bitmap.
             </summary>
         </member>
     </members>
