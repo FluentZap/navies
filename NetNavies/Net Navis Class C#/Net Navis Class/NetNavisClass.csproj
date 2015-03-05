@@ -153,5 +153,8 @@
   <ItemGroup>
     <None Include="Resources\Shot2.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="OpenTK.GLControl.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
