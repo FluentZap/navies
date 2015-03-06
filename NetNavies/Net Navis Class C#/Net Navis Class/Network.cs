@@ -27,7 +27,7 @@ namespace Net_Navis
         private int peerCount = 0;
         private string networkName;
 
-        public void StartNetwork(string name)
+        public void StartNetwork(string name, int port = PORT)
         {
             if (networkActive)
                 return;
@@ -35,7 +35,7 @@ namespace Net_Navis
             networkActive = true;
             networkName = name;
             if (listener == null)
-                listener = new TcpListener(IPAddress.Any, PORT);
+                listener = new TcpListener(IPAddress.Any, port);
             listener.Start();
         }
 
@@ -71,11 +71,14 @@ namespace Net_Navis
 
             TcpClient c = new TcpClient(host, PORT);
             Client newPeer = new Client(c);
+
+            Console.WriteLine("Connecting... writing name");
             newPeer.Write(networkName);
 
             if ((Headers)newPeer.ReadInt32() != Headers.Approved)
             {
                 newPeer.Close();
+                Console.WriteLine("our name was not approved");
                 return false;
             }
 
@@ -84,11 +87,14 @@ namespace Net_Navis
             {
                 newPeer.Write((int)Headers.Invalid);
                 newPeer.Close();
+                Console.WriteLine("their name was taken");
                 return false;
             }
 
+            newPeer.Write((int)Headers.Approved);
             peers.Add(name, newPeer);
             ++peerCount;
+            Console.WriteLine("Client " + name + " successfully added");
             return true;
         }
 
@@ -98,6 +104,7 @@ namespace Net_Navis
             while (listener.Pending())
             {
                 newPeer = new Client(listener.AcceptTcpClient());
+                Console.WriteLine("Incomming Client");
                 registerPeer(newPeer);
             }
         }
@@ -105,11 +112,12 @@ namespace Net_Navis
         private void registerPeer(Client newPeer)
         {
             string name = newPeer.ReadString(); // get the incoming connection's name
-
+            Console.WriteLine("name is " + name);
             if (peers.ContainsKey(name)) // if we already have a user with the same name
             {
                 newPeer.Write((int)Headers.Invalid);
                 newPeer.Close();
+                Console.WriteLine("name taken");
                 return;
             }
 
@@ -117,19 +125,23 @@ namespace Net_Navis
             {
                 newPeer.Write((int)Headers.Denied);
                 newPeer.Close();
+                Console.WriteLine("full");
                 return;
             }
 
             newPeer.Write((int)Headers.Approved);
+            Console.WriteLine("approved");
             newPeer.Write(networkName); // send our name
             if ((Headers)newPeer.ReadInt32() != Headers.Approved) // if they have a user with the same name
             {
                 newPeer.Close();
+                Console.WriteLine("our name was not approved");
                 return;
             }
 
             peers.Add(name, newPeer);
             ++peerCount;
+            Console.WriteLine("client " + name + " added");
         }
 
         private void handlePeers()

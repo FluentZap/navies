@@ -224,10 +224,14 @@ namespace Net_Navis
             else if (pressedkeys.Contains(Keys.D2))
                 StartNetwork("Jonny Fire");
             else if (pressedkeys.Contains(Keys.D3))
-                ConnectToPeer("fastfattoad.com");
-            else if (pressedkeys.Contains(Keys.D4))
                 StartNetwork("Presto Pretzel");
+            else if (pressedkeys.Contains(Keys.D4))
+                StartNetwork("Presto Pretzel", 11995);
             else if (pressedkeys.Contains(Keys.D5))
+                ConnectToPeer("127.0.0.1");
+            else if (pressedkeys.Contains(Keys.D6))
+                ConnectToPeer("fastfattoad.com");
+            else if (pressedkeys.Contains(Keys.D7))
                 ConnectToPeer("discojoker.com");
 
 
