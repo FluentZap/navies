@@ -1,174 +1,186 @@
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
-using System.Xml.Linq;
+using System.Text;
+using System.Net;
+using System.Net.Sockets;
+
 namespace Net_Navis
 {
-	//This module handles all the network interaction
+    partial class Navi_Main
+    {
+        public enum Headers : int
+        {
+            SendingUpdate,
+            Bye,
+            Approved,
+            Denied,
+            Invalid,
+            Error
+        }
 
+        private Dictionary<string, Client> peers = new Dictionary<string, Client>();
+        private System.Net.Sockets.TcpListener listener = null;
+        private bool networkActive = false;
+        private static const int PORT = 11994;
+        private static const int MAX_PEERS = 1;
+        private int peerCount = 0;
+        private string networkName;
 
-	//Packet Layout
-	//All packets
-	//4 byte Program step
-	//1 byte Packet type
+        public void StartNetwork(string name)
+        {
+            if (networkActive)
+                return;
 
-	//Full sync
+            networkActive = true;
+            networkName = name;
+            if (listener == null)
+                listener = new TcpListener(IPAddress.Any, PORT);
+            listener.Start();
+        }
 
-	//CommandSend
+        public void StopNetwork()
+        {
+            if (!networkActive)
+                return;
 
-	public enum Packet_Type : byte
-		{
-			FullSync = 0,
-			CommandSend = 1
-		}
+            networkActive = false;
+            listener.Stop();
 
+            foreach (Client peer in peers.Values)
+            {
+                peer.Write((int)Headers.Bye);
+                peer.Close();
+            }
+            peers = new Dictionary<string, Client>();
+        }
 
-	partial class Navi_Main
-	{
+        public void DoNetworkEvents()
+        {
+            if (!networkActive)
+                return;
 
+            checkIncomingPeers();
+            handlePeers();
+        }
 
-		
+        public bool ConnectToPeer(string host)
+        {
+            if (peerCount == MAX_PEERS)
+                return false;
 
+            TcpClient c = new TcpClient(host, PORT);
+            Client newPeer = new Client(c);
+            newPeer.Write(networkName);
 
-		private System.Net.Sockets.TcpListener Net_Host;
-		private System.Net.Sockets.TcpClient Net_Client;
+            if ((Headers)newPeer.ReadInt32() != Headers.Approved)
+            {
+                newPeer.Close();
+                return false;
+            }
 
-		private bool IsClient;
+            string name = newPeer.ReadString();
+            if (peers.ContainsKey(name))
+            {
+                newPeer.Write((int)Headers.Invalid);
+                newPeer.Close();
+                return false;
+            }
 
-		private Dictionary<int, Client_Type> Client_List = new Dictionary<int, Client_Type>();
+            peers.Add(name, newPeer);
+            ++peerCount;
+            return true;
+        }
 
-		public class Client_Type
-		{
-			public bool ReSync;
-			public System.Net.Sockets.TcpClient Socket;
+        private void checkIncomingPeers()
+        {
+            Client newPeer;
+            while (listener.Pending())
+            {
+                newPeer = new Client(listener.AcceptTcpClient());
+                registerPeer(newPeer);
+            }
+        }
 
-			public NetNavi_Type Client_Navi;
-			public Client_Type(System.Net.Sockets.TcpClient Socket)
-			{
-				this.Socket = Socket;
-				ReSync = true;
-				Client_Navi = new NetNavi_Type();
-			}
+        private void registerPeer(Client newPeer)
+        {
+            string name = newPeer.ReadString(); // get the incoming connection's name
 
-		}
+            if (peers.ContainsKey(name)) // if we already have a user with the same name
+            {
+                newPeer.Write((int)Headers.Invalid);
+                newPeer.Close();
+                return;
+            }
 
+            if (peerCount == MAX_PEERS) // full
+            {
+                newPeer.Write((int)Headers.Denied);
+                newPeer.Close();
+                return;
+            }
 
-		public bool Initialise_Network()
-		{
-			//Check for host if none start host
-			try {
-				Connect_As_Client();
-				Console.WriteLine("Connected");
-				return true;
-			} catch {
-				try {
-					Host();
-					Console.WriteLine("Hosted");
-				} catch (Exception ex) {
-					return false;
-				}
-				return true;
-			}
-			return false;
-		}
+            newPeer.Write((int)Headers.Approved);
+            newPeer.Write(networkName); // send our name
+            if ((Headers)newPeer.ReadInt32() != Headers.Approved) // if they have a user with the same name
+            {
+                newPeer.Close();
+                return;
+            }
 
+            peers.Add(name, newPeer);
+            ++peerCount;
+        }
 
-		private void Connect_As_Client()
-		{
-			System.Net.IPAddress ip = System.Net.IPAddress.Parse("127.0.0.1");
-			Net_Client = new System.Net.Sockets.TcpClient();
-			Net_Client.Connect(ip, 52525);
-			Console.WriteLine("Connecting");
-			IsClient = true;
-		}
+        private void handlePeers()
+        {
+            Client peer;
+            Headers request;
+            HashSet<string> toRemove = new HashSet<string>();
 
+            foreach (string name in peers.Keys)
+            {
+                peer = peers[name];
+                
+                // send update
+                peer.Write((int)Headers.SendingUpdate);
+                sendUpdate(peer);
 
-		private void Host()
-		{
-			System.Net.IPAddress ip = System.Net.IPAddress.Parse("127.0.0.1");
-			Net_Host = new System.Net.Sockets.TcpListener(ip, 52525);
-			Net_Host.Start();
-			Console.WriteLine("Hosting");
-			IsClient = false;
-		}
+                // read info
+                while (peer.Available >= 4) // 4 bytes is the size of a header (int32) from the Headers enum
+                {
+                    request = (Headers)peer.ReadInt32();
 
-		public void CheckForConnections()
-		{
+                    if (request == Headers.Bye)
+                    {
+                        toRemove.Add(name);
+                        peer.Close();
+                        break;
+                    }
+                    else if (request == Headers.SendingUpdate)
+                    {
+                        readPeerUpdate(peer);
+                    }
+                }
+            }
 
-			while (!(Net_Host.Pending() == false)) {
-				int ID = 0;
-				for (ID = 0; ID <= 1000; ID++) {
-					if (!Client_List.ContainsKey(ID))
-						break; // TODO: might not be correct. Was : Exit For
-					if (ID == 1000)
-						return;
-				}
-				Client_List.Add(ID, new Client_Type(Net_Host.AcceptTcpClient()));
-			}
-		}
+            // remove anyone who disconnected
+            foreach (string name in toRemove)
+                peers.Remove(name);
+        }
 
+        private void sendUpdate(Client peer)
+        {
+            byte[] buffer = new byte[72];
+            Host_Navi.Get_Compact_buffer().CopyTo(buffer, 5);
+            peer.WriteSpecial(buffer);
+        }
 
+        public void readPeerUpdate(Client peer)
+        {
+            byte[] buffer = peer.ReadSpecial();
+            Other_Navi.Set_Compact_buffer(buffer);
+        }
 
-		public void Handle_Clients()
-		{
-			foreach (KeyValuePair<int, Navi_Main.Client_Type> Client in Client_List) {				
-				if (Client.Value.ReSync == true) {
-					ServerResync(Client.Value.Socket);
-					//Client.Value.ReSync = False
-				}
-
-
-
-			}
-
-		}
-
-
-		public void Update_To_Host()
-		{
-			if (Net_Client.Client.Available > 0) {
-				byte[] b = new byte[72];
-				Net_Client.GetStream().Read(b, 0, 71);
-				Host_Navi.Set_Compact_buffer(b);
-			}
-
-		}
-
-
-		public void DoNetworkEvents()
-		{
-			if (IsClient == false) {
-				CheckForConnections();
-				Handle_Clients();
-			}
-
-			if (IsClient == true) {
-				Update_To_Host();
-			}
-
-		}
-
-
-
-		public void ServerResync(System.Net.Sockets.TcpClient Socket)
-		{
-			byte[] Buffer = new byte[72];
-			//Convert Data
-			BitConverter.GetBytes(Program_Step).CopyTo(Buffer, 0);
-			Buffer[4] = (byte)Packet_Type.FullSync;
-			Host_Navi.Get_Compact_buffer().CopyTo(Buffer, 5);
-			//65 bytes
-			//Send Data
-			//Socket.GetStream.BeginWrite(Buffer, 0, Buffer.Length, Nothing, Nothing)
-
-			Socket.GetStream().Write(Buffer, 0, Buffer.Length - 1);
-		}
-
-
-	}
+    }
 }
