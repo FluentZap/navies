@@ -45,8 +45,7 @@ namespace Net_Navis
 
         private PointF GroundFriction = new PointF(0.15f, 0f);
         private NetNavi_Type Host_Navi;
-        
-        private NetNavi_Type Other_Navi;
+        private Dictionary<String, NetNavi_Type> Client_Navi;        
 
 		bool Direct_Control = true;
 
@@ -76,9 +75,6 @@ namespace Net_Navis
         public Navi_Main(string Navi_Name, long NaviID)
 		{
 			Host_Navi = Navi_resources.Get_Data(Navi_Name, NaviID);
-            
-            Other_Navi = Navi_resources.Get_Data(Navi_Name, 1);
-
 		}
 
 
@@ -103,16 +99,13 @@ namespace Net_Navis
             NaviForm.LostFocus += NaviForm_LostFocus;
             NaviForm.Disposed += NaviForm_Disposed;            
 
-
             //NaviGL.KeyDown += NaviDX_KeyDown;
             //NaviGL.KeyUp += NaviDX_KeyUp;
             //NaviGL.LostFocus += NaviDX_LostFocus;
             //NaviGL.Disposed += NaviDX_Disposed;
-		
 
-			Host_Navi.Get_Compact_buffer();
-
-			//Initialise_Network()
+            Client_Navi = new Dictionary<String, NetNavi_Type>();
+            
 
 			//Initialise defaults
 			//NaviTray = New NaviTrayIcon
@@ -228,7 +221,7 @@ namespace Net_Navis
             else if (pressedkeys.Contains(Keys.D4))
                 StartNetwork("Presto Pretzel", 11995);
             else if (pressedkeys.Contains(Keys.D5))
-                ConnectToPeer("127.0.0.1");
+                ConnectToPeer("192.168.1.244");
             else if (pressedkeys.Contains(Keys.D6))
                 ConnectToPeer("fastfattoad.com");
             else if (pressedkeys.Contains(Keys.D7))
@@ -431,7 +424,10 @@ namespace Net_Navis
             //yoff = Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y;
 
             Draw_Navi(Host_Navi);
-            Draw_Navi(Other_Navi);
+            foreach (NetNavi_Type navi in Client_Navi.Values)
+            {
+                Draw_Navi(navi);
+            }            
 
             GL.LoadIdentity();
             

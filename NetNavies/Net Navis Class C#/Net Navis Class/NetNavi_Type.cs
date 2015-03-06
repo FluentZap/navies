@@ -161,7 +161,6 @@ namespace Net_Navis
 			BitConverter.GetBytes(HasDashed).CopyTo(b, index);
 			index += 1;
 			return b;
-
 		}
 
 
