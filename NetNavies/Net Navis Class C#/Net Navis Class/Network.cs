@@ -22,8 +22,8 @@ namespace Net_Navis
         private Dictionary<string, Client> peers = new Dictionary<string, Client>();
         private System.Net.Sockets.TcpListener listener = null;
         private bool networkActive = false;
-        private static const int PORT = 11994;
-        private static const int MAX_PEERS = 1;
+        private const int PORT = 11994;
+        private const int MAX_PEERS = 1;
         private int peerCount = 0;
         private string networkName;
 
