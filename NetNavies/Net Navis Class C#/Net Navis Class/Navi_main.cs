@@ -77,6 +77,7 @@ namespace Net_Navis
 		{
 			Host_Navi = Navi_resources.Get_Data(Navi_Name, NaviID);
             
+            Other_Navi = Navi_resources.Get_Data(Navi_Name, 1);
 
 		}
 
@@ -128,8 +129,7 @@ namespace Net_Navis
 			Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
 			Host_Navi.Location.X = 1000;
 
-			Host_Navi.Scale = 3;
-
+			Host_Navi.Scale = 3;                        
 		}
 
 
@@ -426,34 +426,9 @@ namespace Net_Navis
             //xoff = Host_Navi.SpriteSize.X * Host_Navi.Sprite.X;
             //yoff = Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y;
 
-            GL.MatrixMode(MatrixMode.Projection);            
-            GL.LoadIdentity();
+            Draw_Navi(Host_Navi);
+            Draw_Navi(Other_Navi);
 
-            GL.MatrixMode(MatrixMode.Texture);
-            GL.LoadIdentity();
-            GL.Scale(1f / (Host_Navi.SpriteSheet.Width / Host_Navi.SpriteSize.X),
-                     1f / (Host_Navi.SpriteSheet.Height / Host_Navi.SpriteSize.Y), 1);
-            GL.Translate(Host_Navi.Sprite.X, Host_Navi.Sprite.Y, 0);
-            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
-
-            if (Host_Navi.FaceLeft == true)
-            {                
-                GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(Host_Navi.Location.X + Host_Navi.SpriteSize.X * Host_Navi.Scale, Host_Navi.Location.Y);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(Host_Navi.Location.X + Host_Navi.SpriteSize.X * Host_Navi.Scale, Host_Navi.Location.Y + Host_Navi.SpriteSize.Y * Host_Navi.Scale);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y + Host_Navi.SpriteSize.Y * Host_Navi.Scale);
-                GL.End();
-            }
-            else
-            {
-                GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(Host_Navi.Location.X + Host_Navi.SpriteSize.X * Host_Navi.Scale, Host_Navi.Location.Y);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(Host_Navi.Location.X + Host_Navi.SpriteSize.X * Host_Navi.Scale, Host_Navi.Location.Y + Host_Navi.SpriteSize.Y * Host_Navi.Scale);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(Host_Navi.Location.X, Host_Navi.Location.Y + Host_Navi.SpriteSize.Y * Host_Navi.Scale);
-                GL.End();
-            }
             GL.LoadIdentity();
             
 
@@ -491,6 +466,40 @@ namespace Net_Navis
             //GLC.SwapBuffers();
             //GL.Finish();            
 		}
+
+
+
+        public void Draw_Navi(NetNavi_Type Navi)
+        {
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+
+            GL.MatrixMode(MatrixMode.Texture);
+            GL.LoadIdentity();
+            GL.Scale(1f / (Navi.SpriteSheet.Width / Navi.SpriteSize.X),
+                     1f / (Navi.SpriteSheet.Height / Navi.SpriteSize.Y), 1);
+            GL.Translate(Navi.Sprite.X, Navi.Sprite.Y, 0);
+            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
+            if (Navi.FaceLeft == true)
+            {
+                GL.Begin(PrimitiveType.Quads);
+                GL.TexCoord2(1f, 0f); GL.Vertex2(Navi.Location.X, Navi.Location.Y);
+                GL.TexCoord2(0f, 0f); GL.Vertex2(Navi.Location.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y);
+                GL.TexCoord2(0f, 1f); GL.Vertex2(Navi.Location.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y + Navi.SpriteSize.Y * Navi.Scale);
+                GL.TexCoord2(1f, 1f); GL.Vertex2(Navi.Location.X, Navi.Location.Y + Navi.SpriteSize.Y * Navi.Scale);
+                GL.End();
+            }
+            else
+            {
+                GL.Begin(PrimitiveType.Quads);
+                GL.TexCoord2(0f, 0f); GL.Vertex2(Navi.Location.X, Navi.Location.Y);
+                GL.TexCoord2(1f, 0f); GL.Vertex2(Navi.Location.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y);
+                GL.TexCoord2(1f, 1f); GL.Vertex2(Navi.Location.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y + Navi.SpriteSize.Y * Navi.Scale);
+                GL.TexCoord2(0f, 1f); GL.Vertex2(Navi.Location.X, Navi.Location.Y + Navi.SpriteSize.Y * Navi.Scale);
+                GL.End();
+            }
+            GL.LoadIdentity();
+        }
 
         /// <summary>
         ///  OpenGL Start Device
