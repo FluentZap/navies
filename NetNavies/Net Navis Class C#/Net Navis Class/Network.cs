@@ -93,6 +93,10 @@ namespace Net_Navis
 
             newPeer.Write((int)Headers.Approved);
             peers.Add(name, newPeer);
+            
+            Client_Navi.Add(name, new NetNavi_Type());
+            Client_Navi[name] = Navi_resources.Get_Data("Raven", 0);
+
             ++peerCount;
             Console.WriteLine("Client " + name + " successfully added");
             return true;
@@ -137,7 +141,7 @@ namespace Net_Navis
                 newPeer.Close();
                 Console.WriteLine("our name was not approved");
                 return;
-            }
+            }            
 
             peers.Add(name, newPeer);
             ++peerCount;
@@ -171,14 +175,17 @@ namespace Net_Navis
                     }
                     else if (request == Headers.SendingUpdate)
                     {
-                        readPeerUpdate(peer);
+                        readPeerUpdate(peer, name);
                     }
                 }
             }
 
             // remove anyone who disconnected
             foreach (string name in toRemove)
+            {
                 peers.Remove(name);
+                Client_Navi.Remove(name);
+            }
         }
 
         private void sendUpdate(Client peer)
@@ -188,10 +195,10 @@ namespace Net_Navis
             peer.WriteSpecial(buffer);
         }
 
-        public void readPeerUpdate(Client peer)
+        public void readPeerUpdate(Client peer, String name)
         {
             byte[] buffer = peer.ReadSpecial();
-            Other_Navi.Set_Compact_buffer(buffer);
+            Client_Navi[name].Set_Compact_buffer(buffer);
         }
 
     }
