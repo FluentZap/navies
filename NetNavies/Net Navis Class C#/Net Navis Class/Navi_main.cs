@@ -46,7 +46,7 @@ namespace Net_Navis
         private PointF GroundFriction = new PointF(0.15f, 0f);
         private NetNavi_Type Host_Navi;
         
-        private HashSet<NetNavi_Type> Client_Navi;
+        private NetNavi_Type Other_Navi;
 
 		bool Direct_Control = true;
 
@@ -144,7 +144,7 @@ namespace Net_Navis
 				Update_Physics();
 				Navi_resources.Set_Correct_Animation(ref Host_Navi);
 				Host_Navi.Update_Sprite();
-                //DoNetworkEvents();
+                DoNetworkEvents();
 
 				Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds + Physics_Rate;
 				Program_Step += 1;
@@ -219,20 +219,35 @@ namespace Net_Navis
 				pressedkeys.Remove(Keys.OemQuestion);
 			}
 
+            if (pressedkeys.Contains(Keys.D1))
+                StopNetwork();
+            else if (pressedkeys.Contains(Keys.D2))
+                StartNetwork("Jonny Fire");
+            else if (pressedkeys.Contains(Keys.D3))
+                ConnectToPeer("fastfattoad.com");
+            else if (pressedkeys.Contains(Keys.D4))
+                StartNetwork("Presto Pretzel");
+            else if (pressedkeys.Contains(Keys.D5))
+                ConnectToPeer("discojoker.com");
+
+
 
 		}
 
 		public void Draw_All()
 		{
-			if (GLOn == false) {
-				if (!(Host_Navi.Sprite == Host_Navi.OldSprite) || !(Host_Navi.FaceLeft == Host_Navi.OldFaceLeft)) {
+			if (GLOn == false) 
+            {
+				if (!(Host_Navi.Sprite == Host_Navi.OldSprite) || !(Host_Navi.FaceLeft == Host_Navi.OldFaceLeft)) 
+                {
 					NaviForm.Invalidate();
 					Host_Navi.OldSprite = Host_Navi.Sprite;
 					Host_Navi.OldFaceLeft = Host_Navi.FaceLeft;
 				}
 			}
 
-			if (GLOn == true) {
+			if (GLOn == true) 
+            {
                 
                 if (Init_GL == false)
                 {
@@ -245,7 +260,8 @@ namespace Net_Navis
         
 		public void Process_Navi_Commands()
 		{
-			if (Direct_Control == false) {
+			if (Direct_Control == false) 
+            {
 				Host_Navi.Running = false;
 				if (Host_Navi.Navi_Location().Right <= Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox().Width) {
 					Host_Navi.FaceLeft = false;
@@ -349,9 +365,6 @@ namespace Net_Navis
 			//Update Location
 			NaviForm.Left = Convert.ToInt32(Host_Navi.Location.X);
 			NaviForm.Top = Convert.ToInt32(Host_Navi.Location.Y);
-
-			if (IsClient == true)
-				NaviForm.Left = Convert.ToInt32(Host_Navi.Location.X) + 32;
 		}
 
 		public void Navi_Redraw(object sender, System.Windows.Forms.PaintEventArgs e)
