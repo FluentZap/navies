@@ -27,6 +27,7 @@ namespace Net_Navis
         private NaviFXF NaviGL;        		
         //private NaviTrayIcon NaviTray;
         private HashSet<System.Windows.Forms.Keys> pressedkeys = new HashSet<System.Windows.Forms.Keys>();                	
+        private HashSet<System.Windows.Forms.Keys> prevPressedkeys = new HashSet<System.Windows.Forms.Keys>();
 		System.Drawing.Imaging.ImageAttributes NormalImage = new System.Drawing.Imaging.ImageAttributes();
 		System.Drawing.Imaging.ImageAttributes BlueImage = new System.Drawing.Imaging.ImageAttributes();
 		System.Drawing.Imaging.ImageAttributes RedImage = new System.Drawing.Imaging.ImageAttributes();
@@ -102,7 +103,7 @@ namespace Net_Navis
 			//NaviTray.Initialise(Host_Navi)
 			Set_color_filters();
 			Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds;			
-			Physics_Rate = 1f / 60f;
+			Physics_Rate = 1 / 60.0;
 			Program_Step = 0;
 			//Host_Navi.set_Animation(Animation_Name_Enum.None)
 			Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
@@ -195,23 +196,28 @@ namespace Net_Navis
                 Host_Navi.Shooting = false;
 			
 
-            if (pressedkeys.Contains(Keys.D1))
+            if (pressedkeys.Contains(Keys.D1) && !prevPressedkeys.Contains(Keys.D1))
                 StopNetwork();
-            else if (pressedkeys.Contains(Keys.D2))
+            else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
                 StartNetwork("Jonny Fire");
-            else if (pressedkeys.Contains(Keys.D3))
+            else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
                 StartNetwork("Presto Pretzel");
-            else if (pressedkeys.Contains(Keys.D4))
+            else if (pressedkeys.Contains(Keys.D4) && !prevPressedkeys.Contains(Keys.D4))
                 StartNetwork("Presto Pretzel", 11995);
-            else if (pressedkeys.Contains(Keys.D5))
+            else if (pressedkeys.Contains(Keys.D5) && !prevPressedkeys.Contains(Keys.D5))
                 ConnectToPeer("192.168.1.244");
-            else if (pressedkeys.Contains(Keys.D6))
+            else if (pressedkeys.Contains(Keys.D6) && !prevPressedkeys.Contains(Keys.D6))
                 ConnectToPeer("fastfattoad.com");
-            else if (pressedkeys.Contains(Keys.D7))
+            else if (pressedkeys.Contains(Keys.D7) && !prevPressedkeys.Contains(Keys.D7))
                 ConnectToPeer("discojoker.com");
+            else if (pressedkeys.Contains(Keys.D8) && !prevPressedkeys.Contains(Keys.D8))
+                ConnectToPeer("127.0.0.1");
+            else if (pressedkeys.Contains(Keys.D9) && !prevPressedkeys.Contains(Keys.D9))
+                StartNetwork("Mechana Banana", 11996);
 
-
-
+            prevPressedkeys.Clear();
+            foreach (System.Windows.Forms.Keys key in pressedkeys)
+                prevPressedkeys.Add(key);
 		}
 
         public void Process_Navi_Commands()
@@ -418,17 +424,12 @@ namespace Net_Navis
 
         private void NaviForm_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
 		{
-			if (pressedkeys.Contains(e.KeyCode)) {
-			} else {
-				pressedkeys.Add(e.KeyCode);
-			}
+			pressedkeys.Add(e.KeyCode); // automatically checks for duplicates and won't add twice
 		}
 
 		private void NaviForm_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
 		{
-			if (pressedkeys.Contains(e.KeyCode)) {
-				pressedkeys.Remove(e.KeyCode);
-			}
+			pressedkeys.Remove(e.KeyCode); // returns false if KeyCode isn't in the hashset
 		}
 
 		private void NaviForm_GotFocus(object sender, System.EventArgs e)
