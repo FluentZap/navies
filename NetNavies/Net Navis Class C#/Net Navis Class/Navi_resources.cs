@@ -20,6 +20,7 @@ namespace Net_Navis
 					N.NaviID = 0;
 					N.HitBox = new Rectangle(10, 22, 30, 26);
 					N.SpriteSheet = Net_Navis.Resource1.Raven;
+                    N.GLSpriteSheetName = "Raven";
 					N.Icon = Net_Navis.Resource1.Raven_Icon;
 					N.SpriteSize = new Point(48, 48);
 					N.HealthMax = 100;
@@ -29,13 +30,14 @@ namespace Net_Navis
 					N.AirSpeed = 0.2f;
 					N.DashSpeed = 1;
 					N.Acrobatics = 15;
-                    N.ShootPoint = new Point(40, 33);                    
+                    N.ShootPoint = new Point(40, 33);
 					break;
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
 "Vex":
 					N.NaviID = 1;
 					N.HitBox = new Rectangle(11, 18, 29, 30);
 					N.SpriteSheet = Net_Navis.Resource1.Vex;
+                    N.GLSpriteSheetName = "Vex";
 					N.Icon = Net_Navis.Resource1.Vex_Icon;
 					N.SpriteSize = new Point(48, 48);
 					N.HealthMax = 100;
@@ -51,7 +53,8 @@ namespace Net_Navis
 "Barnabus":
 					N.NaviID = 2;
 					N.HitBox = new Rectangle(3, 5, 27, 27);
-					N.SpriteSheet = Net_Navis.Resource1.Barnabus; 
+					N.SpriteSheet = Net_Navis.Resource1.Barnabus;
+                    N.GLSpriteSheetName = "Barnabus";
 					N.Icon = Net_Navis.Resource1.Barnabus_Icon;
 					N.SpriteSize = new Point(32, 32);
 					N.HealthMax = 100;
@@ -67,7 +70,8 @@ namespace Net_Navis
 "Rebel":
 					N.NaviID = 3;
 					N.HitBox = new Rectangle(13, 22, 22, 26);
-					N.SpriteSheet = Net_Navis.Resource1.Rebelpullsheet;	
+					N.SpriteSheet = Net_Navis.Resource1.Rebelpullsheet;
+                    N.GLSpriteSheetName = "Rebel";
 					N.Icon = Net_Navis.Resource1.Rebel_Icon;
 					N.SpriteSize = new Point(48, 48);
 					N.HealthMax = 100;

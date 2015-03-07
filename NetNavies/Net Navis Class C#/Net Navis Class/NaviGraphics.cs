@@ -217,18 +217,24 @@ namespace Net_Navis
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             GL.Viewport(0, 0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             GL.Ortho(0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height, 0, -1, 1);
-            Load_Sprite_Sheets(Host_Navi.Navi_Name);
-            GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);
-            GLBackground = load_sprite(Net_Navis.Resource1.BG1);
+            Load_Sprite_Sheets();            
             NaviForm.Hide();
-            Init_GL = true;
+            Init_GL = true;            
         }
 
-        public void Load_Sprite_Sheets(string name)
+        public void Load_Sprite_Sheets()
         {
-            //Load Navi Sprite Sheet
-            if (!GLNaviTexture.ContainsKey(name))
-                GLNaviTexture.Add(name, load_sprite(Host_Navi.SpriteSheet));
+            //Load Navi Sprite Sheet            
+            GLNaviTexture.Add("Raven", load_sprite(Resource1.Raven));
+            GLNaviTexture.Add("Vex", load_sprite(Resource1.Vex));
+            GLNaviTexture.Add("Barnabus", load_sprite(Resource1.Barnabus));
+            GLNaviTexture.Add("Rebel", load_sprite(Resource1.Rebelpullsheet));
+
+            //Load projectiles
+            GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);
+
+            //Load backgrounds            
+            GLBackground = load_sprite(Net_Navis.Resource1.BG1);
         }
         //Load Sprite From Bitmap
         private int load_sprite(Bitmap bitmap)
