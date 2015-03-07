@@ -86,6 +86,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NaviGraphics.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="MenuForm.cs">
       <SubType>Form</SubType>
@@ -156,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="OpenTK.GLControl.dll" />
+    <None Include="Resources\BG1.png" />
     <None Include="Resources\Vex.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

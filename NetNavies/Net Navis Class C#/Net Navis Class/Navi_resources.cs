@@ -29,7 +29,7 @@ namespace Net_Navis
 					N.AirSpeed = 0.2f;
 					N.DashSpeed = 1;
 					N.Acrobatics = 15;
-
+                    N.ShootPoint = new Point(40, 33);                    
 					break;
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
 "Vex":
@@ -85,8 +85,6 @@ namespace Net_Navis
 			N.Navi_Name = Navi_Name;
 			return N;
 		}
-
-
 
 		public static Animation Get_Animation(Animation_Name_Enum Animation_Name)
 		{
@@ -402,5 +400,4 @@ Animation_Name_Enum.Rebel_Jumping:
 			Rebel_Dash_End,
 			Rebel_Fallfast
 		}
-	
 }

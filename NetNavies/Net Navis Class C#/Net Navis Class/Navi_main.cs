@@ -26,14 +26,7 @@ namespace Net_Navis
         private MenuForm MenuForm;                
         private NaviFXF NaviGL;        		
         //private NaviTrayIcon NaviTray;
-        private HashSet<System.Windows.Forms.Keys> pressedkeys = new HashSet<System.Windows.Forms.Keys>();
-                
-		public int GLNaviTexture;
-        public int GLProjectileTexture;		
-		bool Init_GL;
-		bool GLOn;
-
-
+        private HashSet<System.Windows.Forms.Keys> pressedkeys = new HashSet<System.Windows.Forms.Keys>();                	
 		System.Drawing.Imaging.ImageAttributes NormalImage = new System.Drawing.Imaging.ImageAttributes();
 		System.Drawing.Imaging.ImageAttributes BlueImage = new System.Drawing.Imaging.ImageAttributes();
 		System.Drawing.Imaging.ImageAttributes RedImage = new System.Drawing.Imaging.ImageAttributes();
@@ -42,8 +35,10 @@ namespace Net_Navis
 
         private PointF Gravity = new PointF(0f, 0.5f);
         private PointF AirFriction = new PointF(0.01f, 0.01f);
-
         private PointF GroundFriction = new PointF(0.15f, 0f);
+        private Point ScreenScroll;
+        private Point ScreenBounds = new Point(15360, 966);
+        
         private NetNavi_Type Host_Navi;
         private Dictionary<String, NetNavi_Type> Client_Navi;        
 
@@ -58,13 +53,14 @@ namespace Net_Navis
 		{
 			public PointF Location;
 			public PointF Speed;
-
+            public double Scale;
 			public int Life;
-			public Projectiles_Type(Point Location, PointF Speed, int Life)
+			public Projectiles_Type(Point Location, PointF Speed, int Life, double Scale)
 			{
 				this.Location = Location;
 				this.Speed = Speed;
 				this.Life = Life;
+                this.Scale = Scale;
 			}
 
 		}
@@ -92,37 +88,26 @@ namespace Net_Navis
 			NaviForm.Top = Convert.ToInt32(Host_Navi.Location.Y);
 
 
-            NaviForm.Paint += Navi_Redraw;
+            NaviForm.Paint += Draw_Navi_GDI;
             NaviForm.KeyDown += NaviForm_KeyDown;
             NaviForm.KeyUp += NaviForm_KeyUp;
             NaviForm.GotFocus += NaviForm_GotFocus;
             NaviForm.LostFocus += NaviForm_LostFocus;
-            NaviForm.Disposed += NaviForm_Disposed;            
-
-            //NaviGL.KeyDown += NaviDX_KeyDown;
-            //NaviGL.KeyUp += NaviDX_KeyUp;
-            //NaviGL.LostFocus += NaviDX_LostFocus;
-            //NaviGL.Disposed += NaviDX_Disposed;
-
+            NaviForm.Disposed += NaviForm_Disposed;                      
+            //NaviFXF handels set in startGL
             Client_Navi = new Dictionary<String, NetNavi_Type>();
             
-
 			//Initialise defaults
 			//NaviTray = New NaviTrayIcon
 			//NaviTray.Initialise(Host_Navi)
 			Set_color_filters();
-
-			Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds;
-			
+			Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds;			
 			Physics_Rate = 1f / 60f;
 			Program_Step = 0;
-
 			//Host_Navi.set_Animation(Animation_Name_Enum.None)
-
 			Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
 			Host_Navi.Location.X = 1000;
-
-			Host_Navi.Scale = 3;                        
+			Host_Navi.Scale = 3;
 		}
 
 
@@ -137,19 +122,21 @@ namespace Net_Navis
 				Update_Physics();
 				Navi_resources.Set_Correct_Animation(ref Host_Navi);
 				Host_Navi.Update_Sprite();
+                Host_Navi.ShootCharge += 1;
+
                 DoNetworkEvents();
 
 				Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds + Physics_Rate;
 				Program_Step += 1;
 			}
 
-			Draw_All();
+			Draw_Navi();
 		}
 
-
 		public void Handle_UI()
-		{
-			if (pressedkeys.Contains(Keys.W)) {
+		{                                  
+            
+            if (pressedkeys.Contains(Keys.W)) {
 				Host_Navi.Scale += 0.5f;
 				Host_Navi.OldSprite = new Point(500, 500);
 				if (Host_Navi.Scale < 0.5f)
@@ -202,15 +189,11 @@ namespace Net_Navis
 					NaviGL.Dispose();
 
 
-			if (pressedkeys.Contains(Keys.OemQuestion)) {
-				if (Host_Navi.FaceLeft == true) {
-					Projectile_List.Add(new Projectiles_Type(new Point(Convert.ToInt32(Host_Navi.Navi_Location().Left), Convert.ToInt32(Host_Navi.Navi_Location().Top)), new PointF(-20, 0), 600));
-				} else {
-					Projectile_List.Add(new Projectiles_Type(new Point(Convert.ToInt32(Host_Navi.Navi_Location().Right), Convert.ToInt32(Host_Navi.Navi_Location().Top)), new PointF(20, 0), 600));
-				}
-
-				pressedkeys.Remove(Keys.OemQuestion);
-			}
+			if (pressedkeys.Contains(Keys.OemQuestion))
+                Host_Navi.Shooting = true;
+                else
+                Host_Navi.Shooting = false;
+			
 
             if (pressedkeys.Contains(Keys.D1))
                 StopNetwork();
@@ -231,362 +214,209 @@ namespace Net_Navis
 
 		}
 
-		public void Draw_All()
-		{
-			if (GLOn == false) 
-            {
-				if (!(Host_Navi.Sprite == Host_Navi.OldSprite) || !(Host_Navi.FaceLeft == Host_Navi.OldFaceLeft)) 
-                {
-					NaviForm.Invalidate();
-					Host_Navi.OldSprite = Host_Navi.Sprite;
-					Host_Navi.OldFaceLeft = Host_Navi.FaceLeft;
-				}
-			}
-
-			if (GLOn == true) 
-            {
-                
-                if (Init_GL == false)
-                {
-                    Start_GL();                
-                }
-                Draw_DX();
-			}
-
-		}
-        
-		public void Process_Navi_Commands()
-		{
-			if (Direct_Control == false) 
-            {
-				Host_Navi.Running = false;
-				if (Host_Navi.Navi_Location().Right <= Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox().Width) {
-					Host_Navi.FaceLeft = false;
-					Host_Navi.Running = true;
-				}
-				if (Host_Navi.Navi_Location().Right >= Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox().Width) {
-					Host_Navi.FaceLeft = true;
-				}
-			}
-
-
-
-			//Move Navies
-			if (Host_Navi.OnGround == true) {
-				if (Host_Navi.Running == true) {
-					//Check for dashing
-					if (Host_Navi.Dashing == true) {
-						//Dashing
-						if (Host_Navi.FaceLeft == true)
-							Host_Navi.Speed.X -= Host_Navi.DashSpeed;
-						else
-							Host_Navi.Speed.X += Host_Navi.DashSpeed;
-					} else {
-						//Running
-						if (Host_Navi.FaceLeft == true)
-							Host_Navi.Speed.X -= Host_Navi.GroundSpeed;
-						else
-							Host_Navi.Speed.X += Host_Navi.GroundSpeed;
-					}
-				}
-				//Jumping
-				if (Host_Navi.Jumping == true && Host_Navi.HasJumped == true){Host_Navi.Speed.Y -= Host_Navi.Acrobatics;Host_Navi.HasJumped = false;}
-
-
-			} else {
-				//Air moving
-				if (Host_Navi.Running == true) {
-					if (Host_Navi.FaceLeft == true)
-						Host_Navi.Speed.X -= Host_Navi.AirSpeed;
-					else
-						Host_Navi.Speed.X += Host_Navi.AirSpeed;
-				}
-			}
-
-
-		}
-
-
-		public void Update_Physics()
-		{
-			HashSet<Projectiles_Type> Item_Remove_List = new HashSet<Projectiles_Type>();
-			foreach (Navi_Main.Projectiles_Type item in Projectile_List) {				
-				item.Location.X += item.Speed.X;
-				item.Location.Y += item.Speed.Y;
-				item.Life -= 1;
-				if (item.Life <= 0)
-					Item_Remove_List.Add(item);
-			}
-
-			foreach (Navi_Main.Projectiles_Type item in Item_Remove_List) {				
-				Projectile_List.Remove(item);
-			}
-
-
-			//Friction
-			if (Host_Navi.OnGround == true) {
-				Host_Navi.Speed.X -= Host_Navi.Speed.X * GroundFriction.X;
-				Host_Navi.Speed.Y -= Host_Navi.Speed.Y * GroundFriction.Y;
-			} else {
-				Host_Navi.Speed.X -= Host_Navi.Speed.X * AirFriction.X;
-				Host_Navi.Speed.Y -= Host_Navi.Speed.Y * AirFriction.Y;
-			}
-
-			//Gravity
-			if (Host_Navi.OnGround == false)
-				Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y;
-			//Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
-
-			Host_Navi.Location.X = Host_Navi.Location.X + Host_Navi.Speed.X * Host_Navi.Scale;
-			Host_Navi.Location.Y = Host_Navi.Location.Y + Host_Navi.Speed.Y * Host_Navi.Scale;
-
-			//Bounds
-			if (Host_Navi.FaceLeft == true) {
-				if (Host_Navi.Navi_Location().Left <= Screen.PrimaryScreen.WorkingArea.Left){Host_Navi.Location.X = Screen.PrimaryScreen.WorkingArea.Left - (Host_Navi.GetSize().X - Host_Navi.GetHitBox().Right);Host_Navi.Speed.X = 0;}
-			} else {
-				if (Host_Navi.Navi_Location().Left <= Screen.PrimaryScreen.WorkingArea.Left){Host_Navi.Location.X = Screen.PrimaryScreen.WorkingArea.Left - Host_Navi.GetHitBox().Left;Host_Navi.Speed.X = 0;}
-			}
-
-			if (Host_Navi.FaceLeft == true) {
-				if (Host_Navi.Navi_Location().Right >= Screen.PrimaryScreen.WorkingArea.Right){Host_Navi.Location.X = Screen.PrimaryScreen.WorkingArea.Right - (Host_Navi.GetSize().X - Host_Navi.GetHitBox().Left);Host_Navi.Speed.X = 0;}
-			} else {
-				if (Host_Navi.Navi_Location().Right >= Screen.PrimaryScreen.WorkingArea.Right){Host_Navi.Location.X = Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox().Right;Host_Navi.Speed.X = 0;}
-			}
-
-			if (Host_Navi.Navi_Location().Bottom > Screen.PrimaryScreen.WorkingArea.Bottom)
-				Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetHitBox().Bottom;
-			if (Host_Navi.Navi_Location().Bottom == Screen.PrimaryScreen.WorkingArea.Bottom){Host_Navi.OnGround = true;Host_Navi.Speed.Y = 0;}
-			else
-				Host_Navi.OnGround = false;
-
-			//Update Location
-			NaviForm.Left = Convert.ToInt32(Host_Navi.Location.X);
-			NaviForm.Top = Convert.ToInt32(Host_Navi.Location.Y);
-		}
-
-		public void Navi_Redraw(object sender, System.Windows.Forms.PaintEventArgs e)
-		{
-			NaviForm.Width = Convert.ToInt32(Host_Navi.GetSize().X);
-			NaviForm.Height = Convert.ToInt32(Host_Navi.GetSize().Y);
-			e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-
-			float xoff = 0;
-			float yoff = 0;
-			xoff = Convert.ToSingle(-0.5 + 0.5 * Host_Navi.SpriteSize.X / Host_Navi.GetSize().X) + Host_Navi.SpriteSize.X * Host_Navi.Sprite.X;
-			yoff = Convert.ToSingle(-0.5 + 0.5 * Host_Navi.SpriteSize.Y / Host_Navi.GetSize().Y) + Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y;
-
-			if (Host_Navi.FaceLeft == true) {
-				e.Graphics.DrawImage(Host_Navi.SpriteSheet, new Rectangle(Convert.ToInt32(Host_Navi.GetSize().X), 0, Convert.ToInt32(-Host_Navi.GetSize().X - 1), Convert.ToInt32(Host_Navi.GetSize().Y)), xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y, GraphicsUnit.Pixel, NormalImage);
-			} else {
-				e.Graphics.DrawImage(Host_Navi.SpriteSheet, new Rectangle(0, 0, Convert.ToInt32(Host_Navi.GetSize().X), Convert.ToInt32(Host_Navi.GetSize().Y)), xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y, GraphicsUnit.Pixel, NormalImage);
-			}
-
-
-		}
-
-
-		public void Set_color_filters()
-		{
-			float[][] NormalColorMatrixElements = {
-				new float[] {1,0,0,0,0},
-				new float[] {0,1,0,0,0},
-				new float[] {0,0,1,0,0},
-				new float[] {0,0,0,1,0},
-				new float[] {0,0,0,0,1}
-			};
-
-			float[][] BlueColorMatrixElements = {
-				new float[] {1,0,0,0,0},
-				new float[] {0,1,0,0,0},
-				new float[] {0,0,2,0,0},
-				new float[] {0,0,0,1,0},
-				new float[] {-0.2f,-0.2f,0,0,1}
-			};
-
-			NormalImage.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix(NormalColorMatrixElements), System.Drawing.Imaging.ColorMatrixFlag.Default, System.Drawing.Imaging.ColorAdjustType.Bitmap);
-			BlueImage.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix(BlueColorMatrixElements), System.Drawing.Imaging.ColorMatrixFlag.Default, System.Drawing.Imaging.ColorAdjustType.Bitmap);
-		
-        }
-
-
-
-		public void Draw_DX()
-		{
-
-            // Make the foreground context the current context            
-
-            GL.Clear(ClearBufferMask.ColorBufferBit);
-            GL.ClearColor(Color.SkyBlue);
-
-            //int xoff = 0;
-            //int yoff = 0;
-            //xoff = Host_Navi.SpriteSize.X * Host_Navi.Sprite.X;
-            //yoff = Host_Navi.SpriteSize.Y * Host_Navi.Sprite.Y;
-
-            Draw_Navi(Host_Navi);
-            foreach (NetNavi_Type navi in Client_Navi.Values)
-            {
-                Draw_Navi(navi);
-            }            
-
-            GL.LoadIdentity();
-            
-
-
-
-
-            
-			//DXSprite.Draw(DXNaviTexture(0), New Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, New Vector3(Host_Navi.Location.X, Host_Navi.Location.Y, 0), Color.White)
-            
-			if (Host_Navi.FaceLeft == true) {
-				//DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(-Host_Navi.Scale, Host_Navi.Scale), new Vector2(0, 0), 0, new Vector2(Host_Navi.Location.X + (Host_Navi.SpriteSize.X * Host_Navi.Scale), Host_Navi.Location.Y));
-				//DXSprite.Draw(DXNaviTexture[0], new Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
-			} else {
-				//DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(Host_Navi.Scale, Host_Navi.Scale), new Vector2(0, 0), 0, new Vector2(Host_Navi.Location.X, Host_Navi.Location.Y));
-				//DXSprite.Draw(DXNaviTexture[0], new Rectangle(xoff, yoff, Host_Navi.SpriteSize.X, Host_Navi.SpriteSize.Y), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
-			}
-            GL.BindTexture(TextureTarget.Texture2D, GLProjectileTexture);
-			foreach (Navi_Main.Projectiles_Type item in Projectile_List) {
-
-                GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(item.Location.X, item.Location.Y);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(item.Location.X + 8 * Host_Navi.Scale, item.Location.Y);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(item.Location.X + 8 * Host_Navi.Scale, item.Location.Y + 6 * Host_Navi.Scale);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(item.Location.X, item.Location.Y + 6 * Host_Navi.Scale);
-                GL.End();
-
-				//DXSprite.Transform = Matrix.Transformation2D(new Vector2(0, 0), 0, new Vector2(3, 3), new Vector2(0, 0), 0, new Vector2(item.Location.X, item.Location.Y));
-				//DXSprite.Draw(DXProjectileTexture[0], new Rectangle(0, 0, 8, 6), Vector3.Empty, new Vector3(0, 0, 0), Color.White);
-			}
-            //GLC.SwapBuffers();
-            //GraphicsContext.CurrentContext.SwapBuffers();
-            NaviGL.glControl1.SwapBuffers();
-            //GLC.SwapBuffers();
-            //if (!GLC.IsCurrent) { GLC.MakeCurrent(wi); GLC.LoadAll(); }            
-            //GLC.SwapBuffers();
-            //GL.Finish();            
-		}
-
-
-
-        public void Draw_Navi(NetNavi_Type Navi)
+        public void Process_Navi_Commands()
         {
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
-
-            GL.MatrixMode(MatrixMode.Texture);
-            GL.LoadIdentity();
-            GL.Scale(1f / (Navi.SpriteSheet.Width / Navi.SpriteSize.X),
-                     1f / (Navi.SpriteSheet.Height / Navi.SpriteSize.Y), 1);
-            GL.Translate(Navi.Sprite.X, Navi.Sprite.Y, 0);
-            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture);
-            if (Navi.FaceLeft == true)
+            if (Direct_Control == false)
             {
-                GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(Navi.Location.X, Navi.Location.Y);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(Navi.Location.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(Navi.Location.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y + Navi.SpriteSize.Y * Navi.Scale);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(Navi.Location.X, Navi.Location.Y + Navi.SpriteSize.Y * Navi.Scale);
-                GL.End();
+                Host_Navi.Running = false;
+                if (Host_Navi.Navi_Location().Right <= Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox().Width)
+                {
+                    Host_Navi.FaceLeft = false;
+                    Host_Navi.Running = true;
+                }
+                if (Host_Navi.Navi_Location().Right >= Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox().Width)
+                {
+                    Host_Navi.FaceLeft = true;
+                }
+            }
+
+
+            #region Movement
+            //Move Navies
+            if (Host_Navi.OnGround == true)
+            {
+                if (Host_Navi.Running == true)
+                {
+                    //Check for dashing
+                    if (Host_Navi.Dashing == true)
+                    {
+                        //Dashing
+                        if (Host_Navi.FaceLeft == true)
+                            Host_Navi.Speed.X -= Host_Navi.DashSpeed;
+                        else
+                            Host_Navi.Speed.X += Host_Navi.DashSpeed;
+                    }
+                    else
+                    {
+                        //Running
+                        if (Host_Navi.FaceLeft == true)
+                            Host_Navi.Speed.X -= Host_Navi.GroundSpeed;
+                        else
+                            Host_Navi.Speed.X += Host_Navi.GroundSpeed;
+                    }
+                }
+                //Jumping
+                if (Host_Navi.Jumping == true && Host_Navi.HasJumped == true) { Host_Navi.Speed.Y -= Host_Navi.Acrobatics; Host_Navi.HasJumped = false; }
+
+
             }
             else
             {
-                GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(Navi.Location.X, Navi.Location.Y);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(Navi.Location.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(Navi.Location.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y + Navi.SpriteSize.Y * Navi.Scale);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(Navi.Location.X, Navi.Location.Y + Navi.SpriteSize.Y * Navi.Scale);
-                GL.End();
+                //Air moving
+                if (Host_Navi.Running == true)
+                {
+                    if (Host_Navi.FaceLeft == true)
+                        Host_Navi.Speed.X -= Host_Navi.AirSpeed;
+                    else
+                        Host_Navi.Speed.X += Host_Navi.AirSpeed;
+                }
             }
-            GL.LoadIdentity();
+            #endregion                       
+            if (Host_Navi.Shooting == true)
+            {
+                if (Host_Navi.ShootCharge > 10)
+                {
+                    Host_Navi.ShootCharge = 0;                    
+                    Point loc = new Point();
+                    PointF Shoot_Point;
+                    PointF Speed = new PointF();
+                    Shoot_Point = Host_Navi.Get_Shoot_Point();
+                    if (Host_Navi.FaceLeft)
+                        loc.X = (int)Shoot_Point.X - (int)(8 * Host_Navi.Scale);
+                    else
+                        loc.X = (int)Shoot_Point.X;
+                    loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * Host_Navi.Scale);
+                    if (Host_Navi.FaceLeft) Speed.X = -20; else Speed.X = 20;
+                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, Host_Navi.Scale));
+                }
+            }
+
         }
 
-        /// <summary>
-        ///  OpenGL Start Device
-        /// </summary>
-        public void Start_GL()
+        #region Physics update
+
+        public void Update_Physics()
+		{
+            Update_Physics_Projectiles();
+            Update_Physics_Navi(Host_Navi);
+            //Update GDI Location
+            if (!GLOn)
+            {                
+                NaviForm.Left = Convert.ToInt32(Host_Navi.Location.X);
+                NaviForm.Top = Convert.ToInt32(Host_Navi.Location.Y);
+            }            
+		}
+
+        private void Update_Physics_Projectiles()
         {
+            HashSet<Projectiles_Type> Item_Remove_List = new HashSet<Projectiles_Type>();
+            foreach (Navi_Main.Projectiles_Type item in Projectile_List)
+            {
+                item.Location.X += item.Speed.X;
+                item.Location.Y += item.Speed.Y;
+                item.Life -= 1;
+                if (item.Life <= 0)
+                    Item_Remove_List.Add(item);
+            }
 
-            NaviGL = new NaviFXF();            
-            NaviGL.KeyDown += NaviDX_KeyDown;
-            NaviGL.KeyUp += NaviDX_KeyUp;
-            NaviGL.LostFocus += NaviDX_LostFocus;
-            NaviGL.Disposed += NaviDX_Disposed;            
-
-            NaviGL.Show();
-            NaviGL.Width = Screen.PrimaryScreen.WorkingArea.Width;
-            NaviGL.Height = Screen.PrimaryScreen.WorkingArea.Height;
-            GLControl control = new GLControl(new GraphicsMode(32, 24, 8, 0), 3, 0, GraphicsContextFlags.Default);            
-            NaviGL.glControl1.Width = Screen.PrimaryScreen.WorkingArea.Width;            
-            NaviGL.glControl1.Height = Screen.PrimaryScreen.WorkingArea.Height;
-            
-            GL.ClearColor(Color.Black);
-            GL.Enable(EnableCap.Texture2D);
-            GL.Enable(EnableCap.Blend);
-
-            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
-            
-            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-
-            Load_Sprite_Sheets();
-
-            GL.Viewport(0, 0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-
-            //GL.MatrixMode(MatrixMode.Projection);
-            //GL.LoadIdentity();
-            GL.Ortho(0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height, 0, -1, 1);
-
-
-
-            //NaviDX.Location = New Point(0, Screen.PrimaryScreen.Bounds.Height - NaviDX.Height)
-            NaviForm.Hide();
-            
-            //DXNaviTexture = new Texture[11];
-            //My.Resources.Raven.MakeTransparent(Color.FromArgb(255, 0, 255, 0))
-            //DXNaviTexture[0] = new Texture(DXDevice, Host_Navi.SpriteSheet, Usage.None, Pool.Managed);
-            
-
-            //DXProjectileTexture = new Texture[11];
-            //DXProjectileTexture[0] = new Texture(DXDevice, Net_Navis.Resource1.Shot2, Usage.None, Pool.Managed);
-
-            Init_GL = true;
+            foreach (Navi_Main.Projectiles_Type item in Item_Remove_List)
+            {
+                Projectile_List.Remove(item);
+            }
         }
 
-
-
-
-        public void Load_Sprite_Sheets()
+        private void Update_Physics_Navi(NetNavi_Type navi)
         {
-            //Load Host Sprite Sheet            
-            GLNaviTexture = load_sprite(Host_Navi.SpriteSheet);
-            GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);            
+            //Friction
+            if (navi.OnGround == true)
+            {
+                navi.Speed.X -= navi.Speed.X * GroundFriction.X;
+                navi.Speed.Y -= navi.Speed.Y * GroundFriction.Y;
+            }
+            else
+            {
+                navi.Speed.X -= navi.Speed.X * AirFriction.X;
+                navi.Speed.Y -= navi.Speed.Y * AirFriction.Y;
+            }
+
+            //Gravity
+            if (navi.OnGround == false)
+                navi.Speed.Y = navi.Speed.Y + Gravity.Y;
+            //Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
+
+            navi.Location.X = navi.Location.X + navi.Speed.X * navi.Scale;
+            navi.Location.Y = navi.Location.Y + navi.Speed.Y * navi.Scale;
+
+            if (!GLOn) 
+                Update_Physics_GDI_Bounds(navi);
+            else
+                Update_Physics_GL_Bounds(navi);
         }
 
+        private void Update_Physics_GDI_Bounds(NetNavi_Type navi)
+        {                        
+                //Bounds
+                if (navi.FaceLeft == true)
+                {
+                    if (navi.Navi_Location().Left <= Screen.PrimaryScreen.WorkingArea.Left) { navi.Location.X = Screen.PrimaryScreen.WorkingArea.Left - (navi.GetSize().X - navi.GetHitBox().Right); navi.Speed.X = 0; }
+                }
+                else
+                {
+                    if (navi.Navi_Location().Left <= Screen.PrimaryScreen.WorkingArea.Left) { navi.Location.X = Screen.PrimaryScreen.WorkingArea.Left - navi.GetHitBox().Left; navi.Speed.X = 0; }
+                }
 
-        //Load Sprite From Bitmap
-        private int load_sprite(Bitmap bitmap)
+                if (navi.FaceLeft == true)
+                {
+                    if (navi.Navi_Location().Right >= Screen.PrimaryScreen.WorkingArea.Right) { navi.Location.X = Screen.PrimaryScreen.WorkingArea.Right - (navi.GetSize().X - navi.GetHitBox().Left); navi.Speed.X = 0; }
+                }
+                else
+                {
+                    if (navi.Navi_Location().Right >= Screen.PrimaryScreen.WorkingArea.Right) { navi.Location.X = Screen.PrimaryScreen.WorkingArea.Right - navi.GetHitBox().Right; navi.Speed.X = 0; }
+                }
+
+                if (navi.Navi_Location().Bottom > Screen.PrimaryScreen.WorkingArea.Bottom)
+                    navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - navi.GetHitBox().Bottom;
+                if (navi.Navi_Location().Bottom == Screen.PrimaryScreen.WorkingArea.Bottom) { navi.OnGround = true; navi.Speed.Y = 0; }
+                else
+                    navi.OnGround = false;            
+        }
+
+        private void Update_Physics_GL_Bounds(NetNavi_Type navi)
         {
-            int id;
-            GL.GenTextures(1, out id);
-            bitmap.MakeTransparent(Color.LimeGreen);
-            GL.BindTexture(TextureTarget.Texture2D, id);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-            BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                        ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-            bitmap.UnlockBits(data);
-            return id;
+            //Bounds
+            if (navi.FaceLeft == true)
+            {
+                if (navi.Navi_Location().Left <= 0) { navi.Location.X = 0 - (navi.GetSize().X - navi.GetHitBox().Right); navi.Speed.X = 0; }
+            }
+            else
+            {
+                if (navi.Navi_Location().Left <= 0) { navi.Location.X = 0 - navi.GetHitBox().Left; navi.Speed.X = 0; }
+            }
+
+            if (navi.FaceLeft == true)
+            {
+                if (navi.Navi_Location().Right >= ScreenBounds.X) { navi.Location.X = ScreenBounds.X - (navi.GetSize().X - navi.GetHitBox().Left); navi.Speed.X = 0; }
+            }
+            else
+            {
+                if (navi.Navi_Location().Right >= ScreenBounds.X) { navi.Location.X = ScreenBounds.X - navi.GetHitBox().Right; navi.Speed.X = 0; }
+            }
+
+            if (navi.Navi_Location().Bottom > ScreenBounds.Y)
+                navi.Location.Y = ScreenBounds.Y - navi.GetHitBox().Bottom;
+            if (navi.Navi_Location().Bottom == ScreenBounds.Y) { navi.OnGround = true; navi.Speed.Y = 0; }
+            else
+                navi.OnGround = false;
+
+            if (navi.Navi_Location().Top < 0) { navi.Location.Y = 0 - navi.GetHitBox().Top; navi.Speed.Y = 0;}
         }
 
 
+        #endregion
 
+        #region Fourm Handelers
 
-
-
-
-
-		private void NaviForm_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        private void NaviForm_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
 		{
 			if (pressedkeys.Contains(e.KeyCode)) {
 			} else {
@@ -619,7 +449,7 @@ namespace Net_Navis
 		}
 
 
-		private void NaviDX_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+		private void NaviGL_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
 		{
 			if (pressedkeys.Contains(e.KeyCode)) {
 			} else {
@@ -627,29 +457,35 @@ namespace Net_Navis
 			}
 		}
 
-		private void NaviDX_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+		private void NaviGL_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
 		{
 			if (pressedkeys.Contains(e.KeyCode)) {
 				pressedkeys.Remove(e.KeyCode);
 			}
 		}
 
-		private void NaviDX_LostFocus(object sender, System.EventArgs e)
+		private void NaviGL_LostFocus(object sender, System.EventArgs e)
 		{
 			pressedkeys.Clear();
 		}
 
-		private void NaviDX_Disposed(object sender, System.EventArgs e)
+		private void NaviGL_Disposed(object sender, System.EventArgs e)
 		{
 			GLOn = false;
-			Init_GL = false;            
-            GL.DeleteTextures(1, ref GLNaviTexture);
+			Init_GL = false;
+            foreach (int id in GLNaviTexture.Values)
+            {
+                int ID = id;
+                GL.DeleteTextures(1, ref ID);
+            }
             GL.DeleteTextures(1, ref GLProjectileTexture);
+            GLNaviTexture.Clear();
 			NaviForm.Show();
-		}
-
-
-
-	}
-
+            //Reset Navi location
+            Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
+            Host_Navi.Location.X = 1000;
+            Host_Navi.Scale = 3;
+        }
+        #endregion
+    }
 }		

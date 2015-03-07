@@ -35,6 +35,8 @@ namespace Net_Navis
 		public float GroundSpeed;
 		public float AirSpeed;
 		public float DashSpeed;
+        public Point ShootPoint;
+        public int ShootCharge;
 
 		public int Acrobatics;
 		//Sprite Control
@@ -103,7 +105,14 @@ namespace Net_Navis
 			return new PointF(SpriteSize.X * Scale, SpriteSize.Y * Scale);
 		}
 
-
+        public PointF Get_Shoot_Point()
+        {
+            if (FaceLeft)
+                return new PointF(Location.X + (SpriteSize.X - ShootPoint.X) * Scale, Location.Y + ShootPoint.Y * Scale);
+            else
+                return new PointF(Location.X + ShootPoint.X * Scale, Location.Y + ShootPoint.Y * Scale);
+            
+        }
 
 
 
