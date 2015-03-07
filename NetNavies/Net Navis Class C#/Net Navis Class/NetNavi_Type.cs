@@ -27,6 +27,7 @@ namespace Net_Navis
 		public string Navi_Name;
 		public Rectangle HitBox;
 		public System.Drawing.Bitmap SpriteSheet;
+        public String GLSpriteSheetName;
 		public System.Drawing.Icon Icon;
 		public Point SpriteSize;
 		public int HealthMax;

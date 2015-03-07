@@ -95,8 +95,7 @@ namespace Net_Navis
             newPeer.Write((int)Headers.Approved);
 
             NetNavi_Type localObject = new NetNavi_Type();
-            localObject = Navi_resources.Get_Data("Raven", 0);
-            Load_Sprite_Sheets(name);
+            localObject = Navi_resources.Get_Data("Raven", 0);            
             
             // send first update
             sendUpdate(newPeer, Host_Navi);
@@ -156,8 +155,7 @@ namespace Net_Navis
             }
 
             NetNavi_Type localObject = new NetNavi_Type();
-            localObject = Navi_resources.Get_Data("Raven", 0);
-            Load_Sprite_Sheets(name);
+            localObject = Navi_resources.Get_Data("Raven", 0);            
 
             // send first update
             sendUpdate(newPeer, Host_Navi);
