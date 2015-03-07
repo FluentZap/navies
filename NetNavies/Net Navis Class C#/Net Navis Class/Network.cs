@@ -96,6 +96,7 @@ namespace Net_Navis
             
             Client_Navi.Add(name, new NetNavi_Type());
             Client_Navi[name] = Navi_resources.Get_Data("Raven", 0);
+            Load_Sprite_Sheets(name);
 
             ++peerCount;
             Console.WriteLine("Client " + name + " successfully added");
