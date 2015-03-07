@@ -28,7 +28,12 @@ namespace Net_Navis
         {
             get { return client.Available; }
         }
+        public IPEndPoint RemoteIP
+        {
+            get { return client.Client.RemoteEndPoint as IPEndPoint; }
+        }
 
+        // Constructor
         public Client(TcpClient client)
         {
             this.client = client;

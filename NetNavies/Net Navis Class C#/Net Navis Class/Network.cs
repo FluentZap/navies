@@ -12,7 +12,6 @@ namespace Net_Navis
         public enum Headers : int
         {
             SendingUpdate,
-            Bye,
             Approved,
             Denied,
             Invalid,
@@ -23,9 +22,11 @@ namespace Net_Navis
         private System.Net.Sockets.TcpListener listener = null;
         private bool networkActive = false;
         private const int PORT = 11994;
-        private const int MAX_PEERS = 1;
+        private const int MAX_PEERS = 2;
         private int peerCount = 0;
         private string networkName;
+        //private bool isNetworkCaptain;
+        //private IPEndPoint networkCaptainIP;
 
         public void StartNetwork(string name, int port = PORT)
         {
@@ -37,6 +38,7 @@ namespace Net_Navis
             if (listener == null)
                 listener = new TcpListener(IPAddress.Any, port);
             listener.Start();
+            Console.WriteLine("listener started on port " + port + " with name " + name);
         }
 
         public void StopNetwork()
@@ -48,11 +50,11 @@ namespace Net_Navis
             listener.Stop();
 
             foreach (Client peer in peers.Values)
-            {
-                peer.Write((int)Headers.Bye);
                 peer.Close();
-            }
-            peers = new Dictionary<string, Client>();
+            peers.Clear();
+            Client_Navi.Clear();
+            peerCount = 0;
+            Console.WriteLine("Network stopped");
         }
 
         public void DoNetworkEvents()
@@ -90,16 +92,24 @@ namespace Net_Navis
                 Console.WriteLine("their name was taken");
                 return false;
             }
-
             newPeer.Write((int)Headers.Approved);
-            peers.Add(name, newPeer);
-            
-            Client_Navi.Add(name, new NetNavi_Type());
-            Client_Navi[name] = Navi_resources.Get_Data("Raven", 0);
+
+            NetNavi_Type localObject = new NetNavi_Type();
+            localObject = Navi_resources.Get_Data("Raven", 0);
             Load_Sprite_Sheets(name);
+            
+            // send first update
+            sendUpdate(newPeer, Host_Navi);
+            // receive first update
+            readPeerUpdate(newPeer, localObject);
+
+            // add to containers
+            peers.Add(name, newPeer);
+            Client_Navi.Add(name, localObject);
 
             ++peerCount;
             Console.WriteLine("Client " + name + " successfully added");
+            Console.WriteLine(newPeer.RemoteIP);
             return true;
         }
 
@@ -136,17 +146,31 @@ namespace Net_Navis
 
             newPeer.Write((int)Headers.Approved);
             Console.WriteLine("approved");
+
             newPeer.Write(networkName); // send our name
             if ((Headers)newPeer.ReadInt32() != Headers.Approved) // if they have a user with the same name
             {
                 newPeer.Close();
                 Console.WriteLine("our name was not approved");
                 return;
-            }            
+            }
 
+            NetNavi_Type localObject = new NetNavi_Type();
+            localObject = Navi_resources.Get_Data("Raven", 0);
+            Load_Sprite_Sheets(name);
+
+            // send first update
+            sendUpdate(newPeer, Host_Navi);
+            // receive first update
+            readPeerUpdate(newPeer, localObject);
+
+            // add to containers
             peers.Add(name, newPeer);
+            Client_Navi.Add(name, localObject);
+
             ++peerCount;
             Console.WriteLine("client " + name + " added");
+            Console.WriteLine(newPeer.RemoteIP);
         }
 
         private void handlePeers()
@@ -154,52 +178,57 @@ namespace Net_Navis
             Client peer;
             Headers request;
             HashSet<string> toRemove = new HashSet<string>();
+            NetNavi_Type navi;
 
             foreach (string name in peers.Keys)
             {
                 peer = peers[name];
+                navi = Client_Navi[name];
                 
-                // send update
-                peer.Write((int)Headers.SendingUpdate);
-                sendUpdate(peer);
-
-                // read info
-                while (peer.Available >= 4) // 4 bytes is the size of a header (int32) from the Headers enum
+                try
                 {
-                    request = (Headers)peer.ReadInt32();
+                    // send update
+                    peer.Write((int)Headers.SendingUpdate);
+                    sendUpdate(peer, Host_Navi);
 
-                    if (request == Headers.Bye)
+                    // read info
+                    while (peer.Available >= 4) // 4 bytes is the size of a header (int32) from the Headers enum
                     {
-                        toRemove.Add(name);
-                        peer.Close();
-                        break;
+                        request = (Headers)peer.ReadInt32();
+
+                        if (request == Headers.SendingUpdate)
+                        {
+                            readPeerUpdate(peer, navi);
+                        }
                     }
-                    else if (request == Headers.SendingUpdate)
-                    {
-                        readPeerUpdate(peer, name);
-                    }
+                }
+                catch (System.IO.IOException) // other end disconnected
+                {
+                    toRemove.Add(name);
+                    Client_Navi.Remove(name);
+                    peer.Close();
+                    --peerCount;
+                    Console.WriteLine(name + " disconnected");
                 }
             }
 
-            // remove anyone who disconnected
+            // remove any peers who disconnected
+            // (can't edit the container during iteration)
             foreach (string name in toRemove)
-            {
                 peers.Remove(name);
-                Client_Navi.Remove(name);
-            }
         }
 
-        private void sendUpdate(Client peer)
+        private void sendUpdate(Client peer, NetNavi_Type navi)
         {
             byte[] buffer = new byte[72];
-            Host_Navi.Get_Compact_buffer().CopyTo(buffer, 5);
+            navi.Get_Compact_buffer().CopyTo(buffer, 5);
             peer.WriteSpecial(buffer);
         }
 
-        public void readPeerUpdate(Client peer, String name)
+        public void readPeerUpdate(Client peer, NetNavi_Type navi)
         {
             byte[] buffer = peer.ReadSpecial();
-            Client_Navi[name].Set_Compact_buffer(buffer);
+            navi.Set_Compact_buffer(buffer);
         }
 
     }
