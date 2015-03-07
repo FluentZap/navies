@@ -20,8 +20,7 @@ namespace Net_Navis
 	//DXon if switched on changes rendering to a directx window rendering is then done in Draw_DX
 
 	public partial class Navi_Main
-	{
-        
+	{        
         private NaviFormF NaviForm;
         private MenuForm MenuForm;                
         private NaviFXF NaviGL;        		
