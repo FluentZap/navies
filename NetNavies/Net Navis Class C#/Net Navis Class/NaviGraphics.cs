@@ -120,7 +120,7 @@ namespace Net_Navis
             Point S = ScreenScroll;            
             foreach (Navi_Main.Projectiles_Type item in Projectile_List)
             {
-                GL.Color4(1f, 1f * (item.Life / 100f), 1f * (item.Life / 100f), 1f);
+                GL.Color4(1f, 1f, 1f, 1f);
                 GL.Begin(PrimitiveType.Quads);
                 GL.TexCoord2(0f, 0f); GL.Vertex2(item.Location.X + S.X, item.Location.Y + S.Y);
                 GL.TexCoord2(1f, 0f); GL.Vertex2(item.Location.X + S.X + 8 * item.Scale, item.Location.Y + S.Y);

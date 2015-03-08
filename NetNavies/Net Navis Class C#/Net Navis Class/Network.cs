@@ -24,7 +24,8 @@ namespace Net_Navis
         private const int PORT = 11994;
         private const int MAX_PEERS = 2;
         private int peerCount = 0;
-        private string networkName;
+        private string networkName;        
+
         //private bool isNetworkCaptain;
         //private IPEndPoint networkCaptainIP;
 
@@ -217,14 +218,14 @@ namespace Net_Navis
         }
 
         private void sendUpdate(Client peer, NetNavi_Type navi)
-        {
-            byte[] buffer = new byte[72];
+        {            
+            byte[] buffer = new byte[128];
             navi.Get_Compact_buffer().CopyTo(buffer, 5);
             peer.WriteSpecial(buffer);
         }
 
         public void readPeerUpdate(Client peer, NetNavi_Type navi)
-        {
+        {            
             byte[] buffer = peer.ReadSpecial();
             navi.Set_Compact_buffer(buffer);
         }

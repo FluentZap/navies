@@ -381,7 +381,13 @@ Animation_Name_Enum.Rebel_Jumping:
 
 
 	}
-	
+
+
+    public enum Navi_Abilities : int
+    {
+        Shoot = 1
+    }
+
 	public enum Animation_Name_Enum
 		{
 			None,
