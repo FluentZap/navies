@@ -27,7 +27,7 @@ namespace Net_Navis
 		public string Navi_Name;
 		public Rectangle HitBox;
 		public System.Drawing.Bitmap SpriteSheet;
-        public String GLSpriteSheetName;
+        public int GLSpriteSheetName;
 		public System.Drawing.Icon Icon;
 		public Point SpriteSize;
 		public int HealthMax;
@@ -124,6 +124,9 @@ namespace Net_Navis
 			BitConverter.GetBytes(NaviID).CopyTo(b, index);
 			index += 8;
 
+            BitConverter.GetBytes(GLSpriteSheetName).CopyTo(b, index);
+			index += 4;
+            
 			BitConverter.GetBytes(Location.X).CopyTo(b, index);
 			index += 4;
 			BitConverter.GetBytes(Location.Y).CopyTo(b, index);
@@ -184,6 +187,8 @@ namespace Net_Navis
 			int index = 5;
 			NaviID = BitConverter.ToInt64(b, index);
 			index += 8;
+            GLSpriteSheetName = BitConverter.ToInt32(b, index);
+            index += 4;
 			Location.X = BitConverter.ToSingle(b, index);
 			index += 4;
 			Location.Y = BitConverter.ToSingle(b, index);
