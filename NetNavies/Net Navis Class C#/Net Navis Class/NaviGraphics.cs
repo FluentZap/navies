@@ -17,7 +17,7 @@ namespace Net_Navis
 {
     partial class Navi_Main
     {
-        public Dictionary<string, int> GLNaviTexture = new Dictionary<string, int>();
+        public Dictionary<int, int> GLNaviTexture = new Dictionary<int, int>();
         public int GLProjectileTexture;
         public int GLBackground;
         public bool Init_GL;
@@ -141,7 +141,7 @@ namespace Net_Navis
             GL.Scale(1f / (Navi.SpriteSheet.Width / Navi.SpriteSize.X),
                      1f / (Navi.SpriteSheet.Height / Navi.SpriteSize.Y), 1);
             GL.Translate(Navi.Sprite.X, Navi.Sprite.Y, 0);
-            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture[Navi.Navi_Name]);
+            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture[Navi.GLSpriteSheetName]);
             if (Navi.FaceLeft == true)
             {
                 GL.Begin(PrimitiveType.Quads);
@@ -225,10 +225,10 @@ namespace Net_Navis
         public void Load_Sprite_Sheets()
         {
             //Load Navi Sprite Sheet            
-            GLNaviTexture.Add("Raven", load_sprite(Resource1.Raven));
-            GLNaviTexture.Add("Vex", load_sprite(Resource1.Vex));
-            GLNaviTexture.Add("Barnabus", load_sprite(Resource1.Barnabus));
-            GLNaviTexture.Add("Rebel", load_sprite(Resource1.Rebelpullsheet));
+            GLNaviTexture.Add(0, load_sprite(Resource1.Raven));
+            GLNaviTexture.Add(1, load_sprite(Resource1.Vex));
+            GLNaviTexture.Add(2, load_sprite(Resource1.Barnabus));
+            GLNaviTexture.Add(3, load_sprite(Resource1.Rebelpullsheet));
 
             //Load projectiles
             GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);
