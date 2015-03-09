@@ -196,24 +196,37 @@ namespace Net_Navis
                 Host_Navi.Shooting = false;
 			
 
-            if (pressedkeys.Contains(Keys.D1) && !prevPressedkeys.Contains(Keys.D1))
+            if (pressedkeys.Contains(Keys.D7) && !prevPressedkeys.Contains(Keys.D7))
                 StopNetwork();
-            else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
+            //else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
+            //    StartNetwork("Jonny Fire");
+            //else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
+            //    StartNetwork("Presto Pretzel");
+            //else if (pressedkeys.Contains(Keys.D4) && !prevPressedkeys.Contains(Keys.D4))
+            //    StartNetwork("Presto Pretzel", 11995);
+            //else if (pressedkeys.Contains(Keys.D5) && !prevPressedkeys.Contains(Keys.D5))
+            //    ConnectToPeer("192.168.1.244");
+            //else if (pressedkeys.Contains(Keys.D6) && !prevPressedkeys.Contains(Keys.D6))
+            //    ConnectToPeer("fastfattoad.com");
+            //else if (pressedkeys.Contains(Keys.D7) && !prevPressedkeys.Contains(Keys.D7))
+            //    ConnectToPeer("discojoker.com");
+            //else if (pressedkeys.Contains(Keys.D8) && !prevPressedkeys.Contains(Keys.D8))
+            //    ConnectToPeer("127.0.0.1");
+            //else if (pressedkeys.Contains(Keys.D9) && !prevPressedkeys.Contains(Keys.D9))
+            //    StartNetwork("Mechana Banana", 11996);
+
+            else if (pressedkeys.Contains(Keys.NumPad4) && !prevPressedkeys.Contains(Keys.NumPad4))
                 StartNetwork("Jonny Fire");
-            else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
-                StartNetwork("Presto Pretzel");
-            else if (pressedkeys.Contains(Keys.D4) && !prevPressedkeys.Contains(Keys.D4))
+            else if (pressedkeys.Contains(Keys.NumPad5) && !prevPressedkeys.Contains(Keys.NumPad5))
                 StartNetwork("Presto Pretzel", 11995);
-            else if (pressedkeys.Contains(Keys.D5) && !prevPressedkeys.Contains(Keys.D5))
-                ConnectToPeer("192.168.1.244");
-            else if (pressedkeys.Contains(Keys.D6) && !prevPressedkeys.Contains(Keys.D6))
-                ConnectToPeer("fastfattoad.com");
-            else if (pressedkeys.Contains(Keys.D7) && !prevPressedkeys.Contains(Keys.D7))
-                ConnectToPeer("discojoker.com");
-            else if (pressedkeys.Contains(Keys.D8) && !prevPressedkeys.Contains(Keys.D8))
-                ConnectToPeer("127.0.0.1");
-            else if (pressedkeys.Contains(Keys.D9) && !prevPressedkeys.Contains(Keys.D9))
+            else if (pressedkeys.Contains(Keys.NumPad6) && !prevPressedkeys.Contains(Keys.NumPad6))
                 StartNetwork("Mechana Banana", 11996);
+            else if (pressedkeys.Contains(Keys.NumPad1) && !prevPressedkeys.Contains(Keys.NumPad1))
+                ConnectToPeer("127.0.0.1", 11994);
+            else if (pressedkeys.Contains(Keys.NumPad2) && !prevPressedkeys.Contains(Keys.NumPad2))
+                ConnectToPeer("127.0.0.1", 11995);
+            else if (pressedkeys.Contains(Keys.NumPad3) && !prevPressedkeys.Contains(Keys.NumPad3))
+                ConnectToPeer("127.0.0.1", 11996);
 
             prevPressedkeys.Clear();
             foreach (System.Windows.Forms.Keys key in pressedkeys)
