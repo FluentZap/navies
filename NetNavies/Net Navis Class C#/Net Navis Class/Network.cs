@@ -27,7 +27,7 @@ namespace Net_Navis
         private const int DEFAULT_PORT = 11994;
         private const int MAX_PEERS = 4;
         private int peerCount = 0;
-        private string networkName;
+        private string networkName;        
         private Client networkCaptain = null; // if null, then we are the network captain
         private string networkReservation;
         private int customPort;
@@ -296,7 +296,6 @@ namespace Net_Navis
         {
             NetNavi_Type localObject = new NetNavi_Type();
             localObject = Navi_resources.Get_Data("Raven", 0);
-            Load_Sprite_Sheets(name);
 
             // send and receive first update for draw function
             sendUpdate(peer, Host_Navi);
@@ -314,14 +313,14 @@ namespace Net_Navis
         }
 
         private void sendUpdate(Client peer, NetNavi_Type navi)
-        {
-            byte[] buffer = new byte[72];
+        {            
+            byte[] buffer = new byte[128];
             navi.Get_Compact_buffer().CopyTo(buffer, 5);
             peer.WriteSpecial(buffer);
         }
 
         public void readPeerUpdate(Client peer, NetNavi_Type navi)
-        {
+        {            
             byte[] buffer = peer.ReadSpecial();
             navi.Set_Compact_buffer(buffer);
         }

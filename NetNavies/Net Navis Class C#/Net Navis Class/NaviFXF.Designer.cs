@@ -54,7 +54,7 @@ namespace Net_Navis
             this.ClientSize = new System.Drawing.Size(320, 200);
             this.Controls.Add(this.glControl1);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "NaviFXF";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;

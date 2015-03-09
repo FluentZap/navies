@@ -117,16 +117,28 @@ namespace Net_Navis
 			//Slowing program down
 			System.Threading.Thread.Sleep(Convert.ToInt32(Physics_Rate * 1000));
 
-			if (Physics_Timer <= DateTime.Now.TimeOfDay.TotalSeconds) {
-				Handle_UI();
-				Process_Navi_Commands();
-				Update_Physics();
+			if (Physics_Timer <= DateTime.Now.TimeOfDay.TotalSeconds) {                
+                Handle_UI();
+                Process_Navi_Commands();
+                foreach (NetNavi_Type navi in Client_Navi.Values)
+                {                    
+                    Process_Client_Commands(navi);                    
+                }
+                Update_Physics();
 				Navi_resources.Set_Correct_Animation(ref Host_Navi);
-				Host_Navi.Update_Sprite();
+				
+                Host_Navi.Update_Sprite();
                 Host_Navi.ShootCharge += 1;
 
-                DoNetworkEvents();
 
+                foreach (NetNavi_Type navi in Client_Navi.Values)
+                    navi.Activated_Ability = -1;
+
+                DoNetworkEvents();
+                Host_Navi.Activated_Ability = -1;                
+                
+
+                
 				Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds + Physics_Rate;
 				Program_Step += 1;
 			}
@@ -292,10 +304,11 @@ namespace Net_Navis
             }
             #endregion                       
             if (Host_Navi.Shooting == true)
-            {
                 if (Host_Navi.ShootCharge > 10)
                 {
-                    Host_Navi.ShootCharge = 0;                    
+                    Host_Navi.ShootCharge = 0; 
+                    Host_Navi.Activated_Ability = 1;
+                    
                     Point loc = new Point();
                     PointF Shoot_Point;
                     PointF Speed = new PointF();
@@ -308,9 +321,28 @@ namespace Net_Navis
                     if (Host_Navi.FaceLeft) Speed.X = -20; else Speed.X = 20;
                     Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, Host_Navi.Scale));
                 }
+        }
+
+        public void Process_Client_Commands(NetNavi_Type navi)
+        {
+            if (navi.Activated_Ability == 1)
+            {
+                    Point loc = new Point();
+                    PointF Shoot_Point;
+                    PointF Speed = new PointF();
+                    Shoot_Point = navi.Get_Shoot_Point();
+                    if (navi.FaceLeft)
+                        loc.X = (int)Shoot_Point.X - (int)(8 * navi.Scale);
+                    else
+                        loc.X = (int)Shoot_Point.X;
+                    loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Scale);
+                    if (navi.FaceLeft) Speed.X = -20; else Speed.X = 20;
+                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Scale));
             }
 
         }
+
+
 
         #region Physics update
 
