@@ -188,15 +188,15 @@ namespace Net_Navis
             {
                 if (active)
                 {
-                    stream.Write(buffer, 0, 72);
+                    stream.Write(buffer, 0, 128);
                 }
             }
         }
 
         public byte[] ReadSpecial()
         {
-            byte[] buffer = new byte[72];
-            if (stream.Read(buffer, 0, 72) <= 0)
+            byte[] buffer = new byte[128];
+            if (stream.Read(buffer, 0, 128) <= 0)
                 throw new System.IO.EndOfStreamException();
             return buffer;
         }
