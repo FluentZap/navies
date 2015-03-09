@@ -27,6 +27,7 @@ namespace Net_Navis
 		public string Navi_Name;
 		public Rectangle HitBox;
 		public System.Drawing.Bitmap SpriteSheet;
+        public int GLSpriteSheetName;
 		public System.Drawing.Icon Icon;
 		public Point SpriteSize;
 		public int HealthMax;
@@ -37,6 +38,7 @@ namespace Net_Navis
 		public float DashSpeed;
         public Point ShootPoint;
         public int ShootCharge;
+        public int Activated_Ability = -1;
 
 		public int Acrobatics;
 		//Sprite Control
@@ -45,14 +47,13 @@ namespace Net_Navis
 		public bool Running;
 		public bool Jumping;
 		public bool HasJumped;
-		public bool Shooting;
-		public bool WallGrabing;
+		public bool Shooting;        
+        public bool WallGrabing;
 		public bool Dashing;
 		public bool HasDashed;
 		public Animation_Name_Enum Current_Animation = Animation_Name_Enum.None;
 		public Navi_resources.Animation Ani_Current;
 		public int Ani_Index;
-
 		public int Ani_Step;
 
 		public RectangleF Navi_Location()
@@ -119,10 +120,13 @@ namespace Net_Navis
 		public byte[] Get_Compact_buffer()
 		{
 			int index = 0;
-			byte[] b = new byte[66];
+			byte[] b = new byte[70];
 			BitConverter.GetBytes(NaviID).CopyTo(b, index);
 			index += 8;
 
+            BitConverter.GetBytes(GLSpriteSheetName).CopyTo(b, index);
+			index += 4;
+            
 			BitConverter.GetBytes(Location.X).CopyTo(b, index);
 			index += 4;
 			BitConverter.GetBytes(Location.Y).CopyTo(b, index);
@@ -150,6 +154,11 @@ namespace Net_Navis
 			index += 4;
 			BitConverter.GetBytes(Energy).CopyTo(b, index);
 			index += 4;
+            
+
+            BitConverter.GetBytes(Activated_Ability).CopyTo(b, index);
+            index += 4;
+            
 
 			BitConverter.GetBytes(OnGround).CopyTo(b, index);
 			index += 1;
@@ -162,7 +171,7 @@ namespace Net_Navis
 			BitConverter.GetBytes(HasJumped).CopyTo(b, index);
 			index += 1;
 			BitConverter.GetBytes(Shooting).CopyTo(b, index);
-			index += 1;
+			index += 1;            
 			BitConverter.GetBytes(WallGrabing).CopyTo(b, index);
 			index += 1;
 			BitConverter.GetBytes(Dashing).CopyTo(b, index);
@@ -178,6 +187,8 @@ namespace Net_Navis
 			int index = 5;
 			NaviID = BitConverter.ToInt64(b, index);
 			index += 8;
+            GLSpriteSheetName = BitConverter.ToInt32(b, index);
+            index += 4;
 			Location.X = BitConverter.ToSingle(b, index);
 			index += 4;
 			Location.Y = BitConverter.ToSingle(b, index);
@@ -202,6 +213,9 @@ namespace Net_Navis
 			Energy = BitConverter.ToInt32(b, index);
 			index += 4;
 
+            Activated_Ability = BitConverter.ToInt32(b, index);
+            index += 4;            
+
 			OnGround = BitConverter.ToBoolean(b, index);
 			index += 1;
 			FaceLeft = BitConverter.ToBoolean(b, index);
@@ -213,7 +227,7 @@ namespace Net_Navis
 			HasJumped = BitConverter.ToBoolean(b, index);
 			index += 1;
 			Shooting = BitConverter.ToBoolean(b, index);
-			index += 1;
+            index += 1;            
 			WallGrabing = BitConverter.ToBoolean(b, index);
 			index += 1;
 			Dashing = BitConverter.ToBoolean(b, index);
