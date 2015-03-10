@@ -121,7 +121,7 @@ namespace Net_Navis
 		public byte[] Get_Compact_buffer()
 		{
 			int index = 0;
-			byte[] b = new byte[128];
+			byte[] b = new byte[123];
             BitConverter.GetBytes(NAVIEXEID).CopyTo(b, index);
 			index += 8;
             BitConverter.GetBytes((int)NaviID).CopyTo(b, index);
