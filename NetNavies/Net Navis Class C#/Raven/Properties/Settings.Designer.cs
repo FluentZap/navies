@@ -25,10 +25,10 @@ namespace Raven.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public long NaviID {
+        [global::System.Configuration.DefaultSettingValueAttribute("55513555")]
+        public long NAVIEXEID {
             get {
-                return ((long)(this["NaviID"]));
+                return ((long)(this["NAVIEXEID"]));
             }
         }
     }

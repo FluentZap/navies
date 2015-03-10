@@ -69,9 +69,9 @@ namespace Net_Navis
 
         private HashSet<Projectiles_Type> Projectile_List = new HashSet<Projectiles_Type>();
 
-        public Navi_Main(string Navi_Name, long NaviID)
+        public Navi_Main(int Navi_Name_ID, long NAVIEXEID)
 		{
-			Host_Navi = Navi_resources.Get_Data(Navi_Name, NaviID);
+            Host_Navi = Navi_resources.Get_Data((Navi_Name_ID)Navi_Name_ID, NAVIEXEID);
 		}
 
 

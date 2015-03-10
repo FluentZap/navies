@@ -12,17 +12,15 @@ namespace Raven
 {
 	class Raven
 	{
-		const string Navi_Name = "Raven";
-
-        //public static long Navi_ID = Properties.Settings.Default.NaviID;
-
-        public static long Navi_ID = 0;
+        const int Navi_Name = (int)Navi_Name_ID.Raven;
+        
+        public static long NAVIEXEID = Properties.Settings.Default.NAVIEXEID;
 		
         public static void Main()
 		{
             //Assembly not found error handeler
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
-            Navi_Main Navi_Instance = new Navi_Main(Navi_Name, Navi_ID);
+            Navi_Main Navi_Instance = new Navi_Main(Navi_Name, NAVIEXEID);
 			Navi_Instance.Initialise();
 			do {
 				Application.DoEvents();

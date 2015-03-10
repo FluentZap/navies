@@ -11,13 +11,13 @@ namespace Net_Navis
 {
 	public static class Navi_resources
 	{
-		public static NetNavi_Type Get_Data(string Navi_Name, long NaviID)
+        public static NetNavi_Type Get_Data(Navi_Name_ID Navi_Name, long NAVIEXEID)
 		{
-			NetNavi_Type N = new NetNavi_Type();
-			switch (Navi_Name) {
+			NetNavi_Type N = new NetNavi_Type();            
+            switch (Navi_Name) {
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
-"Raven":
-					N.NaviID = 0;
+Navi_Name_ID.Raven:
+                    N.Navi_Display_Name = "Raven";
 					N.HitBox = new Rectangle(10, 22, 30, 26);
 					N.SpriteSheet = Net_Navis.Resource1.Raven;
                     N.GLSpriteSheetName = 0;
@@ -33,8 +33,8 @@ namespace Net_Navis
                     N.ShootPoint = new Point(40, 33);
 					break;
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
-"Vex":
-					N.NaviID = 1;
+Navi_Name_ID.Vex:
+                    N.Navi_Display_Name = "Vex";
 					N.HitBox = new Rectangle(11, 18, 29, 30);
 					N.SpriteSheet = Net_Navis.Resource1.Vex;
                     N.GLSpriteSheetName = 1;
@@ -50,8 +50,8 @@ namespace Net_Navis
 
 					break;
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
-"Barnabus":
-					N.NaviID = 2;
+Navi_Name_ID.Barnabus:
+                    N.Navi_Display_Name = "Barnabus";
 					N.HitBox = new Rectangle(3, 5, 27, 27);
 					N.SpriteSheet = Net_Navis.Resource1.Barnabus;
                     N.GLSpriteSheetName = 2;
@@ -67,8 +67,8 @@ namespace Net_Navis
 
 					break;
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
-"Rebel":
-					N.NaviID = 3;
+Navi_Name_ID.Rebel:
+                    N.Navi_Display_Name = "Rebel";
 					N.HitBox = new Rectangle(13, 22, 22, 26);
 					N.SpriteSheet = Net_Navis.Resource1.Rebelpullsheet;
                     N.GLSpriteSheetName = 3;
@@ -83,10 +83,10 @@ namespace Net_Navis
 					N.Acrobatics = 10;
 					break;
 			}
-
+            N.NaviID = Navi_Name;
+            N.NAVIEXEID = NAVIEXEID;
 			N.Location = new PointF(0, 0);
-			N.Sprite = new Point(0, 0);
-			N.Navi_Name = Navi_Name;
+			N.Sprite = new Point(0, 0);			
 			return N;
 		}
 
@@ -279,9 +279,9 @@ Animation_Name_Enum.Rebel_Jumping:
 
 		public static void Set_Correct_Animation(ref NetNavi_Type Navi)
 		{
-			switch (Navi.Navi_Name) {
+			switch (Navi.NaviID) {
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
-"Vex":
+Navi_Name_ID.Vex:
 
 					if (Navi.OnGround == true) {
 						if (Navi.Running == true) {
@@ -323,7 +323,7 @@ Animation_Name_Enum.Rebel_Jumping:
 
 
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
-"Raven":
+Navi_Name_ID.Raven:
 					if (Navi.OnGround == true) {
 						if (Navi.Running == true) {
 							if (!(Navi.Current_Animation == Animation_Name_Enum.Raven_Runing))
@@ -339,7 +339,7 @@ Animation_Name_Enum.Rebel_Jumping:
 
 					break;
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
-"Barnabus":
+Navi_Name_ID.Barnabus:
 					if (Navi.OnGround == true) {
 						if (Navi.Running == true) {
 							if (!(Navi.Current_Animation == Animation_Name_Enum.Barnabus_Runing))
@@ -356,7 +356,7 @@ Animation_Name_Enum.Rebel_Jumping:
 					break;
 
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
-"Rebel":
+Navi_Name_ID.Rebel:
 					if (Navi.OnGround == true) {
 						if (Navi.Running == true) {
 							if (!(Navi.Current_Animation == Animation_Name_Enum.Rebel_Runing))
@@ -387,6 +387,17 @@ Animation_Name_Enum.Rebel_Jumping:
     {
         Shoot = 1
     }
+
+
+    public enum Navi_Name_ID : int
+    {
+        Raven = 1,
+        Vex = 2,
+        Barnabus = 3,
+        Rebel = 4
+    }
+
+    
 
 	public enum Animation_Name_Enum
 		{

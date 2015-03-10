@@ -26,12 +26,12 @@ namespace Vex.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public long NaviID {
+        public long NAVIEXEID {
             get {
-                return ((long)(this["NaviID"]));
+                return ((long)(this["NAVIEXEID"]));
             }
             set {
-                this["NaviID"] = value;
+                this["NAVIEXEID"] = value;
             }
         }
     }

@@ -23,8 +23,9 @@ namespace Net_Navis
 		public int Energy;
 
 		//Statistics
-		public long NaviID;
-		public string Navi_Name;
+        public long NAVIEXEID;
+        public Navi_Name_ID NaviID;
+        public string Navi_Display_Name;
 		public Rectangle HitBox;
 		public System.Drawing.Bitmap SpriteSheet;
         public int GLSpriteSheetName;
@@ -120,9 +121,11 @@ namespace Net_Navis
 		public byte[] Get_Compact_buffer()
 		{
 			int index = 0;
-			byte[] b = new byte[70];
-			BitConverter.GetBytes(NaviID).CopyTo(b, index);
+			byte[] b = new byte[128];
+            BitConverter.GetBytes(NAVIEXEID).CopyTo(b, index);
 			index += 8;
+            BitConverter.GetBytes((int)NaviID).CopyTo(b, index);
+			index += 4;            
 
             BitConverter.GetBytes(GLSpriteSheetName).CopyTo(b, index);
 			index += 4;
@@ -184,9 +187,11 @@ namespace Net_Navis
 
 		public void Set_Compact_buffer(byte[] b)
 		{
-			int index = 5;
-			NaviID = BitConverter.ToInt64(b, index);
-			index += 8;
+			int index = 5;            
+            NAVIEXEID = BitConverter.ToInt64(b, index);
+            index += 8;
+			NaviID = (Navi_Name_ID)BitConverter.ToInt32(b, index);
+			index += 4;
             GLSpriteSheetName = BitConverter.ToInt32(b, index);
             index += 4;
 			Location.X = BitConverter.ToSingle(b, index);
