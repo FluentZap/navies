@@ -113,6 +113,7 @@ namespace Net_Navis
 
             //Draw all client navis
             foreach (NetNavi_Type navi in Client_Navi.Values) Draw_Navi_GL(navi);
+            
             GL.LoadIdentity();
 
             //Draw Projectiles
