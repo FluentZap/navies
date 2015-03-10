@@ -17,7 +17,7 @@ namespace Net_Navis
 {
     partial class Navi_Main
     {
-        public Dictionary<string, int> GLNaviTexture = new Dictionary<string, int>();
+        public Dictionary<int, int> GLNaviTexture = new Dictionary<int, int>();
         public int GLProjectileTexture;
         public int GLBackground;
         public bool Init_GL;
@@ -104,7 +104,8 @@ namespace Net_Navis
         public void Draw_GL()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
-            GL.ClearColor(Color.Black);            
+            GL.ClearColor(Color.Black);
+            GL.Color4(1f, 1f, 1f, 1f);
             Draw_Background_GL();
 
             //Draw host navi
@@ -112,13 +113,15 @@ namespace Net_Navis
 
             //Draw all client navis
             foreach (NetNavi_Type navi in Client_Navi.Values) Draw_Navi_GL(navi);
+            
             GL.LoadIdentity();
 
             //Draw Projectiles
             GL.BindTexture(TextureTarget.Texture2D, GLProjectileTexture);
             Point S = ScreenScroll;            
             foreach (Navi_Main.Projectiles_Type item in Projectile_List)
-            {                
+            {
+                GL.Color4(1f, 1f, 1f, 1f);
                 GL.Begin(PrimitiveType.Quads);
                 GL.TexCoord2(0f, 0f); GL.Vertex2(item.Location.X + S.X, item.Location.Y + S.Y);
                 GL.TexCoord2(1f, 0f); GL.Vertex2(item.Location.X + S.X + 8 * item.Scale, item.Location.Y + S.Y);
@@ -139,7 +142,7 @@ namespace Net_Navis
             GL.Scale(1f / (Navi.SpriteSheet.Width / Navi.SpriteSize.X),
                      1f / (Navi.SpriteSheet.Height / Navi.SpriteSize.Y), 1);
             GL.Translate(Navi.Sprite.X, Navi.Sprite.Y, 0);
-            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture[Navi.Navi_Name]);
+            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture[Navi.GLSpriteSheetName]);
             if (Navi.FaceLeft == true)
             {
                 GL.Begin(PrimitiveType.Quads);
@@ -215,18 +218,24 @@ namespace Net_Navis
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             GL.Viewport(0, 0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             GL.Ortho(0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height, 0, -1, 1);
-            Load_Sprite_Sheets(Host_Navi.Navi_Name);
-            GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);
-            GLBackground = load_sprite(Net_Navis.Resource1.BG1);
+            Load_Sprite_Sheets();            
             NaviForm.Hide();
-            Init_GL = true;
+            Init_GL = true;            
         }
 
-        public void Load_Sprite_Sheets(string name)
+        public void Load_Sprite_Sheets()
         {
-            //Load Navi Sprite Sheet
-            if (!GLNaviTexture.ContainsKey(name))
-                GLNaviTexture.Add(name, load_sprite(Host_Navi.SpriteSheet));
+            //Load Navi Sprite Sheet            
+            GLNaviTexture.Add(0, load_sprite(Resource1.Raven));
+            GLNaviTexture.Add(1, load_sprite(Resource1.Vex));
+            GLNaviTexture.Add(2, load_sprite(Resource1.Barnabus));
+            GLNaviTexture.Add(3, load_sprite(Resource1.Rebelpullsheet));
+
+            //Load projectiles
+            GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);
+
+            //Load backgrounds            
+            GLBackground = load_sprite(Net_Navis.Resource1.BG1);
         }
         //Load Sprite From Bitmap
         private int load_sprite(Bitmap bitmap)

@@ -14,7 +14,9 @@ namespace Vex
     {
         const string Navi_Name = "Vex";
 
-        public static long Navi_ID = Properties.Settings.Default.NaviID;
+        //public static long Navi_ID = Properties.Settings.Default.NaviID;
+
+        public static long Navi_ID = 1;
 
         public static void Main()
         {
