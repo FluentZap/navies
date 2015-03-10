@@ -31,18 +31,34 @@ namespace Net_Navis
         private int listenerPort;
         private Client networkCaptain = null; // if null, then we are the network captain
 
-        void StartNetwork(string name, int port = DEFAULT_PORT)
+        void StartNetwork()
         {
             if (networkActive)
                 return;
 
             networkActive = true;
-            networkName = name;
-            listenerPort = port;
             if (listener == null)
+            {
+                listenerPort = findOpenPort(DEFAULT_PORT);
+                networkName = (listener.LocalEndpoint as IPEndPoint).Address.ToString();
+            }
+
+            Console.WriteLine("listener started on port " + listenerPort + " with name " + networkName);
+        }
+
+        // Recursive
+        private int findOpenPort(int port)
+        {
+            try
+            {
                 listener = new TcpListener(IPAddress.Any, port);
-            listener.Start(MAX_PEERS); // set backlog size to MAX_PEERS 
-            Console.WriteLine("listener started on port " + port + " with name " + name);
+                listener.Start(MAX_PEERS); // set backlog size to MAX_PEERS 
+                return port;
+            }
+            catch (SocketException)
+            {
+                return findOpenPort(port + 1);
+            }
         }
 
         void StopNetwork()

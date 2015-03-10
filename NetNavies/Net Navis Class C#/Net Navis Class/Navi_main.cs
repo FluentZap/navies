@@ -218,15 +218,7 @@ namespace Net_Navis
                     Console.WriteLine(peerListeningPorts[networkCaptain]);
             }
             else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
-                StartNetwork("Jonny Flame");
-            else if (pressedkeys.Contains(Keys.Y) && !prevPressedkeys.Contains(Keys.Y))
-                StartNetwork("Presto Pretzel");
-            else if (pressedkeys.Contains(Keys.U) && !prevPressedkeys.Contains(Keys.U))
-                StartNetwork("Mechana Banana");
-            else if (pressedkeys.Contains(Keys.I) && !prevPressedkeys.Contains(Keys.I))
-                StartNetwork("Rico Rico");
-            else if (pressedkeys.Contains(Keys.O) && !prevPressedkeys.Contains(Keys.O))
-                StartNetwork("Chloe Lamb");
+                StartNetwork();
             else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
                 ConnectToPeer("discojoker.com", 11994);
             else if (pressedkeys.Contains(Keys.D4) && !prevPressedkeys.Contains(Keys.D4))
