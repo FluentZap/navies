@@ -20,12 +20,14 @@ namespace Net_Navis
 	//DXon if switched on changes rendering to a directx window rendering is then done in Draw_DX
 
 	public partial class Navi_Main
-	{        
+	{
+        
         private NaviFormF NaviForm;
         private MenuForm MenuForm;                
         private NaviFXF NaviGL;        		
         //private NaviTrayIcon NaviTray;
         private HashSet<System.Windows.Forms.Keys> pressedkeys = new HashSet<System.Windows.Forms.Keys>();                	
+        private HashSet<System.Windows.Forms.Keys> prevPressedkeys = new HashSet<System.Windows.Forms.Keys>();
 		System.Drawing.Imaging.ImageAttributes NormalImage = new System.Drawing.Imaging.ImageAttributes();
 		System.Drawing.Imaging.ImageAttributes BlueImage = new System.Drawing.Imaging.ImageAttributes();
 		System.Drawing.Imaging.ImageAttributes RedImage = new System.Drawing.Imaging.ImageAttributes();
@@ -101,7 +103,7 @@ namespace Net_Navis
 			//NaviTray.Initialise(Host_Navi)
 			Set_color_filters();
 			Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds;			
-			Physics_Rate = 1f / 60f;
+			Physics_Rate = 1 / 60.0;
 			Program_Step = 0;
 			//Host_Navi.set_Animation(Animation_Name_Enum.None)
 			Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
@@ -115,16 +117,28 @@ namespace Net_Navis
 			//Slowing program down
 			System.Threading.Thread.Sleep(Convert.ToInt32(Physics_Rate * 1000));
 
-			if (Physics_Timer <= DateTime.Now.TimeOfDay.TotalSeconds) {
-				Handle_UI();
-				Process_Navi_Commands();
-				Update_Physics();
+			if (Physics_Timer <= DateTime.Now.TimeOfDay.TotalSeconds) {                
+                Handle_UI();
+                Process_Navi_Commands();
+                foreach (NetNavi_Type navi in Client_Navi.Values)
+                {                    
+                    Process_Client_Commands(navi);                    
+                }
+                Update_Physics();
 				Navi_resources.Set_Correct_Animation(ref Host_Navi);
-				Host_Navi.Update_Sprite();
+				
+                Host_Navi.Update_Sprite();
                 Host_Navi.ShootCharge += 1;
 
-                DoNetworkEvents();
 
+                foreach (NetNavi_Type navi in Client_Navi.Values)
+                    navi.Activated_Ability = -1;
+
+                DoNetworkEvents();
+                Host_Navi.Activated_Ability = -1;                
+                
+
+                
 				Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds + Physics_Rate;
 				Program_Step += 1;
 			}
@@ -192,25 +206,55 @@ namespace Net_Navis
                 Host_Navi.Shooting = true;
                 else
                 Host_Navi.Shooting = false;
-			
 
-            if (pressedkeys.Contains(Keys.D1))
+
+            if (pressedkeys.Contains(Keys.D1) && !prevPressedkeys.Contains(Keys.D1))
                 StopNetwork();
-            else if (pressedkeys.Contains(Keys.D2))
-                StartNetwork("Jonny Fire");
-            else if (pressedkeys.Contains(Keys.D3))
+            else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
+            {
+                if (networkCaptain == null)
+                    Console.WriteLine("me");
+                else
+                    Console.WriteLine(peerListeningPorts[networkCaptain]);
+            }
+            else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
+                StartNetwork("Jonny Flame");
+            else if (pressedkeys.Contains(Keys.Y) && !prevPressedkeys.Contains(Keys.Y))
                 StartNetwork("Presto Pretzel");
-            else if (pressedkeys.Contains(Keys.D4))
-                StartNetwork("Presto Pretzel", 11995);
-            else if (pressedkeys.Contains(Keys.D5))
-                ConnectToPeer("192.168.1.244");
-            else if (pressedkeys.Contains(Keys.D6))
-                ConnectToPeer("fastfattoad.com");
-            else if (pressedkeys.Contains(Keys.D7))
-                ConnectToPeer("discojoker.com");
+            else if (pressedkeys.Contains(Keys.U) && !prevPressedkeys.Contains(Keys.U))
+                StartNetwork("Mechana Banana");
+            else if (pressedkeys.Contains(Keys.I) && !prevPressedkeys.Contains(Keys.I))
+                StartNetwork("Rico Rico");
+            else if (pressedkeys.Contains(Keys.O) && !prevPressedkeys.Contains(Keys.O))
+                StartNetwork("Chloe Lamb");
+            else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
+                ConnectToPeer("discojoker.com", 11994);
+            else if (pressedkeys.Contains(Keys.D4) && !prevPressedkeys.Contains(Keys.D4))
+                ConnectToPeer("fastfattoad.com", 11994);
+            //else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
+            //    StartNetwork("Jonny Flame");
+            //else if (pressedkeys.Contains(Keys.Y) && !prevPressedkeys.Contains(Keys.Y))
+            //    StartNetwork("Presto Pretzel", 11995);
+            //else if (pressedkeys.Contains(Keys.U) && !prevPressedkeys.Contains(Keys.U))
+            //    StartNetwork("Mechana Banana", 11996);
+            //else if (pressedkeys.Contains(Keys.I) && !prevPressedkeys.Contains(Keys.I))
+            //    StartNetwork("Rico Rico", 11997);
+            //else if (pressedkeys.Contains(Keys.O) && !prevPressedkeys.Contains(Keys.O))
+            //    StartNetwork("Chloe Lamb", 11998);
+            //else if (pressedkeys.Contains(Keys.G) && !prevPressedkeys.Contains(Keys.G))
+            //    ConnectToPeer("127.0.0.1", 11994);
+            //else if (pressedkeys.Contains(Keys.H) && !prevPressedkeys.Contains(Keys.H))
+            //    ConnectToPeer("127.0.0.1", 11995);
+            //else if (pressedkeys.Contains(Keys.J) && !prevPressedkeys.Contains(Keys.J))
+            //    ConnectToPeer("127.0.0.1", 11996);
+            //else if (pressedkeys.Contains(Keys.K) && !prevPressedkeys.Contains(Keys.K))
+            //    ConnectToPeer("127.0.0.1", 11997);
+            //else if (pressedkeys.Contains(Keys.L) && !prevPressedkeys.Contains(Keys.L))
+            //    ConnectToPeer("127.0.0.1", 11998);
 
-
-
+            prevPressedkeys.Clear();
+            foreach (System.Windows.Forms.Keys key in pressedkeys)
+                prevPressedkeys.Add(key);
 		}
 
         public void Process_Navi_Commands()
@@ -272,10 +316,11 @@ namespace Net_Navis
             }
             #endregion                       
             if (Host_Navi.Shooting == true)
-            {
                 if (Host_Navi.ShootCharge > 10)
                 {
-                    Host_Navi.ShootCharge = 0;                    
+                    Host_Navi.ShootCharge = 0; 
+                    Host_Navi.Activated_Ability = 1;
+                    
                     Point loc = new Point();
                     PointF Shoot_Point;
                     PointF Speed = new PointF();
@@ -288,9 +333,28 @@ namespace Net_Navis
                     if (Host_Navi.FaceLeft) Speed.X = -20; else Speed.X = 20;
                     Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, Host_Navi.Scale));
                 }
+        }
+
+        public void Process_Client_Commands(NetNavi_Type navi)
+        {
+            if (navi.Activated_Ability == 1)
+            {
+                    Point loc = new Point();
+                    PointF Shoot_Point;
+                    PointF Speed = new PointF();
+                    Shoot_Point = navi.Get_Shoot_Point();
+                    if (navi.FaceLeft)
+                        loc.X = (int)Shoot_Point.X - (int)(8 * navi.Scale);
+                    else
+                        loc.X = (int)Shoot_Point.X;
+                    loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Scale);
+                    if (navi.FaceLeft) Speed.X = -20; else Speed.X = 20;
+                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Scale));
             }
 
         }
+
+
 
         #region Physics update
 
@@ -417,17 +481,12 @@ namespace Net_Navis
 
         private void NaviForm_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
 		{
-			if (pressedkeys.Contains(e.KeyCode)) {
-			} else {
-				pressedkeys.Add(e.KeyCode);
-			}
+			pressedkeys.Add(e.KeyCode); // automatically checks for duplicates and won't add twice
 		}
 
 		private void NaviForm_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
 		{
-			if (pressedkeys.Contains(e.KeyCode)) {
-				pressedkeys.Remove(e.KeyCode);
-			}
+			pressedkeys.Remove(e.KeyCode); // returns false if KeyCode isn't in the hashset
 		}
 
 		private void NaviForm_GotFocus(object sender, System.EventArgs e)
