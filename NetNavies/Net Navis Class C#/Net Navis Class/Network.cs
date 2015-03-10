@@ -304,11 +304,12 @@ namespace Net_Navis
         private void addPeer(string name, Client peer, int port)
         {
             NetNavi_Type localObject = new NetNavi_Type();
-            localObject = Navi_resources.Get_Data("Raven", 0);
-
             // send AND receive first update (for draw function)
             sendUpdate(peer, Host_Navi);
             readPeerUpdate(peer, localObject);
+            
+            localObject = Navi_resources.Get_Data(localObject.NaviID, localObject.NAVIEXEID);
+
             //// send update again to salt it, baby
             //peer.Write((int)Headers.SendingUpdate);
             //sendUpdate(peer, Host_Navi);

@@ -45,7 +45,7 @@ namespace Net_Navis
 			tray = new NotifyIcon();
 			tray.Icon = Navi.Icon;
 			tray.ContextMenuStrip = MainMenu;
-			tray.Text = Navi.Navi_Name + " Tray Icon Service";
+			tray.Text = Navi.Navi_Display_Name + " Tray Icon Service";
 			tray.Visible = true;
 		}
 
