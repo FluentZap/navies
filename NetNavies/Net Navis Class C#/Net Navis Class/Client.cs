@@ -28,9 +28,13 @@ namespace Net_Navis
         {
             get { return client.Available; }
         }
-        public IPEndPoint RemoteIP
+        public string IPAddress
         {
-            get { return client.Client.RemoteEndPoint as IPEndPoint; }
+            get { return (client.Client.RemoteEndPoint as IPEndPoint).Address.ToString(); }
+        }
+        public int Port
+        {
+            get { return (client.Client.RemoteEndPoint as IPEndPoint).Port; }
         }
 
         // Constructor
