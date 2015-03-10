@@ -206,39 +206,51 @@ namespace Net_Navis
                 Host_Navi.Shooting = true;
                 else
                 Host_Navi.Shooting = false;
-			
 
-            if (pressedkeys.Contains(Keys.D7) && !prevPressedkeys.Contains(Keys.D7))
+
+            if (pressedkeys.Contains(Keys.D1) && !prevPressedkeys.Contains(Keys.D1))
                 StopNetwork();
-            //else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
-            //    StartNetwork("Jonny Fire");
-            //else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
-            //    StartNetwork("Presto Pretzel");
-            //else if (pressedkeys.Contains(Keys.D4) && !prevPressedkeys.Contains(Keys.D4))
+            else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
+            {
+                if (networkCaptain == null)
+                    Console.WriteLine("me");
+                else
+                    Console.WriteLine(peerListeningPorts[networkCaptain]);
+            }
+            else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
+                StartNetwork("Jonny Flame");
+            else if (pressedkeys.Contains(Keys.Y) && !prevPressedkeys.Contains(Keys.Y))
+                StartNetwork("Presto Pretzel");
+            else if (pressedkeys.Contains(Keys.U) && !prevPressedkeys.Contains(Keys.U))
+                StartNetwork("Mechana Banana");
+            else if (pressedkeys.Contains(Keys.I) && !prevPressedkeys.Contains(Keys.I))
+                StartNetwork("Rico Rico");
+            else if (pressedkeys.Contains(Keys.O) && !prevPressedkeys.Contains(Keys.O))
+                StartNetwork("Chloe Lamb");
+            else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
+                ConnectToPeer("discojoker.com", 11994);
+            else if (pressedkeys.Contains(Keys.D4) && !prevPressedkeys.Contains(Keys.D4))
+                ConnectToPeer("fastfattoad.com", 11994);
+            //else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
+            //    StartNetwork("Jonny Flame");
+            //else if (pressedkeys.Contains(Keys.Y) && !prevPressedkeys.Contains(Keys.Y))
             //    StartNetwork("Presto Pretzel", 11995);
-            //else if (pressedkeys.Contains(Keys.D5) && !prevPressedkeys.Contains(Keys.D5))
-            //    ConnectToPeer("192.168.1.244");
-            //else if (pressedkeys.Contains(Keys.D6) && !prevPressedkeys.Contains(Keys.D6))
-            //    ConnectToPeer("fastfattoad.com");
-            //else if (pressedkeys.Contains(Keys.D7) && !prevPressedkeys.Contains(Keys.D7))
-            //    ConnectToPeer("discojoker.com");
-            //else if (pressedkeys.Contains(Keys.D8) && !prevPressedkeys.Contains(Keys.D8))
-            //    ConnectToPeer("127.0.0.1");
-            //else if (pressedkeys.Contains(Keys.D9) && !prevPressedkeys.Contains(Keys.D9))
+            //else if (pressedkeys.Contains(Keys.U) && !prevPressedkeys.Contains(Keys.U))
             //    StartNetwork("Mechana Banana", 11996);
-
-            else if (pressedkeys.Contains(Keys.NumPad4) && !prevPressedkeys.Contains(Keys.NumPad4))
-                StartNetwork("Jonny Fire");
-            else if (pressedkeys.Contains(Keys.NumPad5) && !prevPressedkeys.Contains(Keys.NumPad5))
-                StartNetwork("Presto Pretzel", 11995);
-            else if (pressedkeys.Contains(Keys.NumPad6) && !prevPressedkeys.Contains(Keys.NumPad6))
-                StartNetwork("Mechana Banana", 11996);
-            else if (pressedkeys.Contains(Keys.NumPad1) && !prevPressedkeys.Contains(Keys.NumPad1))
-                ConnectToPeer("127.0.0.1", 11994);
-            else if (pressedkeys.Contains(Keys.NumPad2) && !prevPressedkeys.Contains(Keys.NumPad2))
-                ConnectToPeer("127.0.0.1", 11995);
-            else if (pressedkeys.Contains(Keys.NumPad3) && !prevPressedkeys.Contains(Keys.NumPad3))
-                ConnectToPeer("127.0.0.1", 11996);
+            //else if (pressedkeys.Contains(Keys.I) && !prevPressedkeys.Contains(Keys.I))
+            //    StartNetwork("Rico Rico", 11997);
+            //else if (pressedkeys.Contains(Keys.O) && !prevPressedkeys.Contains(Keys.O))
+            //    StartNetwork("Chloe Lamb", 11998);
+            //else if (pressedkeys.Contains(Keys.G) && !prevPressedkeys.Contains(Keys.G))
+            //    ConnectToPeer("127.0.0.1", 11994);
+            //else if (pressedkeys.Contains(Keys.H) && !prevPressedkeys.Contains(Keys.H))
+            //    ConnectToPeer("127.0.0.1", 11995);
+            //else if (pressedkeys.Contains(Keys.J) && !prevPressedkeys.Contains(Keys.J))
+            //    ConnectToPeer("127.0.0.1", 11996);
+            //else if (pressedkeys.Contains(Keys.K) && !prevPressedkeys.Contains(Keys.K))
+            //    ConnectToPeer("127.0.0.1", 11997);
+            //else if (pressedkeys.Contains(Keys.L) && !prevPressedkeys.Contains(Keys.L))
+            //    ConnectToPeer("127.0.0.1", 11998);
 
             prevPressedkeys.Clear();
             foreach (System.Windows.Forms.Keys key in pressedkeys)
