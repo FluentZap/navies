@@ -14,7 +14,9 @@ namespace Raven
 	{
 		const string Navi_Name = "Raven";
 
-        public static long Navi_ID = Properties.Settings.Default.NaviID;
+        //public static long Navi_ID = Properties.Settings.Default.NaviID;
+
+        public static long Navi_ID = 0;
 		
         public static void Main()
 		{
