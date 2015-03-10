@@ -12,6 +12,8 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using System.Reflection;
+using System.Threading;
+
 namespace Net_Navis
 {
 	//Main Sub's go into Navi Main
@@ -109,6 +111,12 @@ namespace Net_Navis
 			Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
 			Host_Navi.Location.X = 1000;
 			Host_Navi.Scale = 3;
+
+            StartNetwork();
+
+            Thread t = new Thread(ConsoleInput);
+            t.IsBackground = true;
+            t.Start();
 		}
 
 
@@ -207,22 +215,12 @@ namespace Net_Navis
                 else
                 Host_Navi.Shooting = false;
 
-
             if (pressedkeys.Contains(Keys.D1) && !prevPressedkeys.Contains(Keys.D1))
-                StopNetwork();
-            else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
-            {
-                if (networkCaptain == null)
-                    Console.WriteLine("me");
-                else
-                    Console.WriteLine(peerListeningPorts[networkCaptain]);
-            }
-            else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
-                StartNetwork();
-            else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
                 ConnectToPeer("discojoker.com", 11994);
-            else if (pressedkeys.Contains(Keys.D4) && !prevPressedkeys.Contains(Keys.D4))
+            else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
                 ConnectToPeer("fastfattoad.com", 11994);
+            else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
+                ConnectToPeer("127.0.0.1", 11994);
             //else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
             //    StartNetwork("Jonny Flame");
             //else if (pressedkeys.Contains(Keys.Y) && !prevPressedkeys.Contains(Keys.Y))
@@ -248,6 +246,48 @@ namespace Net_Navis
             foreach (System.Windows.Forms.Keys key in pressedkeys)
                 prevPressedkeys.Add(key);
 		}
+
+        void ConsoleInput()
+        {
+            string[] command = {""};
+
+            while (command[0] != "exit" && command[0] != "quit")
+            {
+                command = Console.ReadLine().Split(' ');
+
+                if (command.Length == 0)
+                    continue;
+
+                if (command[0] == "help")
+                {
+                    Console.WriteLine("\t\"start\"");
+                    Console.WriteLine("\t\"stop\"");
+                    Console.WriteLine("\t\"connect IP PORT\"");
+                    Console.WriteLine("\t\"captain\"");
+                    Console.WriteLine("\t\"peers\"");
+                }
+                else if (command[0] == "connect")
+                {
+                    if (command[1] == "home")
+                        command[1] = "127.0.0.1";
+                    ConnectToPeer(command[1], Convert.ToInt32(command[2]));
+                }
+                else if (command[0] == "start")
+                    StartNetwork();
+                else if (command[0] == "stop")
+                    StopNetwork();
+                else if (command[0] == "captain")
+                {
+                    if (networkCaptain == null)
+                        Console.WriteLine("me");
+                    else
+                        Console.WriteLine(networkCaptain);
+                }
+                else if (command[0] == "peers")
+                    foreach (string name in peers.Keys)
+                        Console.WriteLine(name);
+            }
+        }
 
         public void Process_Navi_Commands()
         {

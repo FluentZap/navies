@@ -21,15 +21,14 @@ namespace Net_Navis
         }
 
         private Dictionary<string, Client> peers = new Dictionary<string, Client>();
-        private Dictionary<Client, int> peerListeningPorts = new Dictionary<Client, int>();
         private System.Net.Sockets.TcpListener listener = null;
         private bool networkActive = false;
         private const int DEFAULT_PORT = 11994;
         private const int MAX_PEERS = 4;
         private int peerCount = 0;
-        private string networkName;
+        private string networkName = null;
         private int listenerPort;
-        private Client networkCaptain = null; // if null, then we are the network captain
+        private string networkCaptain = null; // if null, then we are the network captain
 
         void StartNetwork()
         {
@@ -38,12 +37,11 @@ namespace Net_Navis
 
             networkActive = true;
             if (listener == null)
-            {
                 listenerPort = findOpenPort(DEFAULT_PORT);
-                networkName = (listener.LocalEndpoint as IPEndPoint).Address.ToString();
-            }
+            else
+                listener.Start(MAX_PEERS); // set backlog size to MAX_PEERS 
 
-            Console.WriteLine("listener started on port " + listenerPort + " with name " + networkName);
+            Console.WriteLine("listener started on port " + listenerPort);
         }
 
         // Recursive
@@ -52,7 +50,7 @@ namespace Net_Navis
             try
             {
                 listener = new TcpListener(IPAddress.Any, port);
-                listener.Start(MAX_PEERS); // set backlog size to MAX_PEERS 
+                listener.Start(MAX_PEERS); // set backlog size to MAX_PEERS
                 return port;
             }
             catch (SocketException)
@@ -74,7 +72,6 @@ namespace Net_Navis
 
             peers.Clear();
             Client_Navi.Clear();
-            peerListeningPorts.Clear();
             peerCount = 0;
             networkCaptain = null;
             Console.WriteLine("Network stopped");
@@ -119,8 +116,8 @@ namespace Net_Navis
                 return false;
             }
 
-            newPeer.Write(networkName); // send our name
-            newPeer.Write(listenerPort); // send listener's port
+            newPeer.Write(listenerPort); // send listener port
+            networkName = newPeer.ReadString(); // read our network name
 
             if ((Headers)newPeer.ReadInt32() != Headers.Approved) // name was taken
             {
@@ -133,6 +130,7 @@ namespace Net_Navis
 
             // wait for pending connections
             Client c;
+            string name;
             HashSet<Client> otherPending = new HashSet<Client>();
             while (incomingConnectionCount > 0)
             {
@@ -140,7 +138,8 @@ namespace Net_Navis
                 response = (Headers)c.ReadInt32();
                 if (response == Headers.GroupAppend)
                 {
-                    addPeer(c.ReadString(), c, c.ReadInt32());
+                    name = c.IPAddress + ":" + c.ReadInt32(); // figure out their network name
+                    addPeer(name, c);
                     incomingConnectionCount -= 1;
                 }
                 else if (response == Headers.RequestJoin)
@@ -150,8 +149,8 @@ namespace Net_Navis
             }
 
             // lastly, add the captain we are talking to
-            addPeer(newPeer.ReadString(), newPeer, port);
-            networkCaptain = newPeer; // set them as captain
+            networkCaptain = newPeer.IPAddress + ":" + port; // set them as captain
+            addPeer(networkCaptain, newPeer);
 
             // deal with the other connections that came in while we were handling the GroupAppend
             foreach (Client pending in otherPending)
@@ -185,8 +184,9 @@ namespace Net_Navis
             if (networkCaptain != null) // we are not the captain
             {
                 newPeer.Write((int)Headers.Invalid);
-                newPeer.Write(networkCaptain.IPAddress); // send ip address of captain
-                newPeer.Write(peerListeningPorts[networkCaptain]); // send port too
+                string[] s = networkCaptain.Split(':');
+                newPeer.Write(s[0]); // send ip address of captain
+                newPeer.Write(Convert.ToInt32(s[1])); // send port
                 newPeer.Close();
                 Console.WriteLine("referred to captain");
                 return false;
@@ -201,10 +201,11 @@ namespace Net_Navis
 
             newPeer.Write((int)Headers.Approved);
 
-            // read name
-            string name = newPeer.ReadString();
             // read port
             int port = newPeer.ReadInt32();
+            // figure out name
+            string name = newPeer.IPAddress + ":" + port;
+            newPeer.Write(name); // send them their name
 
             // check to see if the name is taken
             if (peers.ContainsKey(name) || name == networkName) // name is taken
@@ -223,16 +224,12 @@ namespace Net_Navis
             foreach (Client peer in peers.Values)
             {
                 peer.Write((int)Headers.GroupAppend);
-                peer.Write(name);
                 peer.Write(newPeer.IPAddress);
                 peer.Write(port);
             }
 
-            // send our name
-            newPeer.Write(networkName);
-
             // add them to our peers
-            addPeer(name, newPeer, port);
+            addPeer(name, newPeer);
 
             return true;
         }
@@ -268,12 +265,11 @@ namespace Net_Navis
                         }
                         else if (request == Headers.GroupAppend)
                         {
-                            string newPeerName = peer.ReadString();
                             string ip = peer.ReadString();
                             int port = peer.ReadInt32();
+                            string newPeerName = ip + ":" + port;
                             Client newPeer = new Client(new TcpClient(ip, port));
                             newPeer.Write((int)Headers.GroupAppend);
-                            newPeer.Write(networkName);
                             newPeer.Write(listenerPort);
                             toAdd.Add(newPeerName, newPeer);
                         }
@@ -283,11 +279,10 @@ namespace Net_Navis
                 {
                     toRemove.Add(name);
                     Client_Navi.Remove(name);
-                    peerListeningPorts.Remove(peer);
                     peer.Close();
                     --peerCount;
                     // if it was the captain who disconnected, select new captain alphabetically
-                    if (networkCaptain == peer)
+                    if (name == networkCaptain)
                     {
                         string lowest = null;
                         foreach (string s in Client_Navi.Keys)
@@ -300,7 +295,7 @@ namespace Net_Navis
                         if (lowest == null || networkName.CompareTo(lowest) < 0) // our name is the first
                             networkCaptain = null; // set ourself as captain
                         else
-                            networkCaptain = peers[lowest];
+                            networkCaptain = lowest;
                     }
                     Console.WriteLine(name + " disconnected");
                 }
@@ -314,10 +309,10 @@ namespace Net_Navis
             // add any peers who we connected to with a GroupAppend
             // (can't edit the container during iteration)
             foreach (string name in toAdd.Keys)
-                addPeer(name, toAdd[name], toAdd[name].Port);
+                addPeer(name, toAdd[name]);
         }
 
-        private void addPeer(string name, Client peer, int port)
+        private void addPeer(string name, Client peer)
         {
             NetNavi_Type localObject = new NetNavi_Type();
             // send AND receive first update (for draw function)
@@ -333,11 +328,9 @@ namespace Net_Navis
             // add to containers
             peers.Add(name, peer);
             Client_Navi.Add(name, localObject);
-            peerListeningPorts.Add(peer, port);
 
             ++peerCount;
             Console.WriteLine("Client " + name + " successfully added");
-            Console.WriteLine(peer.IPAddress);
         }
 
         private void sendUpdate(Client peer, NetNavi_Type navi)
