@@ -119,12 +119,6 @@ namespace Net_Navis
             newPeer.Write(listenerPort); // send listener port
             networkName = newPeer.ReadString(); // read our network name
 
-            if ((Headers)newPeer.ReadInt32() != Headers.Approved) // name was taken
-            {
-                newPeer.Close();
-                return false;
-            }
-
             // read number of soon-to-be incoming connections
             int incomingConnectionCount = newPeer.ReadInt32();
 
@@ -206,16 +200,6 @@ namespace Net_Navis
             // figure out name
             string name = newPeer.IPAddress + ":" + port;
             newPeer.Write(name); // send them their name
-
-            // check to see if the name is taken
-            if (peers.ContainsKey(name) || name == networkName) // name is taken
-            {
-                newPeer.Write((int)Headers.Invalid);
-                newPeer.Close();
-                return false;
-            }
-
-            newPeer.Write((int)Headers.Approved);
 
             // send number of peers who are about to connect
             newPeer.Write(peerCount);
