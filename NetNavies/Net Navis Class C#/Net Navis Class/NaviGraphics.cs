@@ -43,9 +43,9 @@ namespace Net_Navis
                 {
                     Start_GL();
                 }
-                Draw_GL();
-                ScreenScroll.X = Screen.PrimaryScreen.WorkingArea.Width / 2 - (int)Host_Navi.Location.X - (int)Host_Navi.GetSize().X / 2;
-                ScreenScroll.Y = Screen.PrimaryScreen.WorkingArea.Height / 2 - (int)Host_Navi.Location.Y - (int)Host_Navi.GetSize().Y / 2;
+                ScreenScroll.X = Screen.PrimaryScreen.WorkingArea.Width / 2 - Host_Navi.Location.X - Host_Navi.GetSize().X / 2;
+                ScreenScroll.Y = Screen.PrimaryScreen.WorkingArea.Height / 2 - Host_Navi.Location.Y - Host_Navi.GetSize().Y / 2;
+                Draw_GL();                
             }
 
         }
@@ -118,10 +118,10 @@ namespace Net_Navis
 
             //Draw Projectiles
             GL.BindTexture(TextureTarget.Texture2D, GLProjectileTexture);
-            Point S = ScreenScroll;            
+            PointF S = ScreenScroll;            
             foreach (Navi_Main.Projectiles_Type item in Projectile_List)
             {
-                GL.Color4(1f, 1f, 1f, 1f);
+                GL.Color4(item.Color.R, item.Color.G, item.Color.B, item.Color.A);
                 GL.Begin(PrimitiveType.Quads);
                 GL.TexCoord2(0f, 0f); GL.Vertex2(item.Location.X + S.X, item.Location.Y + S.Y);
                 GL.TexCoord2(1f, 0f); GL.Vertex2(item.Location.X + S.X + 8 * item.Scale, item.Location.Y + S.Y);
@@ -133,7 +133,7 @@ namespace Net_Navis
         }
         public void Draw_Navi_GL(NetNavi_Type Navi)
         {
-            Point S = ScreenScroll;
+            PointF S = ScreenScroll;
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
 
@@ -143,22 +143,27 @@ namespace Net_Navis
                      1f / (Navi.SpriteSheet.Height / Navi.SpriteSize.Y), 1);
             GL.Translate(Navi.Sprite.X, Navi.Sprite.Y, 0);
             GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture[Navi.GLSpriteSheetName]);
+
+            PointF pos = new PointF();
+            pos.X = S.X + ((Navi.Location_Last.X + Navi.Location.X) / 2f);
+            pos.Y = S.Y + ((Navi.Location_Last.Y + Navi.Location.Y) / 2f);
+
             if (Navi.FaceLeft == true)
             {
                 GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(Navi.Location.X + S.X, Navi.Location.Y + S.Y);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(Navi.Location.X + S.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y + S.Y);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(Navi.Location.X + S.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y + S.Y + Navi.SpriteSize.Y * Navi.Scale);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(Navi.Location.X + S.X, Navi.Location.Y + S.Y + Navi.SpriteSize.Y * Navi.Scale);
+                GL.TexCoord2(1f, 0f); GL.Vertex2(pos.X, pos.Y);
+                GL.TexCoord2(0f, 0f); GL.Vertex2(pos.X + Navi.SpriteSize.X * Navi.Scale, pos.Y);
+                GL.TexCoord2(0f, 1f); GL.Vertex2(pos.X + Navi.SpriteSize.X * Navi.Scale, pos.Y + Navi.SpriteSize.Y * Navi.Scale);
+                GL.TexCoord2(1f, 1f); GL.Vertex2(pos.X, pos.Y + Navi.SpriteSize.Y * Navi.Scale);
                 GL.End();
             }
             else
             {
                 GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(Navi.Location.X + S.X, Navi.Location.Y + S.Y);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(Navi.Location.X + S.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y + S.Y);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(Navi.Location.X + S.X + Navi.SpriteSize.X * Navi.Scale, Navi.Location.Y + S.Y + Navi.SpriteSize.Y * Navi.Scale);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(Navi.Location.X + S.X, Navi.Location.Y + S.Y + Navi.SpriteSize.Y * Navi.Scale);
+                GL.TexCoord2(0f, 0f); GL.Vertex2(pos.X, pos.Y);
+                GL.TexCoord2(1f, 0f); GL.Vertex2(pos.X + Navi.SpriteSize.X * Navi.Scale, pos.Y);
+                GL.TexCoord2(1f, 1f); GL.Vertex2(pos.X + Navi.SpriteSize.X * Navi.Scale, pos.Y + Navi.SpriteSize.Y * Navi.Scale);
+                GL.TexCoord2(0f, 1f); GL.Vertex2(pos.X, pos.Y + Navi.SpriteSize.Y * Navi.Scale);
                 GL.End();
             }
             GL.LoadIdentity();
@@ -167,7 +172,7 @@ namespace Net_Navis
 
         public void Draw_Background_GL()
         {
-            Point S = ScreenScroll;
+            PointF S = ScreenScroll;
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
 
@@ -177,10 +182,10 @@ namespace Net_Navis
 
             for (int x = 0; x <= 9; x++)
             {
-                Point pos = new Point();
-                int Scale = 6;
+                PointF pos = new PointF();
+                float Scale = 6;
                 pos.X = x * 256 * Scale + S.X;
-                pos.Y = 0 + S.Y;
+                pos.Y = 0f + S.Y;
                 GL.Begin(PrimitiveType.Quads);
                 GL.TexCoord2(0f, 0f); GL.Vertex2(pos.X, pos.Y);
                 GL.TexCoord2(1f, 0f); GL.Vertex2(pos.X + 256 * Scale, pos.Y);
