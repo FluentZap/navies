@@ -9,6 +9,11 @@
              OpenGL Start Device
             </summary>
         </member>
+        <member name="P:Net_Navis.PerformanceTimer.ElapsedTime">
+            <summary>
+            Returns difference between stop time and start time in milliseconds.
+            </summary>
+        </member>
         <member name="T:Net_Navis.Resource1">
             <summary>
               A strongly-typed resource class, for looking up localized strings, etc.

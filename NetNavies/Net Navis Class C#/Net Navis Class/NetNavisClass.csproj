@@ -110,6 +110,7 @@
     <Compile Include="Navi_resources.cs" />
     <Compile Include="NetNavi_Type.cs" />
     <Compile Include="Network.cs" />
+    <Compile Include="PerformanceTimer.cs" />
     <Compile Include="Resource1.Designer.cs">
       <DependentUpon>Resource1.resx</DependentUpon>
       <AutoGen>True</AutoGen>

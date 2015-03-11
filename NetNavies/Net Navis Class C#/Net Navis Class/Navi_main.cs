@@ -47,10 +47,10 @@ namespace Net_Navis
 
 		bool Direct_Control = true;
 
-		private double Physics_Timer;
 		private double Physics_Rate;
+        private PerformanceTimer Physics_Timer = new PerformanceTimer(60.0);
 
-		private long Program_Step;
+		private ulong Program_Step;
 
         private class Projectiles_Type
 		{
@@ -104,8 +104,8 @@ namespace Net_Navis
 			//NaviTray = New NaviTrayIcon
 			//NaviTray.Initialise(Host_Navi)
 			Set_color_filters();
-			Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds;			
-			Physics_Rate = 1 / 60.0;
+            Physics_Timer.Start();
+			Physics_Rate = 1000 / 60.0;
 			Program_Step = 0;
 			//Host_Navi.set_Animation(Animation_Name_Enum.None)
 			Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
@@ -117,39 +117,45 @@ namespace Net_Navis
             Thread t = new Thread(ConsoleInput);
             t.IsBackground = true;
             t.Start();
+
+
 		}
 
 
 		public void DoEvents()
 		{
 			//Slowing program down
-			System.Threading.Thread.Sleep(Convert.ToInt32(Physics_Rate * 1000));
-
-			if (Physics_Timer <= DateTime.Now.TimeOfDay.TotalSeconds) {                
-                Handle_UI();
-                Process_Navi_Commands();
-                foreach (NetNavi_Type navi in Client_Navi.Values)
-                {                    
-                    Process_Client_Commands(navi);                    
-                }
-                Update_Physics();
-				Navi_resources.Set_Correct_Animation(ref Host_Navi);
+            while (Physics_Timer.ElapsedTime < Physics_Rate)
+            {
+                Thread.Yield();
+                Physics_Timer.Stop(); // doesn't actually stop the timer, just updates it
+            }
+            Physics_Timer.Start();
+            
+             
+            Handle_UI();
+            Process_Navi_Commands();
+            foreach (NetNavi_Type navi in Client_Navi.Values)
+            {                    
+                Process_Client_Commands(navi);                    
+            }
+            Update_Physics();
+			Navi_resources.Set_Correct_Animation(ref Host_Navi);
 				
-                Host_Navi.Update_Sprite();
-                Host_Navi.ShootCharge += 1;
+            Host_Navi.Update_Sprite();
+            Host_Navi.ShootCharge += 1;
 
 
-                foreach (NetNavi_Type navi in Client_Navi.Values)
-                    navi.Activated_Ability = -1;
+            foreach (NetNavi_Type navi in Client_Navi.Values)
+                navi.Activated_Ability = -1;
 
-                DoNetworkEvents();
-                Host_Navi.Activated_Ability = -1;                
+            DoNetworkEvents();
+            Host_Navi.Activated_Ability = -1;                
                 
 
                 
-				Physics_Timer = DateTime.Now.TimeOfDay.TotalSeconds + Physics_Rate;
-				Program_Step += 1;
-			}
+
+			Program_Step += 1;
 
 			Draw_Navi();
 		}
