@@ -58,7 +58,31 @@ namespace Net_Navis
             }
         }
 
+        public void Write(byte b)
+        {
+            lock (writeLock)
+            {
+                if (active)
+                {
+                    byte[] byteData = new byte[1] { b };
+                    stream.Write(byteData, 0, 1);
+                }
+            }
+        }
+
         public void Write(Int32 integer)
+        {
+            lock (writeLock)
+            {
+                if (active)
+                {
+                    byte[] byteData = BitConverter.GetBytes(integer);
+                    stream.Write(byteData, 0, byteData.Length);
+                }
+            }
+        }
+
+        public void Write(UInt64 integer)
         {
             lock (writeLock)
             {
@@ -107,6 +131,17 @@ namespace Net_Navis
             }
         }
 
+        public void WriteByteArray(byte[] buffer)
+        {
+            lock (writeLock)
+            {
+                if (active)
+                {
+                    stream.Write(buffer, 0, buffer.Length);
+                }
+            }
+        }
+
         public void WriteObject(params object[] data)
         {
             lock (writeLock)
@@ -119,12 +154,28 @@ namespace Net_Navis
             }
         }
 
+        public byte ReadByte()
+        {
+            byte[] buffer = new byte[1];
+            if (stream.Read(buffer, 0, 1) <= 0)
+                throw new System.IO.EndOfStreamException();
+            return buffer[0];
+        }
+
         public Int32 ReadInt32()
         {
             byte[] buffer = new byte[4];
             if (stream.Read(buffer, 0, 4) <= 0)
                 throw new System.IO.EndOfStreamException();
             return BitConverter.ToInt32(buffer, 0);
+        }
+
+        public UInt64 ReadUInt64()
+        {
+            byte[] buffer = new byte[8];
+            if (stream.Read(buffer, 0, 8) <= 0)
+                throw new System.IO.EndOfStreamException();
+            return BitConverter.ToUInt64(buffer, 0);
         }
 
         public float ReadFloat()
@@ -152,6 +203,14 @@ namespace Net_Navis
             if (stream.Read(buffer, 0, size) <= 0)
                 throw new System.IO.EndOfStreamException();
             return asciiEncoder.GetString(buffer);
+        }
+
+        public byte[] ReadByteArray(int length)
+        {
+            byte[] buffer = new byte[length];
+            if (stream.Read(buffer, 0, length) < length)
+                throw new System.IO.EndOfStreamException();
+            return buffer;
         }
 
         public object ReadObject()
@@ -184,25 +243,6 @@ namespace Net_Navis
                 if (active)
                     stream.Write(buffer, 0, amountRead);
             }
-        }
-
-        public void WriteSpecial(byte[] buffer)
-        {
-            lock (writeLock)
-            {
-                if (active)
-                {
-                    stream.Write(buffer, 0, 128);
-                }
-            }
-        }
-
-        public byte[] ReadSpecial()
-        {
-            byte[] buffer = new byte[128];
-            if (stream.Read(buffer, 0, 128) <= 0)
-                throw new System.IO.EndOfStreamException();
-            return buffer;
         }
     }
 }

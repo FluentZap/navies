@@ -11,6 +11,8 @@ namespace Net_Navis
 {
 	public class NetNavi_Type
 	{
+        public const int COMPACT_BUFFER_SIZE = 100;
+
 		//Runtime Varables
 		public PointF Location;
 		public PointF Speed;
@@ -121,7 +123,7 @@ namespace Net_Navis
 		public byte[] Get_Compact_buffer()
 		{
 			int index = 0;
-			byte[] b = new byte[123];
+			byte[] b = new byte[COMPACT_BUFFER_SIZE];
             BitConverter.GetBytes(NAVIEXEID).CopyTo(b, index);
 			index += 8;
             BitConverter.GetBytes((int)NaviID).CopyTo(b, index);
@@ -161,33 +163,32 @@ namespace Net_Navis
 
             BitConverter.GetBytes(Activated_Ability).CopyTo(b, index);
             index += 4;
-            
 
-			BitConverter.GetBytes(OnGround).CopyTo(b, index);
-			index += 1;
-			BitConverter.GetBytes(FaceLeft).CopyTo(b, index);
-			index += 1;
-			BitConverter.GetBytes(Running).CopyTo(b, index);
-			index += 1;
-			BitConverter.GetBytes(Jumping).CopyTo(b, index);
-			index += 1;
-			BitConverter.GetBytes(HasJumped).CopyTo(b, index);
-			index += 1;
-			BitConverter.GetBytes(Shooting).CopyTo(b, index);
-			index += 1;            
-			BitConverter.GetBytes(WallGrabing).CopyTo(b, index);
-			index += 1;
-			BitConverter.GetBytes(Dashing).CopyTo(b, index);
-			index += 1;
+            BitConverter.GetBytes(OnGround).CopyTo(b, index);
+            index += 1;
+            BitConverter.GetBytes(FaceLeft).CopyTo(b, index);
+            index += 1;
+            BitConverter.GetBytes(Running).CopyTo(b, index);
+            index += 1;
+            BitConverter.GetBytes(Jumping).CopyTo(b, index);
+            index += 1;
+            BitConverter.GetBytes(HasJumped).CopyTo(b, index);
+            index += 1;
+            BitConverter.GetBytes(Shooting).CopyTo(b, index);
+            index += 1;
+            BitConverter.GetBytes(WallGrabing).CopyTo(b, index);
+            index += 1;
+            BitConverter.GetBytes(Dashing).CopyTo(b, index);
+            index += 1;
+
 			BitConverter.GetBytes(HasDashed).CopyTo(b, index);
 			index += 1;
 			return b;
 		}
 
 
-		public void Set_Compact_buffer(byte[] b)
+		public void Set_Compact_buffer(byte[] b, int index = 0)
 		{
-			int index = 5;            
             NAVIEXEID = BitConverter.ToInt64(b, index);
             index += 8;
 			NaviID = (Navi_Name_ID)BitConverter.ToInt32(b, index);
