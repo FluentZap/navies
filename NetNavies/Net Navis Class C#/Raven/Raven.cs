@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Linq;
 using System.Xml.Linq;
+using System.Reflection;
 namespace Raven
 {
 	class Raven
@@ -18,27 +19,31 @@ namespace Raven
 		
         public static void Main()
 		{
-            //Assembly not found error handeler
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
-            Navi_Main Navi_Instance = new Navi_Main(Navi_Name, NAVIEXEID);
-			Navi_Instance.Initialise();
-			do {
-				Application.DoEvents();
-				Navi_Instance.DoEvents();
-			} while (true);
-
-		}
-
-        //Loads in embeded resource file as assembly
-        static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("EmbedAssembly.NetNaviClass.dll"))
+            //Assembly resolve. Loads assemblys from resource files
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
-                byte[] assembltData = new byte[stream.Length];
-                stream.Read(assembltData, 0, assembltData.Length);
-                return System.Reflection.Assembly.Load(assembltData);
-            }            
-        }
+                String resourceName = new AssemblyName(Assembly.GetExecutingAssembly().FullName).Name + "." + new AssemblyName(args.Name).Name + ".dll";                
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+                {
+                    Byte[] assemblyData = new Byte[stream.Length];
+                    stream.Read(assemblyData, 0, assemblyData.Length);
+                    return Assembly.Load(assemblyData);
+                }
+            };
 
+            Run_Navi();     
+		}        
+
+
+        public static void Run_Navi()
+        {
+            Navi_Main Navi_Instance = new Navi_Main(Navi_Name, NAVIEXEID);
+            Navi_Instance.Initialise();
+            do
+            {
+                Application.DoEvents();
+                Navi_Instance.DoEvents();
+            } while (true);
+        }
 	}
 }

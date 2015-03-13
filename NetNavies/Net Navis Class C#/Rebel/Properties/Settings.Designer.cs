@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Vex.Properties {
+namespace Rebel.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,7 +25,7 @@ namespace Vex.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("88588")]
+        [global::System.Configuration.DefaultSettingValueAttribute("74289637")]
         public long NAVIEXEID {
             get {
                 return ((long)(this["NAVIEXEID"]));
