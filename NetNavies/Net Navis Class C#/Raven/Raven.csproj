@@ -19,7 +19,6 @@
     <OptionInfer>On</OptionInfer>
     <ApplicationIcon>Raven.Ico</ApplicationIcon>
     <TargetFrameworkProfile />
-    <NoWin32Manifest>False</NoWin32Manifest>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -116,6 +115,9 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="OpenTK.dll" />
+    <EmbeddedResource Include="OpenTK.GLControl.dll" />
+    <EmbeddedResource Include="NetNaviClass.dll" />
     <Content Include="Raven.Ico" />
   </ItemGroup>
   <ItemGroup>
@@ -148,10 +150,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Net Navis Class\NetNavisClass.csproj">
+    <ProjectReference Include="..\Net Navis Class\NetNaviClass.csproj">
       <Project>{6D13F25D-82BF-4A16-BD97-EDCDD4B65CBF}</Project>
-      <Name>NetNavisClass</Name>
-      <Private>True</Private>
+      <Name>NetNaviClass</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

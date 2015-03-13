@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetNavisClass", "Net Navis Class\NetNavisClass.csproj", "{6D13F25D-82BF-4A16-BD97-EDCDD4B65CBF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetNaviClass", "Net Navis Class\NetNaviClass.csproj", "{6D13F25D-82BF-4A16-BD97-EDCDD4B65CBF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raven", "Raven\Raven.csproj", "{C26CC17F-A094-4860-B53A-BA0BD82413D8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vex", "Vex\Vex.csproj", "{A9E7E905-0E58-46C4-A741-E039C9706C50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rebel", "Rebel\Rebel.csproj", "{DEC10C88-BDBE-4D0F-BE2C-D14D7920E1CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Barnabus", "Barnabus\Barnabus.csproj", "{E4638F06-8A52-45BC-8596-FA87C7C71EFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +43,22 @@ Global
 		{A9E7E905-0E58-46C4-A741-E039C9706C50}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A9E7E905-0E58-46C4-A741-E039C9706C50}.Release|x86.ActiveCfg = Release|x86
 		{A9E7E905-0E58-46C4-A741-E039C9706C50}.Release|x86.Build.0 = Release|x86
+		{DEC10C88-BDBE-4D0F-BE2C-D14D7920E1CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEC10C88-BDBE-4D0F-BE2C-D14D7920E1CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEC10C88-BDBE-4D0F-BE2C-D14D7920E1CC}.Debug|x86.ActiveCfg = Debug|x86
+		{DEC10C88-BDBE-4D0F-BE2C-D14D7920E1CC}.Debug|x86.Build.0 = Debug|x86
+		{DEC10C88-BDBE-4D0F-BE2C-D14D7920E1CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEC10C88-BDBE-4D0F-BE2C-D14D7920E1CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEC10C88-BDBE-4D0F-BE2C-D14D7920E1CC}.Release|x86.ActiveCfg = Release|x86
+		{DEC10C88-BDBE-4D0F-BE2C-D14D7920E1CC}.Release|x86.Build.0 = Release|x86
+		{E4638F06-8A52-45BC-8596-FA87C7C71EFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4638F06-8A52-45BC-8596-FA87C7C71EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4638F06-8A52-45BC-8596-FA87C7C71EFE}.Debug|x86.ActiveCfg = Debug|x86
+		{E4638F06-8A52-45BC-8596-FA87C7C71EFE}.Debug|x86.Build.0 = Debug|x86
+		{E4638F06-8A52-45BC-8596-FA87C7C71EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4638F06-8A52-45BC-8596-FA87C7C71EFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4638F06-8A52-45BC-8596-FA87C7C71EFE}.Release|x86.ActiveCfg = Release|x86
+		{E4638F06-8A52-45BC-8596-FA87C7C71EFE}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
