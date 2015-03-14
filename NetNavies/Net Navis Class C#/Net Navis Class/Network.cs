@@ -33,8 +33,6 @@ namespace Net_Navis
         private int listenerPort;
         private string networkCaptain = null; // if null, then we are the network captain
 
-        private LinkedList<byte[]> updateBuffer = new LinkedList<byte[]>();
-
 
 
         void StartNetwork()
@@ -77,12 +75,12 @@ namespace Net_Navis
             foreach (Client peer in peers.Values)
             {
                 peer.Write((byte)Headers.Bye);
+                peer.Flush();
                 peer.Close();
             }
 
             peers.Clear();
             Client_Navi.Clear();
-            updateBuffer.Clear();
             peerCount = 0;
             networkCaptain = null;
             Console.WriteLine("Network stopped");
@@ -108,6 +106,7 @@ namespace Net_Navis
         {
             Client newPeer = new Client(new TcpClient(host, port));
             newPeer.Write((byte)Headers.RequestJoin);
+            newPeer.Flush();
             Headers response = (Headers)newPeer.ReadByte();
 
             if (response == Headers.Invalid) // we did not connect to the captain
@@ -118,6 +117,7 @@ namespace Net_Navis
                 newPeer.Close();
                 newPeer = new Client(new TcpClient(host, port));
                 newPeer.Write((byte)Headers.RequestJoin);
+                newPeer.Flush();
                 response = (Headers)newPeer.ReadByte();
             }
 
@@ -128,6 +128,8 @@ namespace Net_Navis
             }
 
             newPeer.Write(listenerPort); // send listener port
+            newPeer.Flush();
+
             networkName = newPeer.ReadString(); // read our network name
 
             // read number of soon-to-be incoming connections
@@ -195,6 +197,7 @@ namespace Net_Navis
                 string[] s = networkCaptain.Split(':');
                 newPeer.Write(s[0]); // send ip address of captain
                 newPeer.Write(Convert.ToInt32(s[1])); // send port
+                newPeer.Flush();
                 newPeer.Close();
                 Console.WriteLine("referred to captain");
                 return false;
@@ -203,11 +206,13 @@ namespace Net_Navis
             if (peerCount == MAX_PEERS) // full
             {
                 newPeer.Write((byte)Headers.Denied);
+                newPeer.Flush();
                 newPeer.Close();
                 return false;
             }
 
             newPeer.Write((byte)Headers.Approved);
+            newPeer.Flush();
 
             // read port
             int port = newPeer.ReadInt32();
@@ -217,6 +222,7 @@ namespace Net_Navis
 
             // send number of peers who are about to connect
             newPeer.Write(peerCount);
+            newPeer.Flush();
 
             // tell the peers to connect
             foreach (Client peer in peers.Values)
@@ -224,10 +230,12 @@ namespace Net_Navis
                 peer.Write((byte)Headers.GroupAppend);
                 peer.Write(newPeer.IPAddress);
                 peer.Write(port);
+                peer.Flush();
             }
             
             // send program step
             newPeer.Write(Program_Step);
+            newPeer.Flush();
 
             // add them to our peers
             addPeer(name, newPeer);
@@ -250,45 +258,38 @@ namespace Net_Navis
                 
                 try
                 {
+                    // read info
+                    //peer.NonBlockingRead();
+
+                    //while (peer.Available >= 1) // 1 byte is the size of a header (byte) from the Headers enum
                     do
                     {
-                        // read info
-                        while (peer.Available >= 1) // 1 byte is the size of a header (byte) from the Headers enum
+                        request = (Headers)peer.ReadByte();
+
+                        if (request == Headers.SendingUpdate)
                         {
-                            request = (Headers)peer.ReadByte();
+                            readPeerUpdate(peer, navi); // read update
 
-                            if (request == Headers.SendingUpdate)
-                                readPeerUpdate(peer); // read update
-                            else if (request == Headers.GroupAppend)
-                            {
-                                string ip = peer.ReadString();
-                                int port = peer.ReadInt32();
-                                string newPeerName = ip + ":" + port;
-                                Client newPeer = new Client(new TcpClient(ip, port));
-                                newPeer.Write((byte)Headers.GroupAppend);
-                                newPeer.Write(listenerPort);
-                                toAdd.Add(newPeerName, newPeer);
-                            }
-                            else if (request == Headers.Bye)
-                                throw new System.IO.IOException();
+                            // send our update
+                            peer.Write((byte)Headers.SendingUpdate);
+                            sendUpdate(peer, Host_Navi);
                         }
+                        else if (request == Headers.GroupAppend)
+                        {
+                            string ip = peer.ReadString();
+                            int port = peer.ReadInt32();
+                            string newPeerName = ip + ":" + port;
+                            Client newPeer = new Client(new TcpClient(ip, port));
+                            newPeer.Write((byte)Headers.GroupAppend);
+                            newPeer.Write(listenerPort);
+                            // flushes when it calls addPeer
+                            toAdd.Add(newPeerName, newPeer);
+                        }
+                        else if (request == Headers.Bye)
+                            throw new System.IO.IOException();
+                    } while (peer.Available >= 1);
 
-                        while (updateBuffer.Count == 0 && peer.Available == 0)
-                            Thread.Yield();
-
-                    } while (updateBuffer.Count == 0);
-
-                    // read update
-                    byte[] buffer = updateBuffer.First.Value;
-                    updateBuffer.RemoveFirst();
-                    navi.Set_Compact_buffer(buffer, 8);
-                    ulong step = BitConverter.ToUInt64(buffer, 0);
-
-                    Console.WriteLine(updateBuffer.Count);
-
-                    // send our update
-                    peer.Write((byte)Headers.SendingUpdate);
-                    sendUpdate(peer, Host_Navi);
+                    peer.Flush();
                 }
                 catch (System.IO.IOException) // other end disconnected
                 {
@@ -327,25 +328,20 @@ namespace Net_Navis
                 addPeer(name, toAdd[name]);
         }
 
+        // when connecting to a new client, BOTH sides must call this function in sync
+        // (because they exchange the 1st update)
         private void addPeer(string name, Client peer)
         {
             NetNavi_Type localObject = new NetNavi_Type();
-            // send AND receive first update (for draw function)
+
+            // exchange first update (for draw function)
             sendUpdate(peer, Host_Navi);
-            readPeerUpdate(peer);
-
-            // fill the buffer
-            byte[] buffer = updateBuffer.First.Value;
-            updateBuffer.Clear();
-            for (ulong i = 3; i > 0; --i)
-            {
-                BitConverter.GetBytes(Program_Step - i).CopyTo(buffer, 0);
-                byte[] newBuffer = new byte[NetNavi_Type.COMPACT_BUFFER_SIZE + 8];
-                buffer.CopyTo(newBuffer, 0);
-                updateBuffer.AddLast(newBuffer);
-            }
-
-            localObject.Set_Compact_buffer(buffer, 8);
+            // send a 2nd update to kick off the read/send chain
+            peer.Write((byte)Headers.SendingUpdate);
+            sendUpdate(peer, Host_Navi); 
+            peer.Flush();
+            // read once. The other update will be read in the read loop
+            readPeerUpdate(peer, localObject); 
 
             localObject = Navi_resources.Get_Data(localObject.NaviID, localObject.NAVIEXEID);
 
@@ -365,10 +361,12 @@ namespace Net_Navis
             peer.WriteByteArray(buffer);
         }
 
-        private void readPeerUpdate(Client peer)
+        private ulong readPeerUpdate(Client peer, NetNavi_Type navi)
         {            
-            byte[] buffer = peer.ReadByteArray(NetNavi_Type.COMPACT_BUFFER_SIZE + 8);            
-            updateBuffer.AddLast(buffer);
+            byte[] buffer = peer.ReadByteArray(NetNavi_Type.COMPACT_BUFFER_SIZE + 8);
+            navi.Set_Compact_buffer(buffer, 8);
+            ulong step = BitConverter.ToUInt64(buffer, 0);
+            return step;
         }
 
     }
