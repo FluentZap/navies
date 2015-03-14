@@ -15,13 +15,13 @@ namespace Net_Navis
 
 		//Runtime Varables
 		public PointF Location;
+        public PointF Location_Last;
 		public PointF Speed;
 		public float Scale = 1;
 		public Point Sprite;
 		public Point OldSprite;
 		public bool OldFaceLeft;
 		public int Health;
-
 		public int Energy;
 
 		//Statistics
@@ -42,6 +42,9 @@ namespace Net_Navis
         public Point ShootPoint;
         public int ShootCharge;
         public int Activated_Ability = -1;
+
+        //Temp
+        public int Shoot_Advance = 0;
 
 		public int Acrobatics;
 		//Sprite Control
@@ -128,9 +131,6 @@ namespace Net_Navis
 			index += 8;
             BitConverter.GetBytes((int)NaviID).CopyTo(b, index);
 			index += 4;            
-
-            BitConverter.GetBytes(GLSpriteSheetName).CopyTo(b, index);
-			index += 4;
             
 			BitConverter.GetBytes(Location.X).CopyTo(b, index);
 			index += 4;
@@ -189,12 +189,11 @@ namespace Net_Navis
 
 		public void Set_Compact_buffer(byte[] b, int index = 0)
 		{
+            Location_Last = Location;
             NAVIEXEID = BitConverter.ToInt64(b, index);
             index += 8;
 			NaviID = (Navi_Name_ID)BitConverter.ToInt32(b, index);
-			index += 4;
-            GLSpriteSheetName = BitConverter.ToInt32(b, index);
-            index += 4;
+			index += 4;            
 			Location.X = BitConverter.ToSingle(b, index);
 			index += 4;
 			Location.Y = BitConverter.ToSingle(b, index);
@@ -239,8 +238,8 @@ namespace Net_Navis
 			Dashing = BitConverter.ToBoolean(b, index);
 			index += 1;
 			HasDashed = BitConverter.ToBoolean(b, index);
-			index += 1;
-		}
+			index += 1;            
+        }
 
 
 

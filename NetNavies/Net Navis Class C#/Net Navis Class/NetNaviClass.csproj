@@ -8,7 +8,7 @@
     <ProjectGuid>{6D13F25D-82BF-4A16-BD97-EDCDD4B65CBF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Net_Navis</RootNamespace>
-    <AssemblyName>NetNavisClass</AssemblyName>
+    <AssemblyName>NetNaviClass</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -43,7 +43,8 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DocumentationFile>Net Navis Class.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <NoWarn />
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -63,11 +64,12 @@
   <ItemGroup>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <EmbedInteropTypes>False</EmbedInteropTypes>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\OpenTK\1.1\Binaries\OpenTK\Release\OpenTK.GLControl.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -148,18 +150,20 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="OpenTK.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Raven.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shot2.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="OpenTK.GLControl.dll" />
     <None Include="Resources\BG1.png" />
     <None Include="Resources\Vex.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)Raven\"
+copy "$(TargetPath)" "$(SolutionDir)Vex\"
+copy "$(TargetPath)" "$(SolutionDir)Barnabus\"
+copy "$(TargetPath)" "$(SolutionDir)Rebel\"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

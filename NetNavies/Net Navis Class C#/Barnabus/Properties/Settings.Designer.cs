@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace My {
+namespace Barnabus.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,10 +25,10 @@ namespace My {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public long NaviID {
+        [global::System.Configuration.DefaultSettingValueAttribute("255285")]
+        public long NAVIEXEID {
             get {
-                return ((long)(this["NaviID"]));
+                return ((long)(this["NAVIEXEID"]));
             }
         }
     }

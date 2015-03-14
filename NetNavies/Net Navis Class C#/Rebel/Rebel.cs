@@ -9,11 +9,11 @@ using System.Windows.Forms;
 using System.Linq;
 using System.Xml.Linq;
 using System.Reflection;
-namespace Barnabus
+namespace Rebel
 {
-    class Barnabus
+    class Rebel
     {
-        const int Navi_Name = (int)Navi_Name_ID.Barnabus;
+        const int Navi_Name = (int)Navi_Name_ID.Rebel;
 
         public static long NAVIEXEID = Properties.Settings.Default.NAVIEXEID;
 

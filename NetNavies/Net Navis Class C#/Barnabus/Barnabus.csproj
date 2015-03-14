@@ -6,8 +6,8 @@
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E4638F06-8A52-45BC-8596-FA87C7C71EFE}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <StartupObject>Sub Main</StartupObject>
+    <OutputType>Exe</OutputType>
+    <StartupObject>Barnabus.Barnabus</StartupObject>
     <RootNamespace>Barnabus</RootNamespace>
     <AssemblyName>Barnabus</AssemblyName>
     <FileAlignment>512</FileAlignment>
@@ -43,8 +43,10 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DocumentationFile>Barnabus.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DocumentationFile>
+    </DocumentationFile>
+    <NoWarn>
+    </NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
@@ -76,10 +78,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Barnabus.cs" />
-    <Compile Include="My Project\Settings.Designer.cs">
+    <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -99,19 +101,22 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="My Project\Settings.settings">
+    <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
-      <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Barnabus.ico" />
+    <EmbeddedResource Include="NetNaviClass.dll" />
+    <EmbeddedResource Include="OpenTK.GLControl.dll" />
+    <EmbeddedResource Include="OpenTK.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Net Navis Class\Net Navis Class.csproj">
+    <ProjectReference Include="..\Net Navis Class\NetNaviClass.csproj">
       <Project>{6D13F25D-82BF-4A16-BD97-EDCDD4B65CBF}</Project>
-      <Name>Net Navis Class</Name>
+      <Name>NetNaviClass</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

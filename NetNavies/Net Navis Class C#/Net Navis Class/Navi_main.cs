@@ -39,7 +39,7 @@ namespace Net_Navis
         private PointF Gravity = new PointF(0f, 0.5f);
         private PointF AirFriction = new PointF(0.01f, 0.01f);
         private PointF GroundFriction = new PointF(0.15f, 0f);
-        private Point ScreenScroll;
+        private PointF ScreenScroll;
         private Point ScreenBounds = new Point(15360, 966);
         
         private NetNavi_Type Host_Navi;
@@ -58,12 +58,14 @@ namespace Net_Navis
 			public PointF Speed;
             public double Scale;
 			public int Life;
-			public Projectiles_Type(Point Location, PointF Speed, int Life, double Scale)
+            public Color4 Color;
+			public Projectiles_Type(Point Location, PointF Speed, int Life, double Scale, Color4 Color)
 			{
 				this.Location = Location;
 				this.Speed = Speed;
 				this.Life = Life;
                 this.Scale = Scale;
+                this.Color = Color;
 			}
 
 		}
@@ -117,66 +119,54 @@ namespace Net_Navis
             Thread t = new Thread(ConsoleInput);
             t.IsBackground = true;
             t.Start();
-
-
 		}
 
 
 		public void DoEvents()
-		{
-			//Slowing program down
-            while (Physics_Timer.ElapsedTime < Physics_Rate)
-            {
-                Thread.Yield();
-                Physics_Timer.Stop(); // doesn't actually stop the timer, just updates it
-            }
-            Physics_Timer.Start();
-            
-             
+		{            
             Handle_UI();
-            Process_Navi_Commands();
-            foreach (NetNavi_Type navi in Client_Navi.Values)
-            {                    
-                Process_Client_Commands(navi);                    
+            Physics_Timer.Stop(); // doesn't actually stop the timer, just updates it
+            //if (Physics_Rate > Physics_Timer.ElapsedTime)
+                //Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);
+            //Random r = new Random(DateTime.Now.Millisecond);
+            //Thread.Sleep(1000);
+            if (Physics_Timer.ElapsedTime > Physics_Rate)
+            {
+                Process_Navi_Commands();
+                foreach (NetNavi_Type navi in Client_Navi.Values)
+                {
+                    Process_Client_Commands(navi);
+                }
+                Update_Physics();
+                Navi_resources.Set_Correct_Animation(ref Host_Navi);
+
+                Host_Navi.Update_Sprite();
+                Host_Navi.ShootCharge += 1;
+
+
+
+                foreach (NetNavi_Type navi in Client_Navi.Values)
+                    navi.Activated_Ability = -1;
+                DoNetworkEvents();
+                Host_Navi.Activated_Ability = -1;
+                Program_Step = 0;
+                
+
+                Program_Step += 1;
+
+                Physics_Timer.Start();
             }
-            Update_Physics();
-			Navi_resources.Set_Correct_Animation(ref Host_Navi);
-				
-            Host_Navi.Update_Sprite();
-            Host_Navi.ShootCharge += 1;
-
-
-            foreach (NetNavi_Type navi in Client_Navi.Values)
-                navi.Activated_Ability = -1;
-
-            DoNetworkEvents();
-            Host_Navi.Activated_Ability = -1;                
-                
-
-                
-
-			Program_Step += 1;
-
 			Draw_Navi();
 		}
 
 		public void Handle_UI()
 		{                                  
             
-            if (pressedkeys.Contains(Keys.W)) {
-				Host_Navi.Scale += 0.5f;
-				Host_Navi.OldSprite = new Point(500, 500);
-				if (Host_Navi.Scale < 0.5f)
-					Host_Navi.Scale = 0.5f;
+            if (pressedkeys.Contains(Keys.W)) {				
 			}
 
-			if (pressedkeys.Contains(Keys.S)) {
-				Host_Navi.Scale -= 0.5f;
-				Host_Navi.OldSprite = new Point(500, 500);
-				if (Host_Navi.Scale < 0.5f)
-					Host_Navi.Scale = 0.5f;
+			if (pressedkeys.Contains(Keys.S)) {				
 			}
-
 
 			if (pressedkeys.Contains(Keys.A)) {
 				Host_Navi.FaceLeft = true;
@@ -354,11 +344,18 @@ namespace Net_Navis
             }
             #endregion                       
             if (Host_Navi.Shooting == true)
-                if (Host_Navi.ShootCharge > 10)
+                if (Host_Navi.ShootCharge > 20)
                 {
-                    Host_Navi.ShootCharge = 0; 
-                    Host_Navi.Activated_Ability = 1;
-                    
+                    Color4 color = new Color4();                    
+                    Host_Navi.ShootCharge = 0;
+                    Host_Navi.Shoot_Advance += 1;
+                    if (Host_Navi.Shoot_Advance > 3) Host_Navi.Shoot_Advance = 1;
+                    Host_Navi.Activated_Ability = Host_Navi.Shoot_Advance;
+
+                    if (Host_Navi.Shoot_Advance == 1) { color.R = 255; color.G = 0; color.B = 0; color.A = 255; }
+                    if (Host_Navi.Shoot_Advance == 2) { color.R = 0; color.G = 255; color.B = 0; color.A = 255; }
+                    if (Host_Navi.Shoot_Advance == 3) { color.R = 0; color.G = 0; color.B = 255; color.A = 255; }
+
                     Point loc = new Point();
                     PointF Shoot_Point;
                     PointF Speed = new PointF();
@@ -368,8 +365,8 @@ namespace Net_Navis
                     else
                         loc.X = (int)Shoot_Point.X;
                     loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * Host_Navi.Scale);
-                    if (Host_Navi.FaceLeft) Speed.X = -20; else Speed.X = 20;
-                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, Host_Navi.Scale));
+                    if (Host_Navi.FaceLeft) Speed.X = -10; else Speed.X = 10;
+                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, Host_Navi.Scale, color));
                 }
         }
 
@@ -386,8 +383,38 @@ namespace Net_Navis
                     else
                         loc.X = (int)Shoot_Point.X;
                     loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Scale);
-                    if (navi.FaceLeft) Speed.X = -20; else Speed.X = 20;
-                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Scale));
+                    if (navi.FaceLeft) Speed.X = -10; else Speed.X = 10;
+                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Scale, new Color4(255, 0, 0, 255)));
+            }
+
+            if (navi.Activated_Ability == 2)
+            {
+                Point loc = new Point();
+                PointF Shoot_Point;
+                PointF Speed = new PointF();
+                Shoot_Point = navi.Get_Shoot_Point();
+                if (navi.FaceLeft)
+                    loc.X = (int)Shoot_Point.X - (int)(8 * navi.Scale);
+                else
+                    loc.X = (int)Shoot_Point.X;
+                loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Scale);
+                if (navi.FaceLeft) Speed.X = -10; else Speed.X = 10;
+                Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Scale, new Color4(0, 255, 0, 255)));
+            }
+
+            if (navi.Activated_Ability == 3)
+            {
+                Point loc = new Point();
+                PointF Shoot_Point;
+                PointF Speed = new PointF();
+                Shoot_Point = navi.Get_Shoot_Point();
+                if (navi.FaceLeft)
+                    loc.X = (int)Shoot_Point.X - (int)(8 * navi.Scale);
+                else
+                    loc.X = (int)Shoot_Point.X;
+                loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Scale);
+                if (navi.FaceLeft) Speed.X = -10; else Speed.X = 10;
+                Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Scale, new Color4(0, 0, 255, 255)));
             }
 
         }
@@ -427,7 +454,7 @@ namespace Net_Navis
         }
 
         private void Update_Physics_Navi(NetNavi_Type navi)
-        {
+        {            
             //Friction
             if (navi.OnGround == true)
             {
@@ -446,12 +473,13 @@ namespace Net_Navis
             //Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
 
             navi.Location.X = navi.Location.X + navi.Speed.X * navi.Scale;
-            navi.Location.Y = navi.Location.Y + navi.Speed.Y * navi.Scale;
+            navi.Location.Y = navi.Location.Y + navi.Speed.Y * navi.Scale;            
 
-            if (!GLOn) 
+            if (!GLOn)
                 Update_Physics_GDI_Bounds(navi);
             else
                 Update_Physics_GL_Bounds(navi);
+            navi.Location_Last = navi.Location;
         }
 
         private void Update_Physics_GDI_Bounds(NetNavi_Type navi)
