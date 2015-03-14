@@ -23,6 +23,9 @@ namespace Net_Navis
         public bool Init_GL;
         public bool GLOn;
 
+        //public readonly Font TextFont = new Font(FontFamily.GenericSansSerif, 8);
+        public Font font = new Font("Arial Black", 20, FontStyle.Regular);        
+        
 
         public void Draw_Navi()
         {
@@ -129,6 +132,8 @@ namespace Net_Navis
                 GL.TexCoord2(0f, 1f); GL.Vertex2(item.Location.X + S.X, item.Location.Y + S.Y + 6 * item.Scale);
                 GL.End();
             }
+            
+            
             NaviGL.glControl1.SwapBuffers();
         }
         public void Draw_Navi_GL(NetNavi_Type Navi)
@@ -224,8 +229,10 @@ namespace Net_Navis
             GL.Viewport(0, 0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             GL.Ortho(0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height, 0, -1, 1);
             Load_Sprite_Sheets();            
+                                    
+            
             NaviForm.Hide();
-            Init_GL = true;            
+            Init_GL = true;
         }
 
         public void Load_Sprite_Sheets()

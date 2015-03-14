@@ -419,8 +419,6 @@ namespace Net_Navis
 
         }
 
-
-
         #region Physics update
 
         public void Update_Physics()
