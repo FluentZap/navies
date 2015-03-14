@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A9E7E905-0E58-46C4-A741-E039C9706C50}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <StartupObject>Sub Main</StartupObject>
+    <StartupObject>Vex.Vex</StartupObject>
     <RootNamespace>Vex</RootNamespace>
     <AssemblyName>Vex</AssemblyName>
     <FileAlignment>512</FileAlignment>
@@ -43,8 +43,10 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DocumentationFile>Vex.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DocumentationFile>
+    </DocumentationFile>
+    <NoWarn>
+    </NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
@@ -105,12 +107,16 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="OpenTK.GLControl.dll" />
+    <EmbeddedResource Include="OpenTK.dll" />
+    <EmbeddedResource Include="NetNaviClass.dll" />
     <Content Include="Vex.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Net Navis Class\NetNavisClass.csproj">
+    <ProjectReference Include="..\Net Navis Class\NetNaviClass.csproj">
       <Project>{6D13F25D-82BF-4A16-BD97-EDCDD4B65CBF}</Project>
-      <Name>NetNavisClass</Name>
+      <Name>NetNaviClass</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
