@@ -355,16 +355,16 @@ namespace Net_Navis
 
         private void sendUpdate(Client peer, NetNavi_Type navi)
         {
-            byte[] buffer = new byte[NetNavi_Type.COMPACT_BUFFER_SIZE + 8];
+            byte[] buffer = new byte[Navi_Main.COMPACT_BUFFER_SIZE + 8];
             BitConverter.GetBytes(Program_Step).CopyTo(buffer, 0);
-            navi.Get_Compact_buffer().CopyTo(buffer, 8);
+            navi.Get_Navi_Network().CopyTo(buffer, 8);
             peer.WriteByteArray(buffer);
         }
 
         private ulong readPeerUpdate(Client peer, NetNavi_Type navi)
         {
-            byte[] buffer = peer.ReadByteArray(NetNavi_Type.COMPACT_BUFFER_SIZE + 8);
-            navi.Set_Compact_buffer(buffer, 8);
+            byte[] buffer = peer.ReadByteArray(Navi_Main.COMPACT_BUFFER_SIZE + 8);
+            navi.Set_Navi_Network(buffer, 8);
             ulong step = BitConverter.ToUInt64(buffer, 0);
             return step;
         }
