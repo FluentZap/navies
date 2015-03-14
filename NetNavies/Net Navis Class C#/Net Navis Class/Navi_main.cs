@@ -123,14 +123,13 @@ namespace Net_Navis
 
 
 		public void DoEvents()
-		{
-            
+		{            
             Handle_UI();
             Physics_Timer.Stop(); // doesn't actually stop the timer, just updates it
-            if (Physics_Rate > Physics_Timer.ElapsedTime)
-                Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime));
+            //if (Physics_Rate > Physics_Timer.ElapsedTime)
+                //Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);
             //Random r = new Random(DateTime.Now.Millisecond);
-            //Thread.Sleep((int)(r.NextDouble() * 100));
+            //Thread.Sleep(1000);
             if (Physics_Timer.ElapsedTime > Physics_Rate)
             {
                 Process_Navi_Commands();
@@ -353,9 +352,9 @@ namespace Net_Navis
                     if (Host_Navi.Shoot_Advance > 3) Host_Navi.Shoot_Advance = 1;
                     Host_Navi.Activated_Ability = Host_Navi.Shoot_Advance;
 
-                    if (Host_Navi.Shoot_Advance == 1) { color.R = 255; color.G = 0; color.B = 0; }
-                    if (Host_Navi.Shoot_Advance == 2) { color.R = 0; color.G = 255; color.B = 0; }
-                    if (Host_Navi.Shoot_Advance == 3) { color.R = 0; color.G = 0; color.B = 255; }
+                    if (Host_Navi.Shoot_Advance == 1) { color.R = 255; color.G = 0; color.B = 0; color.A = 255; }
+                    if (Host_Navi.Shoot_Advance == 2) { color.R = 0; color.G = 255; color.B = 0; color.A = 255; }
+                    if (Host_Navi.Shoot_Advance == 3) { color.R = 0; color.G = 0; color.B = 255; color.A = 255; }
 
                     Point loc = new Point();
                     PointF Shoot_Point;
@@ -455,8 +454,7 @@ namespace Net_Navis
         }
 
         private void Update_Physics_Navi(NetNavi_Type navi)
-        {
-            navi.Location_Last = navi.Location;
+        {            
             //Friction
             if (navi.OnGround == true)
             {
@@ -475,12 +473,13 @@ namespace Net_Navis
             //Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
 
             navi.Location.X = navi.Location.X + navi.Speed.X * navi.Scale;
-            navi.Location.Y = navi.Location.Y + navi.Speed.Y * navi.Scale;
+            navi.Location.Y = navi.Location.Y + navi.Speed.Y * navi.Scale;            
 
-            if (!GLOn) 
+            if (!GLOn)
                 Update_Physics_GDI_Bounds(navi);
             else
                 Update_Physics_GL_Bounds(navi);
+            navi.Location_Last = navi.Location;
         }
 
         private void Update_Physics_GDI_Bounds(NetNavi_Type navi)
