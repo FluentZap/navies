@@ -362,7 +362,7 @@ namespace Net_Navis
         }
 
         private ulong readPeerUpdate(Client peer, NetNavi_Type navi)
-        {            
+        {
             byte[] buffer = peer.ReadByteArray(NetNavi_Type.COMPACT_BUFFER_SIZE + 8);
             navi.Set_Compact_buffer(buffer, 8);
             ulong step = BitConverter.ToUInt64(buffer, 0);
