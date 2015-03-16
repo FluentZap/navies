@@ -23,7 +23,8 @@ namespace Net_Navis
 
 	public partial class Navi_Main
 	{
-        
+        public const int COMPACT_BUFFER_SIZE = 100;
+
         private NaviFormF NaviForm;
         private MenuForm MenuForm;                
         private NaviFXF NaviGL;        		
@@ -148,6 +149,7 @@ namespace Net_Navis
                 foreach (NetNavi_Type navi in Client_Navi.Values)
                     navi.Activated_Ability = -1;
                 DoNetworkEvents();
+                Advance_Clients();
                 Host_Navi.Activated_Ability = -1;
                 Program_Step = 0;
                 
@@ -158,6 +160,14 @@ namespace Net_Navis
             }
 			Draw_Navi();
 		}
+
+
+        public void Advance_Clients()
+        {
+            foreach (NetNavi_Type navi in Client_Navi.Values)
+                navi.Process_Update();
+        }
+        
 
 		public void Handle_UI()
 		{                                  
