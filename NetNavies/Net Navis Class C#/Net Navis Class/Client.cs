@@ -21,8 +21,13 @@ namespace Net_Navis
         private object writeLock = new object();
         private bool active = true;
 
-        private MemoryStream readBuffer;
-        private MemoryStream writeBuffer;
+        private byte[] writeBuffer;
+        private int writeLength = 0;
+        public const int WRITE_BUFFER_SIZE = 4096;
+        private byte[] readBuffer;
+        public int readPosition = 0;
+        private int readLength = 0;
+        private const int READ_BUFFER_SIZE = 4096;
 
         public bool Active
         {
@@ -30,7 +35,7 @@ namespace Net_Navis
         }
         public int Available
         {
-            get { return (int)(readBuffer.Length - readBuffer.Position); }
+            get { return readLength; }
         }
         public string IPAddress
         {
@@ -47,8 +52,8 @@ namespace Net_Navis
             this.client = client;
             client.NoDelay = true;
             stream = client.GetStream();
-            readBuffer = new MemoryStream();
-            writeBuffer = new MemoryStream();
+            readBuffer = new byte[READ_BUFFER_SIZE];
+            writeBuffer = new byte[WRITE_BUFFER_SIZE];
         }
 
         public void Close()
@@ -59,8 +64,6 @@ namespace Net_Navis
                 {
                     stream.Close();
                     client.Close();
-                    readBuffer.Close();
-                    writeBuffer.Close();
                     active = false;
                 }
             }
@@ -72,8 +75,7 @@ namespace Net_Navis
             {
                 if (active)
                 {
-                    byte[] byteData = new byte[1] { b };
-                    writeBuffer.Write(byteData, 0, 1);
+                    writeBuffer[writeLength++] = b;
                 }
             }
         }
@@ -85,7 +87,8 @@ namespace Net_Navis
                 if (active)
                 {
                     byte[] byteData = BitConverter.GetBytes(integer);
-                    writeBuffer.Write(byteData, 0, byteData.Length);
+                    byteData.CopyTo(writeBuffer, writeLength);
+                    writeLength += byteData.Length;
                 }
             }
         }
@@ -97,7 +100,8 @@ namespace Net_Navis
                 if (active)
                 {
                     byte[] byteData = BitConverter.GetBytes(integer);
-                    writeBuffer.Write(byteData, 0, byteData.Length);
+                    byteData.CopyTo(writeBuffer, writeLength);
+                    writeLength += byteData.Length;
                 }
             }
         }
@@ -109,7 +113,8 @@ namespace Net_Navis
                 if (active)
                 {
                     byte[] byteData = BitConverter.GetBytes(number);
-                    writeBuffer.Write(byteData, 0, byteData.Length);
+                    byteData.CopyTo(writeBuffer, writeLength);
+                    writeLength += byteData.Length;
                 }
             }
         }
@@ -121,7 +126,8 @@ namespace Net_Navis
                 if (active)
                 {
                     byte[] byteData = BitConverter.GetBytes(number);
-                    writeBuffer.Write(byteData, 0, byteData.Length);
+                    byteData.CopyTo(writeBuffer, writeLength);
+                    writeLength += byteData.Length;
                 }
             }
         }
@@ -133,8 +139,11 @@ namespace Net_Navis
                 if (active)
                 {
                     byte[] byteData = asciiEncoder.GetBytes(data);
+
                     Write(byteData.Length);
-                    writeBuffer.Write(byteData, 0, byteData.Length);
+
+                    byteData.CopyTo(writeBuffer, writeLength);
+                    writeLength += byteData.Length;
                 }
             }
         }
@@ -145,7 +154,8 @@ namespace Net_Navis
             {
                 if (active)
                 {
-                    writeBuffer.Write(buffer, 0, buffer.Length);
+                    buffer.CopyTo(writeBuffer, writeLength);
+                    writeLength += buffer.Length;
                 }
             }
         }
@@ -169,11 +179,10 @@ namespace Net_Navis
             {
                 if (active)
                 {
-                    if (writeBuffer.Length > 0)
+                    if (writeLength > 0)
                     {
-                        writeBuffer.Position = 0;
-                        writeBuffer.CopyTo(stream);
-                        writeBuffer = new MemoryStream();
+                        stream.Write(writeBuffer, 0, writeLength);
+                        writeLength = 0;
                     }
                 }
             }
@@ -181,14 +190,12 @@ namespace Net_Navis
 
         public byte ReadByte()
         {
-            byte[] buffer = new byte[1];
-            if (readBuffer.Length - readBuffer.Position < 1)
-            {
-                readBuffer = new MemoryStream();
+            if (readPosition == READ_BUFFER_SIZE)
+                readPosition = 0;
+            if (readLength == 0)
                 blockingRead();
-            }
-            readBuffer.Read(buffer, 0, 1);
-            return buffer[0];
+            --readLength;
+            return readBuffer[readPosition++];
         }
 
         public Int32 ReadInt32()
@@ -229,13 +236,18 @@ namespace Net_Navis
         public byte[] ReadByteArray(int amount)
         {
             byte[] buffer = new byte[amount];
-            int amountRead = readBuffer.Read(buffer, 0, amount);
-            while (amountRead < amount)
+
+            int i = 0;
+            while (i < amount)
             {
-                readBuffer = new MemoryStream();
-                blockingRead();
-                amountRead += readBuffer.Read(buffer, amountRead, amount - amountRead);
+                if (readPosition == READ_BUFFER_SIZE)
+                    readPosition = 0;
+                if (readLength == 0)
+                    blockingRead();
+                buffer[i++] = readBuffer[readPosition++];
+                --readLength;
             }
+
             return buffer;
         }
 
@@ -245,23 +257,45 @@ namespace Net_Navis
             int amountRead;
             while (stream.DataAvailable)
             {
-                amountRead = stream.Read(buffer, 0, 4096);
-                long position = readBuffer.Position;
-                readBuffer.Write(buffer, 0, amountRead);
-                readBuffer.Position = position;
+                amountRead = stream.Read(buffer, 0, buffer.Length);
+
+                // overflows buffer
+                if (amountRead + readLength > READ_BUFFER_SIZE)
+                    throw new InternalBufferOverflowException();
+
+                int i = 0;
+                int j = (readPosition + readLength) % READ_BUFFER_SIZE;
+                while (i < amountRead)
+                {
+                    if (j == READ_BUFFER_SIZE)
+                        j = 0;
+                    readBuffer[j++] = buffer[i++];
+                }
+                readLength += amountRead;
             }
         }
 
         private void blockingRead()
         {
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[READ_BUFFER_SIZE];
             int amountRead;
             do
             {
-                amountRead = stream.Read(buffer, 0, 4096);
-                long position = readBuffer.Position;
-                readBuffer.Write(buffer, 0, amountRead);
-                readBuffer.Position = position;
+                amountRead = stream.Read(buffer, 0, buffer.Length);
+
+                // overflows buffer
+                if (amountRead + readLength > READ_BUFFER_SIZE)
+                    throw new InternalBufferOverflowException();
+
+                int i = 0;
+                int j = (readPosition + readLength) % READ_BUFFER_SIZE;
+                while (i < amountRead)
+                {
+                    if (j == READ_BUFFER_SIZE)
+                        j = 0;
+                    readBuffer[j++] = buffer[i++];
+                }
+                readLength += amountRead;
             } while (stream.DataAvailable);
         }
 
@@ -274,7 +308,8 @@ namespace Net_Navis
                     byte[] buffer = new byte[4096];
                     while (stream.DataAvailable)
                         stream.Read(buffer, 0, 4096);
-                    readBuffer = new MemoryStream();
+                    readPosition = 0;
+                    readLength = 0;
                 }
             }
         }
