@@ -341,8 +341,8 @@ namespace Net_Navis
             sendUpdate(peer, Host_Navi); 
             peer.Flush();
             // read once. The other update will be read in the read loop
-            readPeerUpdate(peer, localObject); 
-
+            readPeerUpdate(peer, localObject);
+            localObject.Process_Update();
             localObject = Navi_resources.Get_Data(localObject.NaviID, localObject.NAVIEXEID);
 
             // add to containers
