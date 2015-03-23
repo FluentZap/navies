@@ -43,15 +43,16 @@ namespace Net_Navis
         private PointF ScreenScroll;
         private Point ScreenBounds = new Point(15360, 966);
         
-        private NetNavi_Type Host_Navi;
-        private Dictionary<String, NetNavi_Type> Client_Navi;        
+        public NetNavi_Type Host_Navi;
+        public Dictionary<String, NetNavi_Type> Client_Navi;
+        private Navi_Network_TCP Net;
 
 		bool Direct_Control = true;
 
 		private double Physics_Rate;
         private PerformanceTimer Physics_Timer = new PerformanceTimer(60.0);
 
-		private ulong Program_Step;
+		public ulong Program_Step;
 
         private class Projectiles_Type
 		{
@@ -115,7 +116,9 @@ namespace Net_Navis
 			Host_Navi.Location.X = 1000;
 			Host_Navi.Scale = 3;
 
-            StartNetwork();
+            Net = new Navi_Network_TCP(this);
+
+            //StartNetwork();
 
             Thread t = new Thread(ConsoleInput);
             t.IsBackground = true;
@@ -135,7 +138,7 @@ namespace Net_Navis
             {
                 Process_Navi_Commands();
                 foreach (NetNavi_Type navi in Client_Navi.Values)
-                {
+                {                    
                     Process_Client_Commands(navi);
                 }
                 Update_Physics();
@@ -148,8 +151,7 @@ namespace Net_Navis
 
                 foreach (NetNavi_Type navi in Client_Navi.Values)
                     navi.Activated_Ability = -1;
-                DoNetworkEvents();
-                Advance_Clients();
+                Net.DoNetworkEvents();                
                 Host_Navi.Activated_Ability = -1;
                 Program_Step = 0;
                 
@@ -222,11 +224,11 @@ namespace Net_Navis
                 Host_Navi.Shooting = false;
 
             if (pressedkeys.Contains(Keys.D1) && !prevPressedkeys.Contains(Keys.D1))
-                ConnectToPeer("discojoker.com", 11994);
+                Net.ConnectToPeer("discojoker.com", 51300);
             else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
-                ConnectToPeer("fastfattoad.com", 11994);
+                Net.ConnectToPeer("fastfattoad.com", 51300);
             else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
-                ConnectToPeer("127.0.0.1", 11994);
+                Net.ConnectToPeer("127.0.0.1", 51300);
             //else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
             //    StartNetwork("Jonny Flame");
             //else if (pressedkeys.Contains(Keys.Y) && !prevPressedkeys.Contains(Keys.Y))
@@ -276,27 +278,28 @@ namespace Net_Navis
                 {
                     if (command[1] == "home")
                         command[1] = "127.0.0.1";
-                    ConnectToPeer(command[1], Convert.ToInt32(command[2]));
+                    Net.ConnectToPeer(command[1], Convert.ToInt32(command[2]));
                 }
                 else if (command[0] == "start")
-                    StartNetwork();
+                    Net.StartNetwork();
                 else if (command[0] == "stop")
-                    StopNetwork();
+                    Net.StopNetwork();
                 else if (command[0] == "captain")
                 {
-                    if (networkCaptain == null)
+                    if (Net.networkCaptain == null)
                         Console.WriteLine("me");
                     else
-                        Console.WriteLine(networkCaptain);
+                        Console.WriteLine(Net.networkCaptain);
                 }
                 else if (command[0] == "peers")
-                    foreach (string name in peers.Keys)
+                    foreach (string name in Net.peers.Keys)
                         Console.WriteLine(name);
             }
         }
 
         public void Process_Navi_Commands()
         {
+            /*
             if (Direct_Control == false)
             {
                 Host_Navi.Running = false;
@@ -310,7 +313,7 @@ namespace Net_Navis
                     Host_Navi.FaceLeft = true;
                 }
             }
-
+            */
 
             #region Movement
             //Move Navies
