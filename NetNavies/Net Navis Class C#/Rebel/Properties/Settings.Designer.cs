@@ -26,9 +26,9 @@ namespace Rebel.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("74289637")]
-        public long NAVIEXEID {
+        public ulong NAVIEXEID {
             get {
-                return ((long)(this["NAVIEXEID"]));
+                return ((ulong)(this["NAVIEXEID"]));
             }
         }
     }
