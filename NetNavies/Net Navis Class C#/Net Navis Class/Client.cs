@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.NetworkInformation;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
@@ -341,5 +342,32 @@ namespace Net_Navis
         //            stream.Write(buffer, 0, amountRead);
         //    }
         //}
+
+
+        public bool isActive()
+        {
+
+            IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
+            TcpConnectionInformation[] tcpConnections = ipProperties.GetActiveTcpConnections().Where(x => x.LocalEndPoint.Equals(client.Client.LocalEndPoint) && x.RemoteEndPoint.Equals(client.Client.RemoteEndPoint)).ToArray();
+
+            if (tcpConnections != null && tcpConnections.Length > 0)
+            {
+                TcpState stateOfConnection = tcpConnections.First().State;
+                if (stateOfConnection == TcpState.Established)
+                {
+                    return true;
+                    // Connection is OK
+                }
+                else
+                {
+                    return false;
+                    // No active tcp Connection to hostName:port
+                }
+
+            }
+            return false;
+        }
+
+
     }
 }
