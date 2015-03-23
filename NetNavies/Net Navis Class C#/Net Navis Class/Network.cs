@@ -26,8 +26,8 @@ namespace Net_Navis
 
         private const int DEFAULT_PORT = 53300 ;
         private const int MAX_PEERS = 15;
-
-        private const int MAX_PACKET_BUFFER = 4;
+        
+        private const int MAX_PACKET_BUFFER = 10;
         
         public Dictionary<string, Client> peers = new Dictionary<string, Client>();
         private Navi_Main NaviData;
@@ -39,7 +39,7 @@ namespace Net_Navis
         public string networkCaptain = null; // if null, then we are the network captain
         private int pending_peers = 0;
         public bool NetworkHold;
-        public int PacketAhead = 0;
+        public int StoredPackets = 0;
         
 
         public string name
@@ -114,7 +114,12 @@ namespace Net_Navis
                 return;
             
             handleIncomingPeers();
-            handlePeers();
+
+            if (peers.Count > 0)
+            { handlePeers(); }
+            else
+            { NetworkHold = false; }
+                
         }
 
         public void ConnectToPeer(string host, int port)
@@ -163,22 +168,35 @@ namespace Net_Navis
             foreach (string name in Keys)
                 if (!peers[name].isActive()) 
                     disconnectPeer(peers[name]);
-
-
-            Keys = new string[peers.Keys.Count]; peers.Keys.CopyTo(Keys, 0);           
+                        
+            Keys = new string[peers.Keys.Count]; peers.Keys.CopyTo(Keys, 0);
             foreach (string name in Keys)
                 if (peers[name].Available >= 4)
                     handlePacket(peers[name]);
 
+            
+
+
             Keys = new string[peers.Keys.Count]; peers.Keys.CopyTo(Keys, 0);
             foreach (string name in Keys)
-                if (!peers[name].PendingUpdate) update = false;
+                if (NaviData.Client_Navi[name].NetBuffer.Count == 0) update = false;
 
-            if (PacketAhead < MAX_PACKET_BUFFER)
-                sendPeerUpdate();
 
-            if (update)
+            if (StoredPackets < MAX_PACKET_BUFFER)
             {
+                bool advance = true;
+                Keys = new string[peers.Keys.Count]; peers.Keys.CopyTo(Keys, 0);
+                //foreach (string name in Keys)
+                    //if (NaviData.Host_Navi.Program_Step > NaviData.Client_Navi[name].Program_Step + MAX_PACKET_BUFFER)
+                        //advance = false;
+
+                if (advance)
+                    sendPeerUpdate();
+            }
+            
+            
+            if (update)
+            {                
                 advancePeers();
                 NetworkHold = false;
             }
@@ -192,24 +210,23 @@ namespace Net_Navis
                 packet_NaviUpdate(peers[name], NaviData.Host_Navi);
             }
             NaviData.Host_Navi.Activated_Ability = -1;
-            PacketAhead++;
+            StoredPackets++;
         }
         
 
         private void advancePeers()
         {            
-            string[] Keys = new string[peers.Keys.Count]; peers.Keys.CopyTo(Keys, 0);
-            foreach (string name in Keys)
-            {
-                if(NaviData.Client_Navi[name].NetBuffer.Count == 0)
-                    peers[name].PendingUpdate = false;                
-            }
-            //if (!NaviData.Client_Navi[name].Initialised) { initialiseNaviClient(peers[name]); NaviData.Client_Navi[name].Initialised = true; }
+            //string[] Keys = new string[peers.Keys.Count]; peers.Keys.CopyTo(Keys, 0);
+            //foreach (string name in Keys)
+            //{
+                //if(NaviData.Client_Navi[name].NetBuffer.Count == 0)
+                    //peers[name].PendingUpdate = false;                
+            //}            
                         
             NaviData.Advance_Clients();
             foreach (NetNavi_Type navi in NaviData.Client_Navi.Values)
                 navi.Activated_Ability = -1;
-            PacketAhead--;
+            StoredPackets--;
         }
 
 
@@ -217,6 +234,7 @@ namespace Net_Navis
         {            
             NetNavi_Type navi = Navi_resources.Get_Data(NaviID, NAVIEXEID);            
             navi.Initialised = true;
+            navi.Program_Step = NaviData.Host_Navi.Program_Step;
             NaviData.Client_Navi[peer.Name] = navi;
         }
 
@@ -366,7 +384,7 @@ namespace Net_Navis
             Navi_Name_ID name = (Navi_Name_ID)peer.ReadInt32(); // read name
             ulong EXEID = peer.ReadUInt64(); // read EXEID           
 
-            NaviData.Program_Step = peer.ReadUInt64(); // read the current program step            
+            NaviData.Host_Navi.Program_Step = peer.ReadUInt64(); // read the current program step
             pending_peers = peer.ReadInt32(); // read number of soon-to-be incoming connections            
             initialiseNaviClient(peer, name, EXEID);
 
@@ -391,8 +409,7 @@ namespace Net_Navis
         private void handle_NaviUpdate(Client peer)
         {
             byte[] buffer = peer.ReadByteArray(Navi_Main.COMPACT_BUFFER_SIZE);            
-            NaviData.Client_Navi[peer.Name].write_netBuffer(buffer, 0);            
-            peer.PendingUpdate = true;
+            NaviData.Client_Navi[peer.Name].write_netBuffer(buffer, 0);                        
         }
 
         private void handle_PeerConnect(Client peer)
@@ -402,8 +419,7 @@ namespace Net_Navis
             
             //Get first update
             byte[] buffer = peer.ReadByteArray(Navi_Main.COMPACT_BUFFER_SIZE);                        
-            NaviData.Client_Navi[peer.Name].write_netBuffer(buffer, 0);
-            peer.PendingUpdate = true;
+            NaviData.Client_Navi[peer.Name].write_netBuffer(buffer, 0);            
             
             //initialise the navi
             initialiseNaviClient(peer, NaviData.Client_Navi[peer.Name].NetBuffer.Peek().NaviID, NaviData.Client_Navi[peer.Name].NetBuffer.Peek().NAVIEXEID);
@@ -493,7 +509,7 @@ namespace Net_Navis
                 peer.Write(NaviData.Host_Navi.NAVIEXEID);                
 
                 // send the current program step
-                peer.Write(NaviData.Program_Step);
+                peer.Write(NaviData.Host_Navi.Program_Step);
                 // send number of peers who are about to connect
                 peer.Write(peerCount);                                
                 
