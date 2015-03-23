@@ -135,8 +135,8 @@ namespace Net_Navis
 		{            
             Handle_UI();
             Physics_Timer.Stop(); // doesn't actually stop the timer, just updates it
-            if (Physics_Rate > Physics_Timer.ElapsedTime)
-                Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);
+            //if (Physics_Rate > Physics_Timer.ElapsedTime)
+                //Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);
             //Random r = new Random(DateTime.Now.Millisecond);
             
             if (Physics_Timer.ElapsedTime > Physics_Rate)

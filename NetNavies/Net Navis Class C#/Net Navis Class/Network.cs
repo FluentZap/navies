@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.NetworkInformation;
 using System.Threading;
 
 namespace Net_Navis
@@ -153,15 +154,18 @@ namespace Net_Navis
         private void handlePeers()
         {
             bool update = true;
-            
-            string[] Keys = new string[peers.Keys.Count];
-            peers.Keys.CopyTo(Keys, 0);            
-            foreach (string name in Keys)            
+            string[] Keys = new string[peers.Keys.Count]; peers.Keys.CopyTo(Keys, 0);
+            foreach (string name in Keys)
+                if (!peers[name].isActive()) 
+                    disconnectPeer(peers[name]);
+
+
+            Keys = new string[peers.Keys.Count]; peers.Keys.CopyTo(Keys, 0);           
+            foreach (string name in Keys)
                 if (peers[name].Available >= 4)
                     handlePacket(peers[name]);
 
-            Keys = new string[peers.Keys.Count];
-            peers.Keys.CopyTo(Keys, 0);
+            Keys = new string[peers.Keys.Count]; peers.Keys.CopyTo(Keys, 0);
             foreach (string name in Keys)
                 if (!peers[name].PendingUpdate) update = false;
 
