@@ -19,8 +19,9 @@ namespace Net_Navis
         private static ASCIIEncoding asciiEncoder = new ASCIIEncoding();
 
         private object writeLock = new object();
-        private bool active = true;
-
+        private bool active = true;        
+        private bool authenticated = false;
+        private string name;
         private byte[] writeBuffer;
         private int writeLength = 0;
         public const int WRITE_BUFFER_SIZE = 4096;
@@ -28,14 +29,25 @@ namespace Net_Navis
         public int readPosition = 0;
         private int readLength = 0;
         private const int READ_BUFFER_SIZE = 4096;
+        public bool PendingUpdate = false;
 
+        public bool Authenticated
+        {
+            get { return authenticated; }
+            set { this.authenticated = value; }
+        }
+        public string Name
+        {
+            get { return name; }
+            set { this.name = value; }
+        }
         public bool Active
         {
             get { return active; }
         }
         public int Available
         {
-            get { return readLength; }
+            get { return client.Available; }
         }
         public string IPAddress
         {
@@ -54,6 +66,7 @@ namespace Net_Navis
             stream = client.GetStream();
             readBuffer = new byte[READ_BUFFER_SIZE];
             writeBuffer = new byte[WRITE_BUFFER_SIZE];
+            authenticated = false;
         }
 
         public void Close()
@@ -61,7 +74,7 @@ namespace Net_Navis
             lock (writeLock)
             {
                 if (active)
-                {
+                {                    
                     stream.Close();
                     client.Close();
                     active = false;
