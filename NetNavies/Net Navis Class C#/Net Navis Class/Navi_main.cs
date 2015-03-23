@@ -60,7 +60,7 @@ namespace Net_Navis
         
         private PerformanceTimer Render_Timer = new PerformanceTimer(60.0);
 
-		public ulong Program_Step;
+		//public ulong Program_Step;
 
         private class Projectiles_Type
 		{
@@ -85,7 +85,7 @@ namespace Net_Navis
 
         public Navi_Main(int Navi_Name_ID, ulong NAVIEXEID)
 		{            
-            Host_Navi = Navi_resources.Get_Data((Navi_Name_ID)Navi_Name_ID, NAVIEXEID);            
+            Host_Navi = Navi_resources.Get_Data((Navi_Name_ID)Navi_Name_ID, NAVIEXEID);
 		}
      
         public void Initialise()
@@ -116,8 +116,8 @@ namespace Net_Navis
 			Set_color_filters();
             Physics_Timer.Start();
 			Physics_Rate = 1000 / 60.0;
-            Render_Rate = 1000 / 60.0;            
-            Program_Step = 0;
+            Render_Rate = 1000 / 60.0;
+            Host_Navi.Program_Step = 0;            
 			//Host_Navi.set_Animation(Animation_Name_Enum.None)
 			Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
 			Host_Navi.Location.X = 1000;
@@ -151,8 +151,8 @@ namespace Net_Navis
                     Navi_resources.Set_Correct_Animation(ref Host_Navi);
 
                     Host_Navi.Update_Sprite();
-                    Host_Navi.ShootCharge += 1;
-                    Program_Step += 1;
+                    Host_Navi.ShootCharge += 1;                    
+                    Host_Navi.Program_Step++;
                     Physics_Timer.Start();
                 }
                 Net.NetworkHold = true;
@@ -308,7 +308,7 @@ namespace Net_Navis
                 else if (command[0] == "name")
                     Console.WriteLine(Net.name);
                 else if (command[0] == "step")
-                    Console.WriteLine(Program_Step);
+                    Console.WriteLine(Host_Navi.Program_Step);
                 else if (command[0] == "captain")
                 {
                     if (Net.networkCaptain == null)
