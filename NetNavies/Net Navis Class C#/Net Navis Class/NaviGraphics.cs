@@ -242,6 +242,7 @@ namespace Net_Navis
             GLNaviTexture.Add(1, load_sprite(Resource1.Vex));
             GLNaviTexture.Add(2, load_sprite(Resource1.Barnabus));
             GLNaviTexture.Add(3, load_sprite(Resource1.Rebelpullsheet));
+            GLNaviTexture.Add(4, load_sprite(Resource1.Junker));
 
             //Load projectiles
             GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);

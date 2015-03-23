@@ -159,6 +159,9 @@
     <None Include="Resources\BG1.png" />
     <None Include="Resources\Vex.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Junker.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)Raven\"
