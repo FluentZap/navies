@@ -29,6 +29,7 @@ namespace Net_Navis
         public int readPosition = 0;
         private int readLength = 0;
         private const int READ_BUFFER_SIZE = 4096;
+
         public bool PendingUpdate = false;
 
         public bool Authenticated

@@ -35,7 +35,12 @@ namespace Net_Navis
         private int listenerPort;
         public string networkCaptain = null; // if null, then we are the network captain
         private int pending_peers = 0;
-        public bool NetworkHold = false;
+        public bool NetworkHold;
+
+        public string name
+        {
+            get { return networkName; }            
+        }
 
 
         public Navi_Network_TCP(Navi_Main Data)
@@ -127,7 +132,7 @@ namespace Net_Navis
                 return;
             }
 
-            string name = newPeer.IPAddress + ":" + newPeer.Port; // figure out name
+            string name = newPeer.IPAddress + ":" + newPeer.Port; // figure out name            
             addPeer(name, newPeer); // add them to our peers
 
             if (!packet_RequestJoin(newPeer)) return;            
@@ -141,7 +146,7 @@ namespace Net_Navis
                 peer = new Client(listener.AcceptTcpClient());
                 Console.WriteLine("incomming client");
                 string name = peer.IPAddress + ":" + peer.Port; // figure out name
-                addPeer(name, peer); // add them to our peers                
+                addPeer(name, peer); // add them to our peers
             }
         }
 
@@ -161,7 +166,10 @@ namespace Net_Navis
                 if (!peers[name].PendingUpdate) update = false;
 
             if (update)
+            {
                 advancePeers();
+                NetworkHold = false;
+            }
         }
 
         private void advancePeers()
@@ -255,19 +263,20 @@ namespace Net_Navis
             if (header == Headers.DeniedFull)
                 disconnectPeer(peer);
 
-            if (!peer.Authenticated) return;            
+            if (header == Headers.Bye)
+                disconnectPeer(peer);
+
+            if (!peer.Authenticated) return;
 
             if (header == Headers.NaviUpdate)
                 handle_NaviUpdate(peer);
 
             if (header == Headers.GroupAppend)
                 handle_GroupAppend(peer);
-
-            if (header == Headers.Bye)
-                disconnectPeer(peer);
+            
         }
 
-
+        
         //Captain should only call this
         private string getUniqueNaviName(Navi_Name_ID name, ulong EXEID)
         {
@@ -309,7 +318,8 @@ namespace Net_Navis
             
             int port = peer.ReadInt32(); // read port
             Navi_Name_ID name = (Navi_Name_ID)peer.ReadInt32(); // read name
-            ulong EXEID = peer.ReadUInt64(); // read EXEID
+            ulong EXEID = peer.ReadUInt64(); // read EXEID           
+
             string peerName = getUniqueNaviName(name, EXEID);
             if (peerName == null) { disconnectPeer(peer); return; }
 
@@ -336,11 +346,11 @@ namespace Net_Navis
         {
             string ip = peer.ReadString();
             int port = peer.ReadInt32();
-            string newPeerName = peer.ReadString();            
+            string newPeerName = peer.ReadString();
             Client newPeer = new Client(new TcpClient(ip, port));
             addPeer(newPeerName, newPeer);            
             packet_PeerConnect(newPeer);
-            peer.Authenticated = true;
+            newPeer.Authenticated = true;
         }
 
         private void handle_NaviUpdate(Client peer)
@@ -355,11 +365,13 @@ namespace Net_Navis
         private void handle_PeerConnect(Client peer)
         {
             string newPeerName = peer.ReadString();
-            changePeerName(peer.Name, newPeerName);
+            changePeerName(peer.Name, newPeerName);            
+            
             //Get first update
-            byte[] buffer = peer.ReadByteArray(Navi_Main.COMPACT_BUFFER_SIZE);
+            byte[] buffer = peer.ReadByteArray(Navi_Main.COMPACT_BUFFER_SIZE);            
             if (!NaviData.Client_Navi.ContainsKey(peer.Name))
                 NaviData.Client_Navi.Add(peer.Name, new NetNavi_Type()); //adds blank to fill later
+            
             NaviData.Client_Navi[peer.Name].Set_Navi_Network(buffer, 0);
             peer.PendingUpdate = true;
             //Send update
@@ -422,7 +434,7 @@ namespace Net_Navis
             {                
                 peer.Write((byte)Headers.GroupAppend);                
                 peer.Write(peer.IPAddress);
-                peer.Write(peer.Port);
+                peer.Write(port);
                 peer.Write(peer.Name);
                 peer.Flush();
                 packet_NaviUpdate(peer, NaviData.Host_Navi);
@@ -499,8 +511,7 @@ namespace Net_Navis
                 
                 //send first navi update
                 byte[] buffer = new byte[Navi_Main.COMPACT_BUFFER_SIZE];
-                NaviData.Host_Navi.Get_Navi_Network().CopyTo(buffer, 0);
-                peer.Write((byte)Headers.NaviUpdate);
+                NaviData.Host_Navi.Get_Navi_Network().CopyTo(buffer, 0);                
                 peer.WriteByteArray(buffer);
 
                 peer.Flush();

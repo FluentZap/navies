@@ -23,7 +23,7 @@ namespace Net_Navis
 
 	public partial class Navi_Main
 	{
-        public const int COMPACT_BUFFER_SIZE = 100;
+        public const int COMPACT_BUFFER_SIZE = 256;
 
         private NaviFormF NaviForm;
         private MenuForm MenuForm;                
@@ -78,10 +78,14 @@ namespace Net_Navis
 
         public Navi_Main(int Navi_Name_ID, ulong NAVIEXEID)
 		{
-            Host_Navi = Navi_resources.Get_Data((Navi_Name_ID)Navi_Name_ID, NAVIEXEID);
+            Application.ApplicationExit += new EventHandler(this.OnApplicationExit);
+            Host_Navi = Navi_resources.Get_Data((Navi_Name_ID)Navi_Name_ID, NAVIEXEID);            
 		}
 
-
+        private void OnApplicationExit(object sender, EventArgs e)
+        {
+            Net.StopNetwork();
+        } 
 
         public void Initialise()
 		{
@@ -131,10 +135,10 @@ namespace Net_Navis
 		{            
             Handle_UI();
             Physics_Timer.Stop(); // doesn't actually stop the timer, just updates it
-            //if (Physics_Rate > Physics_Timer.ElapsedTime)
-                //Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);
+            if (Physics_Rate > Physics_Timer.ElapsedTime)
+                Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);
             //Random r = new Random(DateTime.Now.Millisecond);
-            //Thread.Sleep(1000);
+            
             if (Physics_Timer.ElapsedTime > Physics_Rate)
             {
                 if (!Net.NetworkHold)
@@ -148,7 +152,7 @@ namespace Net_Navis
                     //Program_Step += 1;
                     Physics_Timer.Start();
                 }
-
+                Net.NetworkHold = true;
                 Net.DoNetworkEvents();
             }
 			Draw_Navi();
@@ -268,6 +272,7 @@ namespace Net_Navis
                     Console.WriteLine("\t\"connect IP PORT\"");
                     Console.WriteLine("\t\"captain\"");
                     Console.WriteLine("\t\"peers\"");
+                    Console.WriteLine("\t\"name\"");
                 }
                 else if (command[0] == "connect")
                 {
@@ -279,6 +284,8 @@ namespace Net_Navis
                     Net.StartNetwork();
                 else if (command[0] == "stop")
                     Net.StopNetwork();
+                else if (command[0] == "name")
+                    Console.WriteLine(Net.name);
                 else if (command[0] == "captain")
                 {
                     if (Net.networkCaptain == null)
@@ -427,6 +434,8 @@ namespace Net_Navis
 
         }
 
+
+        
         #region Physics update
 
         public void Update_Physics()

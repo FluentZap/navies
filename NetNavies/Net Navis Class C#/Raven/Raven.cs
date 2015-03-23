@@ -18,7 +18,7 @@ namespace Raven
         public static ulong NAVIEXEID = Properties.Settings.Default.NAVIEXEID;
 		
         public static void Main()
-		{
+		{            
             //Assembly resolve. Loads assemblys from resource files
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
@@ -45,5 +45,6 @@ namespace Raven
                 Navi_Instance.DoEvents();
             } while (true);
         }
+
 	}
 }
