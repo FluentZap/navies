@@ -118,6 +118,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="StageInfo.cs" />
     <Compile Include="TrayIcon.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -161,6 +162,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Junker.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Teleporter.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -12,9 +12,8 @@ namespace Net_Navis
 {
     public class Client
     {
-        public int MAX_STRING_LENGTH = 4092; // 4096 - 4
-
-        private TcpClient client;
+        public int MAX_STRING_LENGTH = 4092; // 4096 - 4        
+        private TcpClient client;       
         private NetworkStream stream;
         private static BinaryFormatter formatter = new BinaryFormatter();
         private static ASCIIEncoding asciiEncoder = new ASCIIEncoding();

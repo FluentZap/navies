@@ -18,8 +18,9 @@ namespace Net_Navis
     partial class Navi_Main
     {
         public Dictionary<int, int> GLNaviTexture = new Dictionary<int, int>();
-        public int GLProjectileTexture;
-        public int GLBackground;
+        public Dictionary<int, int> GLItemTexture = new Dictionary<int, int>();
+        public Dictionary<int, int> GLBackground = new Dictionary<int, int>();
+
         public bool Init_GL;
         public bool GLOn;
 
@@ -120,7 +121,7 @@ namespace Net_Navis
             GL.LoadIdentity();
 
             //Draw Projectiles
-            GL.BindTexture(TextureTarget.Texture2D, GLProjectileTexture);
+            GL.BindTexture(TextureTarget.Texture2D, GLItemTexture[0]);
             PointF S = ScreenScroll;            
             foreach (Navi_Main.Projectiles_Type item in Projectile_List)
             {
@@ -147,7 +148,7 @@ namespace Net_Navis
             GL.Scale(1f / (Navi.SpriteSheet.Width / Navi.SpriteSize.X),
                      1f / (Navi.SpriteSheet.Height / Navi.SpriteSize.Y), 1);
             GL.Translate(Navi.Sprite.X, Navi.Sprite.Y, 0);
-            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture[Navi.GLSpriteSheetName]);
+            GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture[(int)Navi.GLSpriteSheetName]);
 
             PointF pos = new PointF();
             pos.X = S.X + ((Navi.Location_Last.X + Navi.Location.X) / 2f);
@@ -183,7 +184,7 @@ namespace Net_Navis
 
             GL.MatrixMode(MatrixMode.Texture);
             GL.LoadIdentity();
-            GL.BindTexture(TextureTarget.Texture2D, GLBackground);
+            GL.BindTexture(TextureTarget.Texture2D, GLBackground[0]);
 
             for (int x = 0; x <= 9; x++)
             {
@@ -238,17 +239,18 @@ namespace Net_Navis
         public void Load_Sprite_Sheets()
         {
             //Load Navi Sprite Sheet            
-            GLNaviTexture.Add(0, load_sprite(Resource1.Raven));
-            GLNaviTexture.Add(1, load_sprite(Resource1.Vex));
-            GLNaviTexture.Add(2, load_sprite(Resource1.Barnabus));
-            GLNaviTexture.Add(3, load_sprite(Resource1.Rebelpullsheet));
-            GLNaviTexture.Add(4, load_sprite(Resource1.Junker));
+            GLNaviTexture.Add((int)GLNaviSpriteName.Raven, load_sprite(Resource1.Raven));
+            GLNaviTexture.Add((int)GLNaviSpriteName.Vex, load_sprite(Resource1.Vex));
+            GLNaviTexture.Add((int)GLNaviSpriteName.Barabus, load_sprite(Resource1.Barnabus));
+            GLNaviTexture.Add((int)GLNaviSpriteName.Rebel, load_sprite(Resource1.Rebelpullsheet));
+            GLNaviTexture.Add((int)GLNaviSpriteName.Junker, load_sprite(Resource1.Junker));
 
             //Load projectiles
-            GLProjectileTexture = load_sprite(Net_Navis.Resource1.Shot2);
+            GLItemTexture[(int)GLItemTextureName.BasicShot] = load_sprite(Net_Navis.Resource1.Shot2);
 
             //Load backgrounds            
-            GLBackground = load_sprite(Net_Navis.Resource1.BG1);
+            GLBackground[(int)GLBackgroundName.BG1] = load_sprite(Net_Navis.Resource1.BG1);
+            //GLBackground = load_sprite(Net_Navis.Resource1.BG1);
         }
         //Load Sprite From Bitmap
         private int load_sprite(Bitmap bitmap)
@@ -264,9 +266,30 @@ namespace Net_Navis
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             bitmap.UnlockBits(data);
             return id;
-        }
+        }        
 
         #endregion
 
     }
+
+    public enum GLNaviSpriteName
+    {
+        Raven,
+        Vex,
+        Rebel,
+        Barabus,
+        Junker
+    }
+
+    public enum GLItemTextureName
+    {
+        BasicShot,
+        Portal1
+    }
+
+    public enum GLBackgroundName
+    {
+        BG1
+    }
+
 }
