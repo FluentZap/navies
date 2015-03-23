@@ -33,7 +33,7 @@ namespace Net_Navis
         public string Navi_Display_Name;
 		public Rectangle HitBox;
 		public System.Drawing.Bitmap SpriteSheet;
-        public int GLSpriteSheetName;
+        public GLNaviSpriteName GLSpriteSheetName;
 		public System.Drawing.Icon Icon;
 		public Point SpriteSize;
 		public int HealthMax;

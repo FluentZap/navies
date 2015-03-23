@@ -20,7 +20,7 @@ Navi_Name_ID.Raven:
                     N.Navi_Display_Name = "Raven";
 					N.HitBox = new Rectangle(10, 22, 30, 26);
 					N.SpriteSheet = Net_Navis.Resource1.Raven;
-                    N.GLSpriteSheetName = 0;
+                    N.GLSpriteSheetName = GLNaviSpriteName.Raven;
 					N.Icon = Net_Navis.Resource1.Raven_Icon;
 					N.SpriteSize = new Point(48, 48);
 					N.HealthMax = 100;
@@ -37,7 +37,7 @@ Navi_Name_ID.Vex:
                     N.Navi_Display_Name = "Vex";
 					N.HitBox = new Rectangle(11, 18, 29, 30);
 					N.SpriteSheet = Net_Navis.Resource1.Vex;
-                    N.GLSpriteSheetName = 1;
+                    N.GLSpriteSheetName = GLNaviSpriteName.Vex;
 					N.Icon = Net_Navis.Resource1.Vex_Icon;
 					N.SpriteSize = new Point(48, 48);
 					N.HealthMax = 100;
@@ -54,7 +54,7 @@ Navi_Name_ID.Barnabus:
                     N.Navi_Display_Name = "Barnabus";
 					N.HitBox = new Rectangle(3, 5, 27, 27);
 					N.SpriteSheet = Net_Navis.Resource1.Barnabus;
-                    N.GLSpriteSheetName = 2;
+                    N.GLSpriteSheetName = GLNaviSpriteName.Barabus;
 					N.Icon = Net_Navis.Resource1.Barnabus_Icon;
 					N.SpriteSize = new Point(32, 32);
 					N.HealthMax = 100;
@@ -71,7 +71,7 @@ Navi_Name_ID.Rebel:
                     N.Navi_Display_Name = "Rebel";
 					N.HitBox = new Rectangle(13, 22, 22, 26);
 					N.SpriteSheet = Net_Navis.Resource1.Rebelpullsheet;
-                    N.GLSpriteSheetName = 3;
+                    N.GLSpriteSheetName = GLNaviSpriteName.Rebel;
 					N.Icon = Net_Navis.Resource1.Rebel_Icon;
 					N.SpriteSize = new Point(48, 48);
 					N.HealthMax = 100;
@@ -88,7 +88,7 @@ Navi_Name_ID.Junker:
                     N.Navi_Display_Name = "Junker";
                     N.HitBox = new Rectangle(0, 0, 35, 27);
                     N.SpriteSheet = Net_Navis.Resource1.Junker;
-                    N.GLSpriteSheetName = 4;
+                    N.GLSpriteSheetName = GLNaviSpriteName.Junker;
                     N.Icon = Net_Navis.Resource1.Rebel_Icon;
                     N.SpriteSize = new Point(35, 27);
                     N.HealthMax = 10;
@@ -413,9 +413,7 @@ Navi_Name_ID.Rebel:
         Barnabus = 3,
         Rebel = 4,
         Junker = 5
-    }
-
-    
+    }    
 
 	public enum Animation_Name_Enum
 		{

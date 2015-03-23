@@ -153,6 +153,16 @@ namespace Net_Navis {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Teleporter {
+            get {
+                object obj = ResourceManager.GetObject("Teleporter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Vex {
             get {
                 object obj = ResourceManager.GetObject("Vex", resourceCulture);

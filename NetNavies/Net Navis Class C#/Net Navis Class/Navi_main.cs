@@ -50,6 +50,8 @@ namespace Net_Navis
 
 		bool Direct_Control = true;
 
+        bool OnDesktop = true;
+
 		private double Physics_Rate;
         private double Render_Rate;
         private bool Advance_Physics;
@@ -82,16 +84,10 @@ namespace Net_Navis
         private HashSet<Projectiles_Type> Projectile_List = new HashSet<Projectiles_Type>();
 
         public Navi_Main(int Navi_Name_ID, ulong NAVIEXEID)
-		{
-            Application.ApplicationExit += new EventHandler(this.OnApplicationExit);
+		{            
             Host_Navi = Navi_resources.Get_Data((Navi_Name_ID)Navi_Name_ID, NAVIEXEID);            
 		}
-
-        private void OnApplicationExit(object sender, EventArgs e)
-        {
-            Net.StopNetwork();
-        } 
-
+     
         public void Initialise()
 		{
 			//Create and show forms
@@ -187,7 +183,7 @@ namespace Net_Navis
         
 
 		public void Handle_UI()
-		{                                  
+		{
             
             if (pressedkeys.Contains(Keys.W)) {				
 			}
@@ -230,9 +226,15 @@ namespace Net_Navis
             {
                 pressedkeys.Remove(Keys.Tab);
                 if (GLOn == false)
+                {
                     GLOn = true;
+                    OnDesktop = true;
+                }
                 else
+                {
+                    OnDesktop = false;
                     NaviGL.Dispose();
+                }
             }
 
 			if (pressedkeys.Contains(Keys.OemQuestion))
@@ -639,8 +641,16 @@ namespace Net_Navis
                 int ID = id;
                 GL.DeleteTextures(1, ref ID);
             }
-            GL.DeleteTextures(1, ref GLProjectileTexture);
+
+            foreach (int id in GLItemTexture.Values)
+            {
+                int ID = id;
+                GL.DeleteTextures(1, ref ID);
+            }
+            
+
             GLNaviTexture.Clear();
+            GLItemTexture.Clear();
 			NaviForm.Show();
             //Reset Navi location
             Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
