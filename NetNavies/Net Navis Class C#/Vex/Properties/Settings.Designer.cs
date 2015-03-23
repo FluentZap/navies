@@ -26,9 +26,9 @@ namespace Vex.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("88588")]
-        public long NAVIEXEID {
+        public ulong NAVIEXEID {
             get {
-                return ((long)(this["NAVIEXEID"]));
+                return ((ulong)(this["NAVIEXEID"]));
             }
         }
     }

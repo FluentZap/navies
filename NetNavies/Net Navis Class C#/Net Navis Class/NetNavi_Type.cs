@@ -11,9 +11,10 @@ namespace Net_Navis
 {    
 	public class NetNavi_Type
 	{
-        NetNavi_Network_Type NetBuffer = new NetNavi_Network_Type();
+        public NetNavi_Network_Type NetBuffer = new NetNavi_Network_Type();
 
 		//Runtime Varables
+        public bool Initialised;
 		public PointF Location;
         public PointF Location_Last;
 		public PointF Speed;
@@ -25,7 +26,7 @@ namespace Net_Navis
 		public int Energy;
 
 		//Statistics
-        public long NAVIEXEID;
+        public ulong NAVIEXEID;
         public Navi_Name_ID NaviID;
         public string Navi_Display_Name;
 		public Rectangle HitBox;
@@ -129,7 +130,10 @@ namespace Net_Navis
         { return NetBuffer.Get(this); }
 
         public void Process_Update()
-        { NetBuffer.ProcessBuffer(this); }
+        {
+            Location_Last = Location;
+            NetBuffer.ProcessBuffer(this); 
+        }
     }	
 
 
@@ -138,8 +142,8 @@ namespace Net_Navis
     public class NetNavi_Network_Type
     {        
         //Statistics
-        long NAVIEXEID;
-        Navi_Name_ID NaviID;
+        public ulong NAVIEXEID;
+        public Navi_Name_ID NaviID;
         //public string Navi_Display_Name;        
 
         //Runtime Varables
@@ -164,7 +168,7 @@ namespace Net_Navis
         
         public void Set(byte[] b, int index = 0)
         {            
-            NAVIEXEID = BitConverter.ToInt64(b, index);                 index += 8;
+            NAVIEXEID = BitConverter.ToUInt64(b, index);                 index += 8;
             NaviID = (Navi_Name_ID)BitConverter.ToInt32(b, index);      index += 4;
             Location.X = BitConverter.ToSingle(b, index);               index += 4;
             Location.Y = BitConverter.ToSingle(b, index);               index += 4;

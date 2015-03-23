@@ -15,7 +15,7 @@ namespace Rebel
     {
         const int Navi_Name = (int)Navi_Name_ID.Rebel;
 
-        public static long NAVIEXEID = Properties.Settings.Default.NAVIEXEID;
+        public static ulong NAVIEXEID = Properties.Settings.Default.NAVIEXEID;
 
         public static void Main()
         {

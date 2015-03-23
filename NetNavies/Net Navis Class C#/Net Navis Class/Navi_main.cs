@@ -47,6 +47,7 @@ namespace Net_Navis
         public Dictionary<String, NetNavi_Type> Client_Navi;
         private Navi_Network_TCP Net;
 
+
 		bool Direct_Control = true;
 
 		private double Physics_Rate;
@@ -75,7 +76,7 @@ namespace Net_Navis
 
         private HashSet<Projectiles_Type> Projectile_List = new HashSet<Projectiles_Type>();
 
-        public Navi_Main(int Navi_Name_ID, long NAVIEXEID)
+        public Navi_Main(int Navi_Name_ID, ulong NAVIEXEID)
 		{
             Host_Navi = Navi_resources.Get_Data((Navi_Name_ID)Navi_Name_ID, NAVIEXEID);
 		}
@@ -136,29 +137,19 @@ namespace Net_Navis
             //Thread.Sleep(1000);
             if (Physics_Timer.ElapsedTime > Physics_Rate)
             {
-                Process_Navi_Commands();
-                foreach (NetNavi_Type navi in Client_Navi.Values)
-                {                    
-                    Process_Client_Commands(navi);
+                if (!Net.NetworkHold)
+                {
+                    Process_Navi_Commands();                    
+                    Update_Physics();
+                    Navi_resources.Set_Correct_Animation(ref Host_Navi);
+
+                    Host_Navi.Update_Sprite();
+                    Host_Navi.ShootCharge += 1;
+                    //Program_Step += 1;
+                    Physics_Timer.Start();
                 }
-                Update_Physics();
-                Navi_resources.Set_Correct_Animation(ref Host_Navi);
 
-                Host_Navi.Update_Sprite();
-                Host_Navi.ShootCharge += 1;
-
-
-
-                foreach (NetNavi_Type navi in Client_Navi.Values)
-                    navi.Activated_Ability = -1;
-                Net.DoNetworkEvents();                
-                Host_Navi.Activated_Ability = -1;
-                Program_Step = 0;
-                
-
-                Program_Step += 1;
-
-                Physics_Timer.Start();
+                Net.DoNetworkEvents();
             }
 			Draw_Navi();
 		}
@@ -167,7 +158,11 @@ namespace Net_Navis
         public void Advance_Clients()
         {
             foreach (NetNavi_Type navi in Client_Navi.Values)
+            {
                 navi.Process_Update();
+                Process_Client_Commands(navi);
+            }
+                
         }
         
 
@@ -224,11 +219,11 @@ namespace Net_Navis
                 Host_Navi.Shooting = false;
 
             if (pressedkeys.Contains(Keys.D1) && !prevPressedkeys.Contains(Keys.D1))
-                Net.ConnectToPeer("discojoker.com", 51300);
+                Net.ConnectToPeer("discojoker.com", 53300);
             else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
-                Net.ConnectToPeer("fastfattoad.com", 51300);
+                Net.ConnectToPeer("fastfattoad.com", 53300);
             else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
-                Net.ConnectToPeer("127.0.0.1", 51300);
+                Net.ConnectToPeer("127.0.0.1", 53300);
             //else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
             //    StartNetwork("Jonny Flame");
             //else if (pressedkeys.Contains(Keys.Y) && !prevPressedkeys.Contains(Keys.Y))

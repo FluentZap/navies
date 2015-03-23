@@ -15,7 +15,7 @@ namespace Barnabus
     {
         const int Navi_Name = (int)Navi_Name_ID.Barnabus;
 
-        public static long NAVIEXEID = Properties.Settings.Default.NAVIEXEID;
+        public static ulong NAVIEXEID = Properties.Settings.Default.NAVIEXEID;
 
         public static void Main()
         {

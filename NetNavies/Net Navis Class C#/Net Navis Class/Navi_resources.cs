@@ -11,7 +11,7 @@ namespace Net_Navis
 {
 	public static class Navi_resources
 	{
-        public static NetNavi_Type Get_Data(Navi_Name_ID Navi_Name, long NAVIEXEID)
+        public static NetNavi_Type Get_Data(Navi_Name_ID Navi_Name, ulong NAVIEXEID)
 		{
 			NetNavi_Type N = new NetNavi_Type();            
             switch (Navi_Name) {
