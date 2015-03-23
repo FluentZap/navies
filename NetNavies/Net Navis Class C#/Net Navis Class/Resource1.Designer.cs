@@ -93,6 +93,16 @@ namespace Net_Navis {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Junker {
+            get {
+                object obj = ResourceManager.GetObject("Junker", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Raven {
             get {
                 object obj = ResourceManager.GetObject("Raven", resourceCulture);

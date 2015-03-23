@@ -11,9 +11,11 @@ namespace Net_Navis
 {    
 	public class NetNavi_Type
 	{
-        public NetNavi_Network_Type NetBuffer = new NetNavi_Network_Type();
+        //public NetNavi_Network_Type NetBuffer = new NetNavi_Network_Type();
+        public Queue<NetNavi_Network_Type> NetBuffer = new Queue<NetNavi_Network_Type>();
 
 		//Runtime Varables
+        public ulong Program_Step;
         public bool Initialised;
 		public PointF Location;
         public PointF Location_Last;
@@ -123,78 +125,56 @@ namespace Net_Navis
             
         }
 
-        public void Set_Navi_Network(byte[] b, int index = 0)
-        { NetBuffer.Set(b, index); }
+        public void write_netBuffer(byte[] b, int index = 0)
+        {
+            NetNavi_Network_Type buffer = new NetNavi_Network_Type();
+            CopyToBuffer(buffer, b, index);
+            NetBuffer.Enqueue(buffer);
+        }
 
-        public byte[] Get_Navi_Network()
-        { return NetBuffer.Get(this); }
+        public byte[] get_netBuffer()
+        {            
+            return GetFromNavi(this);            
+        }    
 
         public void Process_Update()
         {
             Location_Last = Location;
-            NetBuffer.ProcessBuffer(this); 
-        }
-    }	
-
-
-
-
-    public class NetNavi_Network_Type
-    {        
-        //Statistics
-        public ulong NAVIEXEID;
-        public Navi_Name_ID NaviID;
-        //public string Navi_Display_Name;        
-
-        //Runtime Varables
-        PointF Location;
-        PointF Speed;
-        float Scale = 1;
-        Point Sprite;
-        int Health;
-        int Energy;
-        int Activated_Ability = -1;
-
-        //Sprite Control
-        bool OnGround;
-        bool FaceLeft;
-        bool Running;
-        bool Jumping;
-        bool HasJumped;
-        bool Shooting;
-        bool WallGrabing;
-        bool Dashing;
-        bool HasDashed;
-        
-        public void Set(byte[] b, int index = 0)
-        {            
-            NAVIEXEID = BitConverter.ToUInt64(b, index);                 index += 8;
-            NaviID = (Navi_Name_ID)BitConverter.ToInt32(b, index);      index += 4;
-            Location.X = BitConverter.ToSingle(b, index);               index += 4;
-            Location.Y = BitConverter.ToSingle(b, index);               index += 4;
-            Speed.X = BitConverter.ToSingle(b, index);                  index += 4;
-            Speed.Y = BitConverter.ToSingle(b, index);                  index += 4;
-            Scale = BitConverter.ToSingle(b, index);                    index += 4;
-            Sprite.X = BitConverter.ToInt32(b, index);                  index += 4;
-            Sprite.Y = BitConverter.ToInt32(b, index);                  index += 4;
-            Health = BitConverter.ToInt32(b, index);                    index += 4;
-            Energy = BitConverter.ToInt32(b, index);                    index += 4;
-            Activated_Ability = BitConverter.ToInt32(b, index);         index += 4;
-            OnGround = BitConverter.ToBoolean(b, index);                index += 1;
-            FaceLeft = BitConverter.ToBoolean(b, index);                index += 1;
-            Running = BitConverter.ToBoolean(b, index);                 index += 1;
-            Jumping = BitConverter.ToBoolean(b, index);                 index += 1;
-            HasJumped = BitConverter.ToBoolean(b, index);               index += 1;
-            Shooting = BitConverter.ToBoolean(b, index);                index += 1;
-            WallGrabing = BitConverter.ToBoolean(b, index);             index += 1;
-            Dashing = BitConverter.ToBoolean(b, index);                 index += 1;
-            HasDashed = BitConverter.ToBoolean(b, index);               index += 1;
+            if (NetBuffer.Count > 0)
+                CopyToNavi(NetBuffer.Dequeue());
         }
 
-        public byte[] Get(NetNavi_Type navi)
+
+        public void CopyToBuffer(NetNavi_Network_Type n, byte[] b, int index = 0)
+        {
+            n.Program_Step = BitConverter.ToUInt64(b, index); index += 8;
+            n.NAVIEXEID = BitConverter.ToUInt64(b, index); index += 8;
+            n.NaviID = (Navi_Name_ID)BitConverter.ToInt32(b, index); index += 4;
+            n.Location.X = BitConverter.ToSingle(b, index); index += 4;
+            n.Location.Y = BitConverter.ToSingle(b, index); index += 4;
+            n.Speed.X = BitConverter.ToSingle(b, index); index += 4;
+            n.Speed.Y = BitConverter.ToSingle(b, index); index += 4;
+            n.Scale = BitConverter.ToSingle(b, index); index += 4;
+            n.Sprite.X = BitConverter.ToInt32(b, index); index += 4;
+            n.Sprite.Y = BitConverter.ToInt32(b, index); index += 4;
+            n.Health = BitConverter.ToInt32(b, index); index += 4;
+            n.Energy = BitConverter.ToInt32(b, index); index += 4;
+            n.Activated_Ability = BitConverter.ToInt32(b, index); index += 4;
+            n.OnGround = BitConverter.ToBoolean(b, index); index += 1;
+            n.FaceLeft = BitConverter.ToBoolean(b, index); index += 1;
+            n.Running = BitConverter.ToBoolean(b, index); index += 1;
+            n.Jumping = BitConverter.ToBoolean(b, index); index += 1;
+            n.HasJumped = BitConverter.ToBoolean(b, index); index += 1;
+            n.Shooting = BitConverter.ToBoolean(b, index); index += 1;
+            n.WallGrabing = BitConverter.ToBoolean(b, index); index += 1;
+            n.Dashing = BitConverter.ToBoolean(b, index); index += 1;
+            n.HasDashed = BitConverter.ToBoolean(b, index); index += 1;
+        }
+        public byte[] GetFromNavi(NetNavi_Type navi)
         {
             byte[] b = new byte[Navi_Main.COMPACT_BUFFER_SIZE];
-            int index = 0;
+            int index = 0;            
+            BitConverter.GetBytes(navi.Program_Step).CopyTo(b, index); index += 8;
             BitConverter.GetBytes(navi.NAVIEXEID).CopyTo(b, index); index += 8;
             BitConverter.GetBytes((int)navi.NaviID).CopyTo(b, index); index += 4;
             BitConverter.GetBytes(navi.Location.X).CopyTo(b, index); index += 4;
@@ -218,27 +198,60 @@ namespace Net_Navis
             BitConverter.GetBytes(navi.HasDashed).CopyTo(b, index); index += 1;
             return b;
         }
-
-        public void ProcessBuffer(NetNavi_Type navi)
+        public void CopyToNavi(NetNavi_Network_Type b)
         {
-            navi.NAVIEXEID = NAVIEXEID;
-            navi.NaviID = NaviID;
-            navi.Location = Location;
-            navi.Speed = Speed;
-            navi.Scale = Scale;
-            navi.Sprite = Sprite;
-            navi.Health = Health;
-            navi.Energy = Energy;
-            navi.Activated_Ability = Activated_Ability;
-            navi.OnGround = OnGround;
-            navi.FaceLeft = FaceLeft;
-            navi.Running = Running;
-            navi.Jumping = Jumping;
-            navi.HasJumped = HasJumped;
-            navi.Shooting = Shooting;
-            navi.WallGrabing = WallGrabing;
-            navi.Dashing = Dashing;
-            navi.HasDashed = HasDashed;
+            Program_Step = b.Program_Step;
+            NAVIEXEID = b.NAVIEXEID;
+            NaviID = b.NaviID;
+            Location = b.Location;
+            Speed = b.Speed;
+            Scale = b.Scale;
+            Sprite = b.Sprite;
+            Health = b.Health;
+            Energy = b.Energy;
+            Activated_Ability = b.Activated_Ability;
+            OnGround = b.OnGround;
+            FaceLeft = b.FaceLeft;
+            Running = b.Running;
+            Jumping = b.Jumping;
+            HasJumped = b.HasJumped;
+            Shooting = b.Shooting;
+            WallGrabing = b.WallGrabing;
+            Dashing = b.Dashing;
+            HasDashed = b.HasDashed;
         }
+
+    }	
+
+
+
+
+    public class NetNavi_Network_Type
+    {                
+        //Statistics
+        public ulong Program_Step;
+        public ulong NAVIEXEID;
+        public Navi_Name_ID NaviID;
+        //public string Navi_Display_Name;        
+
+        //Runtime Varables
+        public PointF Location;
+        public PointF Speed;
+        public float Scale = 1;
+        public Point Sprite;
+        public int Health;
+        public int Energy;
+        public int Activated_Ability = -1;
+
+        //Sprite Control
+        public bool OnGround;
+        public bool FaceLeft;
+        public bool Running;
+        public bool Jumping;
+        public bool HasJumped;
+        public bool Shooting;
+        public bool WallGrabing;
+        public bool Dashing;
+        public bool HasDashed;       
     }
 }

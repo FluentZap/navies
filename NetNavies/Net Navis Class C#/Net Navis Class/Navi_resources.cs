@@ -47,7 +47,7 @@ Navi_Name_ID.Vex:
 					N.AirSpeed = 0.1f;
 					N.DashSpeed = 2;
 					N.Acrobatics = 10;
-
+                    N.ShootPoint = new Point(37, 34);
 					break;
 				case  // ERROR: Case labels with binary operators are unsupported : Equality
 Navi_Name_ID.Barnabus:
@@ -82,6 +82,23 @@ Navi_Name_ID.Rebel:
 					N.DashSpeed = 1;
 					N.Acrobatics = 10;
 					break;
+
+                case  // ERROR: Case labels with binary operators are unsupported : Equality
+Navi_Name_ID.Junker:
+                    N.Navi_Display_Name = "Junker";
+                    N.HitBox = new Rectangle(0, 0, 35, 27);
+                    N.SpriteSheet = Net_Navis.Resource1.Junker;
+                    N.GLSpriteSheetName = 4;
+                    N.Icon = Net_Navis.Resource1.Rebel_Icon;
+                    N.SpriteSize = new Point(35, 27);
+                    N.HealthMax = 10;
+                    N.EnergyMax = 10;
+                    N.Weight = 10;
+                    N.GroundSpeed = 0f;
+                    N.AirSpeed = 0f;
+                    N.DashSpeed = 0;
+                    N.Acrobatics = 0;
+                    break;
 			}
             N.NaviID = Navi_Name;
             N.NAVIEXEID = NAVIEXEID;
@@ -394,7 +411,8 @@ Navi_Name_ID.Rebel:
         Raven = 1,
         Vex = 2,
         Barnabus = 3,
-        Rebel = 4
+        Rebel = 4,
+        Junker = 5
     }
 
     

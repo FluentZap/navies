@@ -23,7 +23,7 @@ namespace Net_Navis
 
 	public partial class Navi_Main
 	{
-        public const int COMPACT_BUFFER_SIZE = 256;
+        public const int COMPACT_BUFFER_SIZE = 100;
 
         private NaviFormF NaviForm;
         private MenuForm MenuForm;                
@@ -37,7 +37,7 @@ namespace Net_Navis
 		System.Drawing.Imaging.ImageAttributes GreenImage = new System.Drawing.Imaging.ImageAttributes();
 
 
-        private PointF Gravity = new PointF(0f, 0.5f);
+        private PointF Gravity = new PointF(0.0f, 0.5f);
         private PointF AirFriction = new PointF(0.01f, 0.01f);
         private PointF GroundFriction = new PointF(0.15f, 0f);
         private PointF ScreenScroll;
@@ -51,7 +51,12 @@ namespace Net_Navis
 		bool Direct_Control = true;
 
 		private double Physics_Rate;
+        private double Render_Rate;
+        private bool Advance_Physics;
+
         private PerformanceTimer Physics_Timer = new PerformanceTimer(60.0);
+        
+        private PerformanceTimer Render_Timer = new PerformanceTimer(60.0);
 
 		public ulong Program_Step;
 
@@ -115,7 +120,8 @@ namespace Net_Navis
 			Set_color_filters();
             Physics_Timer.Start();
 			Physics_Rate = 1000 / 60.0;
-			Program_Step = 0;
+            Render_Rate = 1000 / 60.0;            
+            Program_Step = 0;
 			//Host_Navi.set_Animation(Animation_Name_Enum.None)
 			Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
 			Host_Navi.Location.X = 1000;
@@ -136,11 +142,12 @@ namespace Net_Navis
             Handle_UI();
             Physics_Timer.Stop(); // doesn't actually stop the timer, just updates it
             //if (Physics_Rate > Physics_Timer.ElapsedTime)
-                //Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);
-            //Random r = new Random(DateTime.Now.Millisecond);
+                //Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);            
             
             if (Physics_Timer.ElapsedTime > Physics_Rate)
+            //if (Advance_Physics == true)
             {
+                //Advance_Physics = false;
                 if (!Net.NetworkHold)
                 {
                     Process_Navi_Commands();                    
@@ -149,13 +156,22 @@ namespace Net_Navis
 
                     Host_Navi.Update_Sprite();
                     Host_Navi.ShootCharge += 1;
-                    //Program_Step += 1;
+                    Program_Step += 1;
                     Physics_Timer.Start();
                 }
                 Net.NetworkHold = true;
                 Net.DoNetworkEvents();
             }
-			Draw_Navi();
+
+
+            Render_Timer.Stop();
+            if (Render_Timer.ElapsedTime > Render_Rate)
+            {
+                Draw_Navi();
+                //Advance_Physics = true;
+                Render_Timer.Start();
+            }
+
 		}
 
 
@@ -210,12 +226,14 @@ namespace Net_Navis
 				}
 			}
 
-			if (pressedkeys.Contains(Keys.Tab))
-				if (GLOn == false)
-					GLOn = true;
-				else
-					NaviGL.Dispose();
-
+            if (pressedkeys.Contains(Keys.Tab))
+            {
+                pressedkeys.Remove(Keys.Tab);
+                if (GLOn == false)
+                    GLOn = true;
+                else
+                    NaviGL.Dispose();
+            }
 
 			if (pressedkeys.Contains(Keys.OemQuestion))
                 Host_Navi.Shooting = true;
@@ -273,6 +291,7 @@ namespace Net_Navis
                     Console.WriteLine("\t\"captain\"");
                     Console.WriteLine("\t\"peers\"");
                     Console.WriteLine("\t\"name\"");
+                    Console.WriteLine("\t\"step\"");
                 }
                 else if (command[0] == "connect")
                 {
@@ -286,6 +305,8 @@ namespace Net_Navis
                     Net.StopNetwork();
                 else if (command[0] == "name")
                     Console.WriteLine(Net.name);
+                else if (command[0] == "step")
+                    Console.WriteLine(Program_Step);
                 else if (command[0] == "captain")
                 {
                     if (Net.networkCaptain == null)
@@ -485,6 +506,7 @@ namespace Net_Navis
             //Gravity
             if (navi.OnGround == false)
                 navi.Speed.Y = navi.Speed.Y + Gravity.Y;
+            navi.Speed.X = navi.Speed.X + Gravity.X;
             //Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
 
             navi.Location.X = navi.Location.X + navi.Speed.X * navi.Scale;
