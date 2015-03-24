@@ -15,7 +15,24 @@ namespace Net_Navis
 		{
 			NetNavi_Type N = new NetNavi_Type();            
             switch (Navi_Name) {
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+                case  // ERROR: Case labels with binary operators are unsupported : Equality
+Navi_Name_ID.Junker:
+                    N.Navi_Display_Name = "Junker";
+                    N.HitBox = new Rectangle(0, 0, 35, 27);
+                    N.SpriteSheet = Net_Navis.Resource1.Junker;
+                    N.GLSpriteSheetName = GLNaviSpriteName.Junker;
+                    N.Icon = Net_Navis.Resource1.Rebel_Icon;
+                    N.SpriteSize = new Point(35, 27);
+                    N.HealthMax = 10;
+                    N.EnergyMax = 10;
+                    N.Weight = 10;
+                    N.GroundSpeed = 0f;
+                    N.AirSpeed = 0f;
+                    N.DashSpeed = 0;
+                    N.Acrobatics = 0;
+                    break;
+                
+                case  // ERROR: Case labels with binary operators are unsupported : Equality
 Navi_Name_ID.Raven:
                     N.Navi_Display_Name = "Raven";
 					N.HitBox = new Rectangle(10, 22, 30, 26);
@@ -82,22 +99,22 @@ Navi_Name_ID.Rebel:
 					N.DashSpeed = 1;
 					N.Acrobatics = 10;
 					break;
-
                 case  // ERROR: Case labels with binary operators are unsupported : Equality
-Navi_Name_ID.Junker:
-                    N.Navi_Display_Name = "Junker";
-                    N.HitBox = new Rectangle(0, 0, 35, 27);
-                    N.SpriteSheet = Net_Navis.Resource1.Junker;
-                    N.GLSpriteSheetName = GLNaviSpriteName.Junker;
-                    N.Icon = Net_Navis.Resource1.Rebel_Icon;
-                    N.SpriteSize = new Point(35, 27);
-                    N.HealthMax = 10;
-                    N.EnergyMax = 10;
-                    N.Weight = 10;
-                    N.GroundSpeed = 0f;
-                    N.AirSpeed = 0f;
-                    N.DashSpeed = 0;
-                    N.Acrobatics = 0;
+Navi_Name_ID.Zen:
+                    N.Navi_Display_Name = "Zen";
+                    N.HitBox = new Rectangle(15, 21, 19, 27);
+                    N.SpriteSheet = Net_Navis.Resource1.Zen;
+                    N.GLSpriteSheetName = GLNaviSpriteName.Zen;
+                    N.Icon = Net_Navis.Resource1.Zen_Icon;
+                    N.SpriteSize = new Point(48, 48);
+                    N.HealthMax = 100;
+                    N.EnergyMax = 100;
+                    N.Weight = 15;
+                    N.GroundSpeed = 0.8f;
+                    N.AirSpeed = 0.1f;
+                    N.DashSpeed = 2;
+                    N.Acrobatics = 10;
+                    N.ShootPoint = new Point(35, 37);
                     break;
 			}
             N.NaviID = Navi_Name;
@@ -267,8 +284,44 @@ Animation_Name_Enum.Rebel_Jumping:
 					Ani.Hold_Index = 3;
 
 					break;
-			}
 
+
+                //---------------Zen--------------
+                case
+Animation_Name_Enum.Zen_Standing:
+                    frames = new Ani_Frame[1];
+                    frames[0] = new Ani_Frame(new Point(0, 0), 0);
+                    Ani.Frame = frames;
+                    Ani.Hold_Index = 0;
+                    break;
+                case
+Animation_Name_Enum.Zen_Runing:
+                    frames = new Ani_Frame[4];
+                    
+                    frames[0] = new Ani_Frame(new Point(1, 0), 10);
+                    frames[1] = new Ani_Frame(new Point(2, 0), 10);
+                    frames[2] = new Ani_Frame(new Point(3, 0), 10);
+                    frames[3] = new Ani_Frame(new Point(2, 0), 10);                    
+
+                    Ani.Frame = frames;
+                    Ani.RepeatFrame = 0;
+
+                    break;
+                case
+Animation_Name_Enum.Zen_Jumping:
+                    frames = new Ani_Frame[1];
+                    frames[0] = new Ani_Frame(new Point(4, 0), 0);                    
+                    Ani.Frame = frames;
+                    Ani.Hold_Index = 0;
+                    break;
+                case
+Animation_Name_Enum.Zen_Dash:
+                    frames = new Ani_Frame[1];                    
+                    frames[0] = new Ani_Frame(new Point(5, 0), 0);                    
+                    Ani.Frame = frames;
+                    Ani.Hold_Index = 0;
+                    break;
+			}
 
 			return Ani;
 		}
@@ -388,15 +441,39 @@ Navi_Name_ID.Rebel:
 					}
 
 					break;
+                case
+Navi_Name_ID.Zen:
+                    if (Navi.OnGround == true)
+                    {
+                        if (Navi.Running == true)
+                        {
 
+                            if (Navi.Dashing == true)
+                            {
+                                if (!(Navi.Current_Animation == Animation_Name_Enum.Zen_Dash))
+                                    Navi.set_Animation(Animation_Name_Enum.Zen_Dash);
+                            }
+                            else
+                            {
+                                if (!(Navi.Current_Animation == Animation_Name_Enum.Zen_Runing))
+                                    Navi.set_Animation(Animation_Name_Enum.Zen_Runing);
+                            }
 
+                        }
+                        else
+                        {
+                            if (!(Navi.Current_Animation == Animation_Name_Enum.Zen_Standing))
+                                Navi.set_Animation(Animation_Name_Enum.Zen_Standing);                                                                                  
+                        }
+                    }
+                    else
+                    {                        
+                        if (!(Navi.Current_Animation == Animation_Name_Enum.Zen_Jumping))
+                            Navi.set_Animation(Animation_Name_Enum.Zen_Jumping);
+                    }
+					break;
 			}
-
-
-
 		}
-
-
 	}
 
 
@@ -408,11 +485,12 @@ Navi_Name_ID.Rebel:
 
     public enum Navi_Name_ID : int
     {
+        Junker = 0,
         Raven = 1,
         Vex = 2,
         Barnabus = 3,
-        Rebel = 4,
-        Junker = 5
+        Rebel = 4,        
+        Zen = 6
     }    
 
 	public enum Animation_Name_Enum
@@ -435,6 +513,10 @@ Navi_Name_ID.Rebel:
 			Rebel_Standing,
 			Rebel_Dash_Start,
 			Rebel_Dash_End,
-			Rebel_Fallfast
+			Rebel_Fallfast,
+            Zen_Runing,
+            Zen_Jumping,
+            Zen_Standing,
+            Zen_Dash,            
 		}
 }
