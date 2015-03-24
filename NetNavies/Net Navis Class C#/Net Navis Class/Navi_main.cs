@@ -37,12 +37,14 @@ namespace Net_Navis
 		System.Drawing.Imaging.ImageAttributes GreenImage = new System.Drawing.Imaging.ImageAttributes();
 
 
-        private PointF Gravity = new PointF(0.0f, 0.5f);
-        private PointF AirFriction = new PointF(0.01f, 0.01f);
-        private PointF GroundFriction = new PointF(0.15f, 0f);
+        //private PointF Gravity = new PointF(0.0f, 0.5f);
+        //private PointF AirFriction = new PointF(0.01f, 0.01f);
+        //private PointF GroundFriction = new PointF(0.15f, 0f);
+        private Size ScreenSize;
         private PointF ScreenScroll;
-        private Point ScreenBounds = new Point(15360, 966);
-        
+        private float ScreenZoom;        
+        private Stage stage;
+
         public NetNavi_Type Host_Navi;
         public Dictionary<String, NetNavi_Type> Client_Navi;
         private Navi_Network_TCP Net;
@@ -119,8 +121,11 @@ namespace Net_Navis
             Render_Rate = 1000 / 60.0;
             Host_Navi.Program_Step = 0;            
 			//Host_Navi.set_Animation(Animation_Name_Enum.None)
-			Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
-			Host_Navi.Location.X = 1000;
+            stage = new Stage(StageName.Lobby);
+            ScreenZoom = 3.0f;
+
+            Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
+			Host_Navi.Location.X = 0;
 			Host_Navi.Scale = 3;
 
             Net = new Navi_Network_TCP(this);
@@ -185,10 +190,12 @@ namespace Net_Navis
 		public void Handle_UI()
 		{
             
-            if (pressedkeys.Contains(Keys.W)) {				
-			}
+            if (pressedkeys.Contains(Keys.W)) {
+                //ScreenZoom += 0.0001f;
+            }
 
-			if (pressedkeys.Contains(Keys.S)) {				
+			if (pressedkeys.Contains(Keys.S)) {
+                //ScreenZoom -= 0.0001f;
 			}
 
 			if (pressedkeys.Contains(Keys.A)) {
@@ -229,6 +236,8 @@ namespace Net_Navis
                 {
                     GLOn = true;
                     OnDesktop = true;
+                    Host_Navi.Location = stage.EntryPoint;
+                    Host_Navi.Scale = 1;
                 }
                 else
                 {
@@ -496,19 +505,19 @@ namespace Net_Navis
             //Friction
             if (navi.OnGround == true)
             {
-                navi.Speed.X -= navi.Speed.X * GroundFriction.X;
-                navi.Speed.Y -= navi.Speed.Y * GroundFriction.Y;
+                navi.Speed.X -= navi.Speed.X * stage.GroundFriction.X;
+                navi.Speed.Y -= navi.Speed.Y * stage.GroundFriction.Y;
             }
             else
             {
-                navi.Speed.X -= navi.Speed.X * AirFriction.X;
-                navi.Speed.Y -= navi.Speed.Y * AirFriction.Y;
+                navi.Speed.X -= navi.Speed.X * stage.AirFriction.X;
+                navi.Speed.Y -= navi.Speed.Y * stage.AirFriction.Y;
             }
 
             //Gravity
             if (navi.OnGround == false)
-                navi.Speed.Y = navi.Speed.Y + Gravity.Y;
-            navi.Speed.X = navi.Speed.X + Gravity.X;
+                navi.Speed.Y = navi.Speed.Y + stage.Gravity.Y;
+            navi.Speed.X = navi.Speed.X + stage.Gravity.X;
             //Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
 
             navi.Location.X = navi.Location.X + navi.Speed.X * navi.Scale;
@@ -563,16 +572,16 @@ namespace Net_Navis
 
             if (navi.FaceLeft == true)
             {
-                if (navi.Navi_Location().Right >= ScreenBounds.X) { navi.Location.X = ScreenBounds.X - (navi.GetSize().X - navi.GetHitBox().Left); navi.Speed.X = 0; }
+                if (navi.Navi_Location().Right >= stage.Bounds.Width) { navi.Location.X = stage.Bounds.Width - (navi.GetSize().X - navi.GetHitBox().Left); navi.Speed.X = 0; }
             }
             else
             {
-                if (navi.Navi_Location().Right >= ScreenBounds.X) { navi.Location.X = ScreenBounds.X - navi.GetHitBox().Right; navi.Speed.X = 0; }
+                if (navi.Navi_Location().Right >= stage.Bounds.Width) { navi.Location.X = stage.Bounds.Width - navi.GetHitBox().Right; navi.Speed.X = 0; }
             }
 
-            if (navi.Navi_Location().Bottom > ScreenBounds.Y)
-                navi.Location.Y = ScreenBounds.Y - navi.GetHitBox().Bottom;
-            if (navi.Navi_Location().Bottom == ScreenBounds.Y) { navi.OnGround = true; navi.Speed.Y = 0; }
+            if (navi.Navi_Location().Bottom > stage.Bounds.Height)
+                navi.Location.Y = stage.Bounds.Height - navi.GetHitBox().Bottom;
+            if (navi.Navi_Location().Bottom == stage.Bounds.Height) { navi.OnGround = true; navi.Speed.Y = 0; }
             else
                 navi.OnGround = false;
 

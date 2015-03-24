@@ -47,9 +47,17 @@ namespace Net_Navis
                 {
                     Start_GL();
                 }
-                ScreenScroll.X = Screen.PrimaryScreen.WorkingArea.Width / 2 - Host_Navi.Location.X - Host_Navi.GetSize().X / 2;
-                ScreenScroll.Y = Screen.PrimaryScreen.WorkingArea.Height / 2 - Host_Navi.Location.Y - Host_Navi.GetSize().Y / 2;
-                Draw_GL();                
+                ScreenScroll.X = Host_Navi.Location.X + Host_Navi.GetSize().X / 2 - ScreenSize.Width / 2;
+                ScreenScroll.Y = Host_Navi.Location.Y + Host_Navi.GetSize().Y / 2 - ScreenSize.Height / 2;
+
+                SizeF screenBounds = new SizeF(0 - (ScreenSize.Width - (ScreenSize.Width / ScreenZoom)) / 2, 0 - (ScreenSize.Height - (ScreenSize.Height / ScreenZoom)) / 2);
+                SizeF stageBounds = new SizeF(0 - (stage.Bounds.Width - (stage.Bounds.Width / ScreenZoom)) / 2, 0 - (stage.Bounds.Height - (stage.Bounds.Height / ScreenZoom))/2);
+
+                if (ScreenScroll.X + ScreenSize.Width > stage.Bounds.Width - screenBounds.Width) ScreenScroll.X = stage.Bounds.Width - (ScreenSize.Width + screenBounds.Width);
+                if (ScreenScroll.X < screenBounds.Width) ScreenScroll.X = screenBounds.Width;                               
+                if (ScreenScroll.Y < screenBounds.Height) ScreenScroll.Y = screenBounds.Height;
+                if (ScreenScroll.Y + ScreenSize.Height > stage.Bounds.Height - screenBounds.Height) ScreenScroll.Y = stage.Bounds.Height - (ScreenSize.Height + screenBounds.Height);
+                Draw_GL();
             }
 
         }
@@ -108,101 +116,104 @@ namespace Net_Navis
         public void Draw_GL()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
-            GL.ClearColor(Color.Black);
+            GL.ClearColor(stage.BackColor);
             GL.Color4(1f, 1f, 1f, 1f);
-            Draw_Background_GL();
-
+            foreach (StageBackground BG in stage.BG)
+            {
+                Draw_Background_GL(BG);
+            }
             //Draw host navi
             Draw_Navi_GL(Host_Navi);
 
             //Draw all client navis
             foreach (NetNavi_Type navi in Client_Navi.Values) Draw_Navi_GL(navi);
-            
-            GL.LoadIdentity();
+            Draw_Projectiles_GL();
 
-            //Draw Projectiles
-            GL.BindTexture(TextureTarget.Texture2D, GLItemTexture[0]);
-            PointF S = ScreenScroll;            
-            foreach (Navi_Main.Projectiles_Type item in Projectile_List)
-            {
-                GL.Color4(item.Color.R, item.Color.G, item.Color.B, item.Color.A);
-                GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(item.Location.X + S.X, item.Location.Y + S.Y);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(item.Location.X + S.X + 8 * item.Scale, item.Location.Y + S.Y);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(item.Location.X + S.X + 8 * item.Scale, item.Location.Y + S.Y + 6 * item.Scale);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(item.Location.X + S.X, item.Location.Y + S.Y + 6 * item.Scale);
-                GL.End();
-            }
-            
-            
             NaviGL.glControl1.SwapBuffers();
         }
+
         public void Draw_Navi_GL(NetNavi_Type Navi)
         {
             PointF S = ScreenScroll;
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
+            Reset_Matrix_GL();
 
             GL.MatrixMode(MatrixMode.Texture);
             GL.LoadIdentity();
             GL.Scale(1f / (Navi.SpriteSheet.Width / Navi.SpriteSize.X),
                      1f / (Navi.SpriteSheet.Height / Navi.SpriteSize.Y), 1);
-            GL.Translate(Navi.Sprite.X, Navi.Sprite.Y, 0);
+            GL.Translate(Navi.Sprite.X, Navi.Sprite.Y, 0);            
             GL.BindTexture(TextureTarget.Texture2D, GLNaviTexture[(int)Navi.GLSpriteSheetName]);
-
-            PointF pos = new PointF();
-            pos.X = S.X + ((Navi.Location_Last.X + Navi.Location.X) / 2f);
-            pos.Y = S.Y + ((Navi.Location_Last.Y + Navi.Location.Y) / 2f);
+            
+            RectangleF r = new RectangleF();
+            r.X = ((Navi.Location_Last.X + Navi.Location.X) / 2f) - S.X;
+            r.Y = ((Navi.Location_Last.Y + Navi.Location.Y) / 2f) - S.Y;
+            r.Width = Navi.SpriteSize.X * Navi.Scale;
+            r.Height = Navi.SpriteSize.Y * Navi.Scale;
 
             if (Navi.FaceLeft == true)
+                Draw_Sprite(r, true);
+            else
+                Draw_Sprite(r);
+
+        }
+
+
+        public void Draw_Background_GL(StageBackground BG)
+        {
+            Reset_Matrix_GL();
+            GL.MatrixMode(MatrixMode.Texture);
+            GL.LoadIdentity();
+            GL.BindTexture(TextureTarget.Texture2D, GLBackground[BG.SpriteInt]);
+            PointF S = new PointF(ScreenScroll.X, ScreenScroll.Y);
+            RectangleF r = new RectangleF(BG.Bounds.X - S.X * BG.Parallax, BG.Bounds.Y - S.Y * BG.Parallax, BG.Bounds.Width, BG.Bounds.Height);
+            Draw_Sprite(r);            
+        }
+
+        public void Draw_Projectiles_GL()
+        {
+            Reset_Matrix_GL();
+            //Draw Projectiles
+            GL.BindTexture(TextureTarget.Texture2D, GLItemTexture[(int)GLItemTextureName.BasicShot]);
+            PointF S = ScreenScroll;
+            foreach (Navi_Main.Projectiles_Type item in Projectile_List)
+            {
+                GL.Color4(item.Color.R, item.Color.G, item.Color.B, item.Color.A);
+                Draw_Sprite(new RectangleF(item.Location.X - S.X, item.Location.Y - S.Y, 8f * (float)item.Scale, 6f * (float)item.Scale));                
+            }
+        }
+
+        public void Reset_Matrix_GL()
+        {
+            GL.MatrixMode(MatrixMode.Texture);
+            GL.LoadIdentity();
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            GL.Scale(ScreenZoom, ScreenZoom, 1);
+        }
+
+        public void Draw_Sprite(RectangleF r, bool flip = false)
+        {            
+            if (!flip)
             {
                 GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(pos.X, pos.Y);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(pos.X + Navi.SpriteSize.X * Navi.Scale, pos.Y);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(pos.X + Navi.SpriteSize.X * Navi.Scale, pos.Y + Navi.SpriteSize.Y * Navi.Scale);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(pos.X, pos.Y + Navi.SpriteSize.Y * Navi.Scale);
+                //Top left, Top right, Bottom right, Bottom left
+                GL.TexCoord2(0f, 0f); GL.Vertex2(r.X, r.Y);
+                GL.TexCoord2(1f, 0f); GL.Vertex2(r.Right, r.Y);
+                GL.TexCoord2(1f, 1f); GL.Vertex2(r.Right, r.Bottom);
+                GL.TexCoord2(0f, 1f); GL.Vertex2(r.X, r.Bottom);
                 GL.End();
             }
             else
             {
                 GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(pos.X, pos.Y);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(pos.X + Navi.SpriteSize.X * Navi.Scale, pos.Y);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(pos.X + Navi.SpriteSize.X * Navi.Scale, pos.Y + Navi.SpriteSize.Y * Navi.Scale);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(pos.X, pos.Y + Navi.SpriteSize.Y * Navi.Scale);
+                //Top left, Top right, Bottom right, Bottom left
+                GL.TexCoord2(1f, 0f); GL.Vertex2(r.X, r.Y);
+                GL.TexCoord2(0f, 0f); GL.Vertex2(r.Right, r.Y);
+                GL.TexCoord2(0f, 1f); GL.Vertex2(r.Right, r.Bottom);
+                GL.TexCoord2(1f, 1f); GL.Vertex2(r.X, r.Bottom);
                 GL.End();
             }
-            GL.LoadIdentity();
-        }
-
-
-        public void Draw_Background_GL()
-        {
-            PointF S = ScreenScroll;
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
-
-            GL.MatrixMode(MatrixMode.Texture);
-            GL.LoadIdentity();
-            GL.BindTexture(TextureTarget.Texture2D, GLBackground[0]);
-
-            for (int x = 0; x <= 9; x++)
-            {
-                PointF pos = new PointF();
-                float Scale = 6;
-                pos.X = x * 256 * Scale + S.X;
-                pos.Y = 0f + S.Y;
-                GL.Begin(PrimitiveType.Quads);
-                GL.TexCoord2(0f, 0f); GL.Vertex2(pos.X, pos.Y);
-                GL.TexCoord2(1f, 0f); GL.Vertex2(pos.X + 256 * Scale, pos.Y);
-                GL.TexCoord2(1f, 1f); GL.Vertex2(pos.X + 256 * Scale, pos.Y + 256 * Scale);
-                GL.TexCoord2(0f, 1f); GL.Vertex2(pos.X, pos.Y + 256 * Scale);
-                GL.End();            
-            }
-            
-            
-            GL.LoadIdentity();
-        }
+        }    
 
         /// <summary>
         ///  OpenGL Start Device
@@ -227,6 +238,8 @@ namespace Net_Navis
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+            ScreenSize.Width = Screen.PrimaryScreen.WorkingArea.Width;
+            ScreenSize.Height = Screen.PrimaryScreen.WorkingArea.Height;
             GL.Viewport(0, 0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             GL.Ortho(0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height, 0, -1, 1);
             Load_Sprite_Sheets();            
@@ -244,12 +257,14 @@ namespace Net_Navis
             GLNaviTexture.Add((int)GLNaviSpriteName.Barabus, load_sprite(Resource1.Barnabus));
             GLNaviTexture.Add((int)GLNaviSpriteName.Rebel, load_sprite(Resource1.Rebelpullsheet));
             GLNaviTexture.Add((int)GLNaviSpriteName.Junker, load_sprite(Resource1.Junker));
+            GLNaviTexture.Add((int)GLNaviSpriteName.Zen, load_sprite(Resource1.Zen));
 
             //Load projectiles
             GLItemTexture[(int)GLItemTextureName.BasicShot] = load_sprite(Net_Navis.Resource1.Shot2);
 
             //Load backgrounds            
-            GLBackground[(int)GLBackgroundName.BG1] = load_sprite(Net_Navis.Resource1.BG1);
+            GLBackground[(int)GLBGTextureName.LobbyBG1] = load_sprite(Net_Navis.Resource1.LobbyBG1);
+            GLBackground[(int)GLBGTextureName.LobbyFG1] = load_sprite(Net_Navis.Resource1.LobbyFG1);            
             //GLBackground = load_sprite(Net_Navis.Resource1.BG1);
         }
         //Load Sprite From Bitmap
@@ -274,22 +289,25 @@ namespace Net_Navis
 
     public enum GLNaviSpriteName
     {
+        Junker,
         Raven,
         Vex,
         Rebel,
         Barabus,
-        Junker
+        Zen
     }
 
     public enum GLItemTextureName
     {
         BasicShot,
-        Portal1
+        Portal1,        
     }
 
-    public enum GLBackgroundName
-    {
-        BG1
-    }
 
+
+    public enum GLBGTextureName
+    {        
+        LobbyBG1,
+        LobbyFG1
+    }
 }
