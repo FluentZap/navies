@@ -60,11 +60,34 @@ namespace Net_Navis
         public Rectangle Bounds { get { return this.bounds; } }        
     }
 
+
+    public class StageCollisionTile
+    {       
+        public bool Active;
+        public byte HeightLeft;
+        public byte HeightRight;
+        public bool DeathTile;
+
+        public StageCollisionTile(bool deathTile = false)
+        {
+            DeathTile = deathTile;            
+        }
+
+        public StageCollisionTile(byte heightLeft, byte heightRight, bool deathTile = false)
+        {
+            DeathTile = deathTile;
+            HeightLeft = heightLeft;
+            HeightRight = heightRight;
+        }
+    }
+
+
     public class Stage
     {
         public StageInfo info = new StageInfo();
         public HashSet<StageObject> Objects = new HashSet<StageObject>();
         public HashSet<StageBackground> BG = new HashSet<StageBackground>();
+        public Dictionary<Point, StageCollisionTile> CollisionMap = new Dictionary<Point, StageCollisionTile>();
         public Point EntryPoint;
         public Size Bounds;
         public Color BackColor;
@@ -78,6 +101,7 @@ namespace Net_Navis
         public Stage(StageName Name = StageName.Lobby)
             {
                 if (Name == StageName.Lobby) info.Load_Lobby(this);
+                if (Name == StageName.Hyrule) info.Load_Hyrule(this);
             }           
         }
 
@@ -88,8 +112,9 @@ namespace Net_Navis
 
         private Size SpriteSize(GLBGTextureName sprite)
         {
+            
+            
             if (sprite == GLBGTextureName.LobbyBG1) return new Size(640, 600);
-
             if (sprite == GLBGTextureName.LobbyFG1) return new Size(832, 337);
 
             return new Size(0, 0);
@@ -106,8 +131,8 @@ namespace Net_Navis
             s.Gravity = new PointF(0.0f, 0.5f);
             s.AirFriction = new PointF(0.01f, 0.01f);
             s.GroundFriction = new PointF(0.15f, 0f);
-            s.Bounds = new Size(1000, 337);
-            s.Bounds = new Size(1664, 600);
+            
+            s.Bounds = new Size(1664, 600);            
             s.EntryPoint = new Point(0, 0);
             //Add Background
             s.BG.Add(new StageBackground(new Rectangle(new Point(640 * 0, 0), SpriteSize(GLBGTextureName.LobbyBG1)), GLBGTextureName.LobbyBG1, 0.75f, true, false));
@@ -117,7 +142,60 @@ namespace Net_Navis
             s.BG.Add(new StageBackground(new Rectangle(new Point(0, 263), SpriteSize(GLBGTextureName.LobbyFG1)), GLBGTextureName.LobbyFG1, 1.0f, true, false));
             s.BG.Add(new StageBackground(new Rectangle(new Point(832, 263), SpriteSize(GLBGTextureName.LobbyFG1)), GLBGTextureName.LobbyFG1, 1.0f, true, false));
 
+            for (int x = 0; x < 104; x++)
+            {
+                s.CollisionMap.Add(new Point(x, 36), new StageCollisionTile());
+            }
+            s.CollisionMap.Add(new Point(10, 35), new StageCollisionTile(16, 8));
+            s.CollisionMap.Add(new Point(11, 35), new StageCollisionTile(8, 0));
+            s.CollisionMap.Add(new Point(12, 35), new StageCollisionTile());
+            s.CollisionMap.Add(new Point(13, 35), new StageCollisionTile());
+            
+            s.CollisionMap.Add(new Point(14, 34), new StageCollisionTile(0, 0));
+            s.CollisionMap.Add(new Point(15, 34), new StageCollisionTile(0, 0));
+            s.CollisionMap.Add(new Point(16, 34), new StageCollisionTile(0, 0));
+            s.CollisionMap.Add(new Point(17, 34), new StageCollisionTile(0, 0));
 
+            s.CollisionMap.Add(new Point(18, 32), new StageCollisionTile(0, 0));
+            s.CollisionMap.Add(new Point(19, 32), new StageCollisionTile(0, 0));
+            s.CollisionMap.Add(new Point(20, 32), new StageCollisionTile(0, 0));
+            s.CollisionMap.Add(new Point(21, 32), new StageCollisionTile(0, 0));
+        }
+
+
+
+
+        public void Load_Hyrule(Stage s)
+        {
+
+            s.BackColor = Color.White;
+            s.Gravity = new PointF(0.0f, 0.5f);
+            s.AirFriction = new PointF(0.01f, 0.01f);
+            s.GroundFriction = new PointF(0.15f, 0f);
+
+            s.Bounds = new Size(1600, 1120);
+            s.EntryPoint = new Point(500, 0);
+            //Add Background
+            s.BG.Add(new StageBackground(new Rectangle(new Point(0, 0), Net_Navis.Resource1.HyruleBG.Size), GLBGTextureName.HyruleBG, 0.75f, true, false));
+            //Add Forground
+            s.BG.Add(new StageBackground(new Rectangle(new Point(320, 160), Net_Navis.Resource1.HyruleFG.Size), GLBGTextureName.HyruleFG, 1.0f, true, false));
+
+
+            //DeathMap
+            for (int y = 0; y <= 70; y++)//left
+                s.CollisionMap.Add(new Point(0, y), new StageCollisionTile(true));
+
+            for (int y = 0; y <= 70; y++)//right
+                s.CollisionMap.Add(new Point(99, y), new StageCollisionTile(true));
+
+            for (int x = 1; x < 99; x++)//bottom
+                s.CollisionMap.Add(new Point(x, 69), new StageCollisionTile(true));
+            
+            for (int x = 25; x < 47; x++)
+                 s.CollisionMap.Add(new Point(x, 26), new StageCollisionTile());
+
+            for (int x = 51; x < 69; x++)
+                s.CollisionMap.Add(new Point(x, 26), new StageCollisionTile());
 
         }
     
@@ -126,7 +204,8 @@ namespace Net_Navis
 
     public enum StageName
     {
-        Lobby
+        Lobby,
+        Hyrule
     }
 
     

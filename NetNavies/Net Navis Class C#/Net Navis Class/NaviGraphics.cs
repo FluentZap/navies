@@ -117,7 +117,8 @@ namespace Net_Navis
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
             GL.ClearColor(stage.BackColor);
-            GL.Color4(1f, 1f, 1f, 1f);
+            GL.Color4(1f, 1f, 1f, 1f);                        
+
             foreach (StageBackground BG in stage.BG)
             {
                 Draw_Background_GL(BG);
@@ -127,7 +128,11 @@ namespace Net_Navis
 
             //Draw all client navis
             foreach (NetNavi_Type navi in Client_Navi.Values) Draw_Navi_GL(navi);
-            Draw_Projectiles_GL();
+            
+
+            Draw_Projectiles_GL(); 
+            if (Show_CD == true)
+                Draw_CollisionMap();
 
             NaviGL.glControl1.SwapBuffers();
         }
@@ -157,6 +162,48 @@ namespace Net_Navis
 
         }
 
+
+        public void Draw_CollisionMap()
+        {                        
+            RectangleF r;
+            GL.Disable(EnableCap.Texture2D);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+            Reset_Matrix_GL();
+            GL.Color4(1f, 0f, 0f, 1f);
+            foreach (KeyValuePair<Point,StageCollisionTile> tile in stage.CollisionMap)
+            {
+                if (tile.Value.Active)
+                    GL.Color4(1f, 0f, 0f, 1f);
+                else
+                    GL.Color4(0f, 1f, 0f, 1f);
+
+                r = new RectangleF(tile.Key.X * 16 - ScreenScroll.X, tile.Key.Y * 16 - ScreenScroll.Y, 16, 16);                
+                GL.Begin(PrimitiveType.Quads);
+                //Top left, Top right, Bottom right, Bottom left                
+                GL.Vertex2(r.X, r.Y + tile.Value.HeightLeft);             
+                GL.Vertex2(r.Right, r.Y + tile.Value.HeightRight);
+                GL.Vertex2(r.Right, r.Bottom);
+                GL.Vertex2(r.X, r.Bottom);                                                               
+                GL.End();
+            }
+
+
+            r = Host_Navi.Navi_Location();
+            r.X -= ScreenScroll.X;
+            r.Y -= ScreenScroll.Y;
+
+            GL.Begin(PrimitiveType.Quads);
+            //Top left, Top right, Bottom right, Bottom left                
+            GL.Vertex2(r.X, r.Y);
+            GL.Vertex2(r.Right, r.Y);
+            GL.Vertex2(r.Right, r.Bottom);
+            GL.Vertex2(r.X, r.Bottom);
+            GL.End();
+
+            GL.Enable(EnableCap.Texture2D);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+        }
 
         public void Draw_Background_GL(StageBackground BG)
         {
@@ -225,9 +272,9 @@ namespace Net_Navis
             NaviGL.KeyDown += NaviGL_KeyDown;
             NaviGL.KeyUp += NaviGL_KeyUp;
             NaviGL.LostFocus += NaviGL_LostFocus;
-            NaviGL.Disposed += NaviGL_Disposed;
-
+            NaviGL.Disposed += NaviGL_Disposed;            
             NaviGL.Show();
+            //NaviGL.Location = new Point(-1920, 0);
             NaviGL.Width = Screen.PrimaryScreen.WorkingArea.Width;
             NaviGL.Height = Screen.PrimaryScreen.WorkingArea.Height;
             GLControl control = new GLControl(new GraphicsMode(32, 24, 8, 0), 3, 0, GraphicsContextFlags.Default);
@@ -264,7 +311,10 @@ namespace Net_Navis
 
             //Load backgrounds            
             GLBackground[(int)GLBGTextureName.LobbyBG1] = load_sprite(Net_Navis.Resource1.LobbyBG1);
-            GLBackground[(int)GLBGTextureName.LobbyFG1] = load_sprite(Net_Navis.Resource1.LobbyFG1);            
+            GLBackground[(int)GLBGTextureName.LobbyFG1] = load_sprite(Net_Navis.Resource1.LobbyFG1);
+
+            GLBackground[(int)GLBGTextureName.HyruleFG] = load_sprite(Net_Navis.Resource1.HyruleFG);
+            GLBackground[(int)GLBGTextureName.HyruleBG] = load_sprite(Net_Navis.Resource1.HyruleBG);
             //GLBackground = load_sprite(Net_Navis.Resource1.BG1);
         }
         //Load Sprite From Bitmap
@@ -308,6 +358,8 @@ namespace Net_Navis
     public enum GLBGTextureName
     {        
         LobbyBG1,
-        LobbyFG1
+        LobbyFG1,
+        HyruleBG,
+        HyruleFG
     }
 }

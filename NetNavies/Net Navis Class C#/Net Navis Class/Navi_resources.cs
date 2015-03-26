@@ -15,7 +15,7 @@ namespace Net_Navis
 		{
 			NetNavi_Type N = new NetNavi_Type();            
             switch (Navi_Name) {
-                case  // ERROR: Case labels with binary operators are unsupported : Equality
+                case
 Navi_Name_ID.Junker:
                     N.Navi_Display_Name = "Junker";
                     N.HitBox = new Rectangle(0, 0, 35, 27);
@@ -32,10 +32,10 @@ Navi_Name_ID.Junker:
                     N.Acrobatics = 0;
                     break;
                 
-                case  // ERROR: Case labels with binary operators are unsupported : Equality
+                case 
 Navi_Name_ID.Raven:
                     N.Navi_Display_Name = "Raven";
-					N.HitBox = new Rectangle(10, 22, 30, 26);
+					N.HitBox = new Rectangle(10, 22, 26, 26);
 					N.SpriteSheet = Net_Navis.Resource1.Raven;
                     N.GLSpriteSheetName = GLNaviSpriteName.Raven;
 					N.Icon = Net_Navis.Resource1.Raven_Icon;
@@ -44,12 +44,12 @@ Navi_Name_ID.Raven:
 					N.EnergyMax = 100;
 					N.Weight = 50;
 					N.GroundSpeed = 0.5f;
-					N.AirSpeed = 0.2f;
+					N.AirSpeed = 0.15f;
 					N.DashSpeed = 1;
 					N.Acrobatics = 15;
                     N.ShootPoint = new Point(40, 33);
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Navi_Name_ID.Vex:
                     N.Navi_Display_Name = "Vex";
 					N.HitBox = new Rectangle(11, 18, 29, 30);
@@ -66,7 +66,7 @@ Navi_Name_ID.Vex:
 					N.Acrobatics = 10;
                     N.ShootPoint = new Point(37, 34);
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case
 Navi_Name_ID.Barnabus:
                     N.Navi_Display_Name = "Barnabus";
 					N.HitBox = new Rectangle(3, 5, 27, 27);
@@ -83,7 +83,7 @@ Navi_Name_ID.Barnabus:
 					N.Acrobatics = 10;
 
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Navi_Name_ID.Rebel:
                     N.Navi_Display_Name = "Rebel";
 					N.HitBox = new Rectangle(13, 22, 22, 26);
@@ -99,7 +99,7 @@ Navi_Name_ID.Rebel:
 					N.DashSpeed = 1;
 					N.Acrobatics = 10;
 					break;
-                case  // ERROR: Case labels with binary operators are unsupported : Equality
+                case
 Navi_Name_ID.Zen:
                     N.Navi_Display_Name = "Zen";
                     N.HitBox = new Rectangle(15, 21, 19, 27);
@@ -129,14 +129,14 @@ Navi_Name_ID.Zen:
 			Animation Ani = new Animation();
 			switch (Animation_Name) {
 				//---------------VEX--------------
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Animation_Name_Enum.Vex_Standing:
 					Ani_Frame[] frames = new Ani_Frame[1];
 					frames[0] = new Ani_Frame(new Point(0, 0), 0);
 					Ani.Frame = frames;
 					Ani.Hold_Index = 0;
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality					
+				case				
 Animation_Name_Enum.Vex_Runing:
 					frames = new Ani_Frame[8];
 				for (int a = 0; a <= 7; a++) {
@@ -147,7 +147,7 @@ Animation_Name_Enum.Vex_Runing:
 					Ani.RepeatFrame = 0;
 
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Animation_Name_Enum.Vex_Jumping:
 					frames = new Ani_Frame[6];
 					for (int a = 0; a <= 5; a++) {
@@ -160,7 +160,7 @@ Animation_Name_Enum.Vex_Jumping:
 					break;
 
 
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case
 Animation_Name_Enum.Vex_Dash_Start:
 					frames = new Ani_Frame[3];
 					for (int a = 0; a <= 2; a++) {
@@ -173,7 +173,7 @@ Animation_Name_Enum.Vex_Dash_Start:
 					break;
 
 
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Animation_Name_Enum.Vex_Dash_End:
 					frames = new Ani_Frame[2];
 					for (int a = 0; a <= 1; a++) {
@@ -187,14 +187,14 @@ Animation_Name_Enum.Vex_Dash_End:
 
 
 				//---------------RAVEN--------------
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case
 Animation_Name_Enum.Raven_Standing:
 					frames = new Ani_Frame[1];
 					frames[0] = new Ani_Frame(new Point(0, 0), 0);
 					Ani.Frame = frames;
 					Ani.Hold_Index = 0;
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case
 Animation_Name_Enum.Raven_Runing:
 					frames = new Ani_Frame[2];
 
@@ -206,7 +206,7 @@ Animation_Name_Enum.Raven_Runing:
 					Ani.RepeatFrame = 0;
 
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Animation_Name_Enum.Raven_Jumping:
 					frames = new Ani_Frame[1];
 					frames[0] = new Ani_Frame(new Point(6, 0), 0);
@@ -215,14 +215,14 @@ Animation_Name_Enum.Raven_Jumping:
 
 					break;
 				//---------------BARNABUS--------------
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Animation_Name_Enum.Barnabus_Standing:
 					frames = new Ani_Frame[1];
 					frames[0] = new Ani_Frame(new Point(0, 0), 0);
 					Ani.Frame = frames;
 					Ani.Hold_Index = 0;
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Animation_Name_Enum.Barnabus_Runing:
 					frames = new Ani_Frame[10];
 					var b = 1;
@@ -235,7 +235,7 @@ Animation_Name_Enum.Barnabus_Runing:
 					Ani.RepeatFrame = 0;
 
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Animation_Name_Enum.Barnabus_Jumping:
 					frames = new Ani_Frame[4];
 					b = 11;
@@ -250,14 +250,14 @@ Animation_Name_Enum.Barnabus_Jumping:
 					break;
 				//---------------Rebel--------------
 
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Animation_Name_Enum.Rebel_Standing:
 					frames = new Ani_Frame[1];
 					frames[0] = new Ani_Frame(new Point(0, 0), 0);
 					Ani.Frame = frames;
 					Ani.Hold_Index = 0;
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Animation_Name_Enum.Rebel_Runing:
 
 					frames = new Ani_Frame[10];
@@ -271,7 +271,7 @@ Animation_Name_Enum.Rebel_Runing:
 					Ani.RepeatFrame = 0;
 
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case  
 Animation_Name_Enum.Rebel_Jumping:
 					frames = new Ani_Frame[4];
 
@@ -350,7 +350,7 @@ Animation_Name_Enum.Zen_Dash:
 		public static void Set_Correct_Animation(ref NetNavi_Type Navi)
 		{
 			switch (Navi.NaviID) {
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Navi_Name_ID.Vex:
 
 					if (Navi.OnGround == true) {
@@ -392,7 +392,7 @@ Navi_Name_ID.Vex:
 					break;
 
 
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Navi_Name_ID.Raven:
 					if (Navi.OnGround == true) {
 						if (Navi.Running == true) {
@@ -408,7 +408,7 @@ Navi_Name_ID.Raven:
 					}
 
 					break;
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Navi_Name_ID.Barnabus:
 					if (Navi.OnGround == true) {
 						if (Navi.Running == true) {
@@ -425,7 +425,7 @@ Navi_Name_ID.Barnabus:
 
 					break;
 
-				case  // ERROR: Case labels with binary operators are unsupported : Equality
+				case 
 Navi_Name_ID.Rebel:
 					if (Navi.OnGround == true) {
 						if (Navi.Running == true) {
