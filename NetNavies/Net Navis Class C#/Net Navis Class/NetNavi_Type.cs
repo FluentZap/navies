@@ -75,6 +75,30 @@ namespace Net_Navis
 			}
 		}
 
+
+
+        public void Set_Location(PointF point)
+        {            
+            if (FaceLeft == true)
+                Location.X = point.X - (GetSize().X - GetHitBox().Right);
+            else
+                Location.X = point.X - GetHitBox().Left;
+            Location.Y = point.Y- GetHitBox().Bottom;
+        }
+
+        public void Set_LocationX(float x)
+        {
+            if (FaceLeft == true)
+                Location.X = x - (GetSize().X - GetHitBox().Right);
+            else
+                Location.X = x - GetHitBox().Left;
+        }
+
+        public void Set_LocationY(float y)
+        {            
+            Location.Y = y - GetHitBox().Bottom;
+        }
+
 		public void Update_Sprite()
 		{
 			//Set correct animation
