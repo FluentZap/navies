@@ -178,6 +178,12 @@
   <ItemGroup>
     <None Include="Resources\LobbyBG1.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\HyruleFG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\HyruleBG.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)Raven\"
