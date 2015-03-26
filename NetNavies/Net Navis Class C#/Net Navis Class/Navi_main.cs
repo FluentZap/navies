@@ -58,6 +58,9 @@ namespace Net_Navis
         private double Render_Rate;
         private bool Advance_Physics;
 
+
+        private bool Show_CD = false;
+
         private PerformanceTimer Physics_Timer = new PerformanceTimer(60.0);
         
         private PerformanceTimer Render_Timer = new PerformanceTimer(60.0);
@@ -67,18 +70,20 @@ namespace Net_Navis
         private class Projectiles_Type
 		{
 			public PointF Location;
+            public String Owner;
 			public PointF Speed;
             public double Scale;
 			public int Life;
             public Color4 Color;
-			public Projectiles_Type(Point Location, PointF Speed, int Life, double Scale, Color4 Color)
-			{
-				this.Location = Location;
-				this.Speed = Speed;
-				this.Life = Life;
+            public Projectiles_Type(Point Location, PointF Speed, int Life, double Scale, Color4 Color, string Owner)
+            {
+                this.Location = Location;
+                this.Speed = Speed;
+                this.Life = Life;
                 this.Scale = Scale;
                 this.Color = Color;
-			}
+                this.Owner = Owner;
+            }
 
 		}
 
@@ -121,7 +126,7 @@ namespace Net_Navis
             Render_Rate = 1000 / 60.0;
             Host_Navi.Program_Step = 0;            
 			//Host_Navi.set_Animation(Animation_Name_Enum.None)
-            stage = new Stage(StageName.Lobby);
+            stage = new Stage(StageName.Hyrule);
             ScreenZoom = 3.0f;
 
             Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
@@ -178,9 +183,10 @@ namespace Net_Navis
 
         public void Advance_Clients()
         {
-            foreach (NetNavi_Type navi in Client_Navi.Values)
+            
+            foreach (KeyValuePair<string,NetNavi_Type> navi in Client_Navi)
             {
-                navi.Process_Update();
+                navi.Value.Process_Update();
                 Process_Client_Commands(navi);
             }
                 
@@ -303,6 +309,7 @@ namespace Net_Navis
                     Console.WriteLine("\t\"peers\"");
                     Console.WriteLine("\t\"name\"");
                     Console.WriteLine("\t\"step\"");
+                    Console.WriteLine("\t\"scd\"");                    
                 }
                 else if (command[0] == "connect")
                 {
@@ -318,6 +325,11 @@ namespace Net_Navis
                     Console.WriteLine(Net.name);
                 else if (command[0] == "step")
                     Console.WriteLine(Host_Navi.Program_Step);
+                else if (command[0] == "scd")
+                    if (Show_CD)
+                    { Show_CD = false; Console.WriteLine("Hideing collision detection"); }
+                    else
+                    { Show_CD = true; Console.WriteLine("Showing collision detection"); }                    
                 else if (command[0] == "captain")
                 {
                     if (Net.networkCaptain == null)
@@ -413,55 +425,55 @@ namespace Net_Navis
                         loc.X = (int)Shoot_Point.X;
                     loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * Host_Navi.Scale);
                     if (Host_Navi.FaceLeft) Speed.X = -10; else Speed.X = 10;
-                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, Host_Navi.Scale, color));
+                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, Host_Navi.Scale, color, "Host"));
                 }
         }
 
-        public void Process_Client_Commands(NetNavi_Type navi)
+        public void Process_Client_Commands(KeyValuePair<string, NetNavi_Type> navi)
         {
-            if (navi.Activated_Ability == 1)
+            if (navi.Value.Activated_Ability == 1)
             {
                     Point loc = new Point();
                     PointF Shoot_Point;
                     PointF Speed = new PointF();
-                    Shoot_Point = navi.Get_Shoot_Point();
-                    if (navi.FaceLeft)
-                        loc.X = (int)Shoot_Point.X - (int)(8 * navi.Scale);
+                    Shoot_Point = navi.Value.Get_Shoot_Point();
+                    if (navi.Value.FaceLeft)
+                        loc.X = (int)Shoot_Point.X - (int)(8 * navi.Value.Scale);
                     else
                         loc.X = (int)Shoot_Point.X;
-                    loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Scale);
-                    if (navi.FaceLeft) Speed.X = -10; else Speed.X = 10;
-                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Scale, new Color4(255, 0, 0, 255)));
+                    loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Value.Scale);
+                    if (navi.Value.FaceLeft) Speed.X = -10; else Speed.X = 10;
+                    Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Value.Scale, new Color4(255, 0, 0, 255), navi.Key));
             }
 
-            if (navi.Activated_Ability == 2)
+            if (navi.Value.Activated_Ability == 2)
             {
                 Point loc = new Point();
                 PointF Shoot_Point;
                 PointF Speed = new PointF();
-                Shoot_Point = navi.Get_Shoot_Point();
-                if (navi.FaceLeft)
-                    loc.X = (int)Shoot_Point.X - (int)(8 * navi.Scale);
+                Shoot_Point = navi.Value.Get_Shoot_Point();
+                if (navi.Value.FaceLeft)
+                    loc.X = (int)Shoot_Point.X - (int)(8 * navi.Value.Scale);
                 else
                     loc.X = (int)Shoot_Point.X;
-                loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Scale);
-                if (navi.FaceLeft) Speed.X = -10; else Speed.X = 10;
-                Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Scale, new Color4(0, 255, 0, 255)));
+                loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Value.Scale);
+                if (navi.Value.FaceLeft) Speed.X = -10; else Speed.X = 10;
+                Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Value.Scale, new Color4(0, 255, 0, 255), navi.Key));
             }
 
-            if (navi.Activated_Ability == 3)
+            if (navi.Value.Activated_Ability == 3)
             {
                 Point loc = new Point();
                 PointF Shoot_Point;
                 PointF Speed = new PointF();
-                Shoot_Point = navi.Get_Shoot_Point();
-                if (navi.FaceLeft)
-                    loc.X = (int)Shoot_Point.X - (int)(8 * navi.Scale);
+                Shoot_Point = navi.Value.Get_Shoot_Point();
+                if (navi.Value.FaceLeft)
+                    loc.X = (int)Shoot_Point.X - (int)(8 * navi.Value.Scale);
                 else
                     loc.X = (int)Shoot_Point.X;
-                loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Scale);
-                if (navi.FaceLeft) Speed.X = -10; else Speed.X = 10;
-                Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Scale, new Color4(0, 0, 255, 255)));
+                loc.Y = (int)Shoot_Point.Y - (int)((6 / 2) * navi.Value.Scale);
+                if (navi.Value.FaceLeft) Speed.X = -10; else Speed.X = 10;
+                Projectile_List.Add(new Projectiles_Type(loc, Speed, 100, navi.Value.Scale, new Color4(0, 0, 255, 255), navi.Key));
             }
 
         }
@@ -484,21 +496,58 @@ namespace Net_Navis
 
         private void Update_Physics_Projectiles()
         {
-            HashSet<Projectiles_Type> Item_Remove_List = new HashSet<Projectiles_Type>();
-            foreach (Navi_Main.Projectiles_Type item in Projectile_List)
+            Projectiles_Type[] p = new Projectiles_Type[Projectile_List.Count]; Projectile_List.CopyTo(p);
+            foreach (Navi_Main.Projectiles_Type item in p)
             {
                 item.Location.X += item.Speed.X;
                 item.Location.Y += item.Speed.Y;
+
+                foreach (KeyValuePair<string, NetNavi_Type> navi in Client_Navi)
+                    Update_Physics_Projectiles_Hit_Client(item, navi);
+                Update_Physics_Projectiles_Hit_Host(item, Host_Navi);
+
                 item.Life -= 1;
                 if (item.Life <= 0)
-                    Item_Remove_List.Add(item);
-            }
-
-            foreach (Navi_Main.Projectiles_Type item in Item_Remove_List)
-            {
-                Projectile_List.Remove(item);
+                    Projectile_List.Remove(item);
             }
         }
+
+
+        private void Update_Physics_Projectiles_Hit_Host(Projectiles_Type p, NetNavi_Type navi)
+        {
+            if (p.Owner != "Host")
+            {
+                Point point = new Point((int)p.Location.X, (int)p.Location.Y);
+                if (navi.Navi_Location().Contains(point))
+                {
+                    if (p.Speed.X < 0)
+                        navi.Speed.X -= 15;
+                    else
+                        navi.Speed.X += 15;
+
+                    Projectile_List.Remove(p);
+                }
+            }
+        }
+
+        private void Update_Physics_Projectiles_Hit_Client(Projectiles_Type p, KeyValuePair<string, NetNavi_Type> navi)
+        {
+            if (p.Owner != navi.Key)
+            {
+                Point point = new Point((int)p.Location.X, (int)p.Location.Y);
+                if (navi.Value.Navi_Location().Contains(point))
+                {
+                    if (p.Speed.X < 0)
+                        navi.Value.Speed.X -= 15;
+                    else
+                        navi.Value.Speed.X += 15;
+
+                    Projectile_List.Remove(p);
+                }
+            }
+        }
+
+
 
         private void Update_Physics_Navi(NetNavi_Type navi)
         {            
@@ -516,19 +565,47 @@ namespace Net_Navis
 
             //Gravity
             if (navi.OnGround == false)
+            {
                 navi.Speed.Y = navi.Speed.Y + stage.Gravity.Y;
-            navi.Speed.X = navi.Speed.X + stage.Gravity.X;
+                navi.Speed.X = navi.Speed.X + stage.Gravity.X;
+            }
             //Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
 
-            navi.Location.X = navi.Location.X + navi.Speed.X * navi.Scale;
-            navi.Location.Y = navi.Location.Y + navi.Speed.Y * navi.Scale;            
+            PointF vector = new PointF(navi.Speed.X * navi.Scale, navi.Speed.Y * navi.Scale);
+            float x,y;
+            
+            //1 by 1 movement
+            do {
+                if (vector.X > 0)
+                    if (vector.X > 1) { vector.X--; x = 1; } else { vector.X = 0; x = vector.X; }
+                else
+                    if (vector.X < -1) { vector.X++; x = -1; } else { vector.X = 0; x = vector.X; }
 
-            if (!GLOn)
-                Update_Physics_GDI_Bounds(navi);
-            else
-                Update_Physics_GL_Bounds(navi);
+
+                if (vector.Y > 0)
+                    if (vector.Y > 1) { vector.Y--; y = 1; } else { vector.Y = 0; y = vector.Y; }
+                else
+                    if (vector.Y < -1) { vector.Y++; y = -1; } else { vector.Y = 0; y = vector.Y; }
+                
+                navi.Location.X += x;
+                navi.Location.Y += y;
+
+                if (!GLOn)
+                    Update_Physics_GDI_Bounds(navi);
+                else
+                    Update_Physics_GL_Bounds(navi);            
+
+            } while (vector.X != 0 || vector.Y != 0);
+
+
+
+
+            
             navi.Location_Last = navi.Location;
         }
+
+
+        
 
         private void Update_Physics_GDI_Bounds(NetNavi_Type navi)
         {                        
@@ -560,34 +637,88 @@ namespace Net_Navis
 
         private void Update_Physics_GL_Bounds(NetNavi_Type navi)
         {
-            //Bounds
-            if (navi.FaceLeft == true)
-            {
-                if (navi.Navi_Location().Left <= 0) { navi.Location.X = 0 - (navi.GetSize().X - navi.GetHitBox().Right); navi.Speed.X = 0; }
-            }
-            else
-            {
-                if (navi.Navi_Location().Left <= 0) { navi.Location.X = 0 - navi.GetHitBox().Left; navi.Speed.X = 0; }
-            }
+            bool OnGround = false;
 
-            if (navi.FaceLeft == true)
-            {
-                if (navi.Navi_Location().Right >= stage.Bounds.Width) { navi.Location.X = stage.Bounds.Width - (navi.GetSize().X - navi.GetHitBox().Left); navi.Speed.X = 0; }
-            }
-            else
-            {
-                if (navi.Navi_Location().Right >= stage.Bounds.Width) { navi.Location.X = stage.Bounds.Width - navi.GetHitBox().Right; navi.Speed.X = 0; }
-            }
+            if (navi.Navi_Location().Left < 0)
+            { navi.Set_LocationX(0); navi.Speed.X = 0; }
+
+            if (navi.Navi_Location().Right > stage.Bounds.Width)
+            { navi.Set_LocationX(stage.Bounds.Width - navi.Navi_Location().Width); navi.Speed.X = 0; }
+
 
             if (navi.Navi_Location().Bottom > stage.Bounds.Height)
                 navi.Location.Y = stage.Bounds.Height - navi.GetHitBox().Bottom;
-            if (navi.Navi_Location().Bottom == stage.Bounds.Height) { navi.OnGround = true; navi.Speed.Y = 0; }
-            else
-                navi.OnGround = false;
+            //Set on ground
+            if (navi.Navi_Location().Bottom == stage.Bounds.Height) { OnGround = true; navi.Speed.Y = 0; }
+            //else
+                //navi.OnGround = false;
 
+            //Top bounds
             if (navi.Navi_Location().Top < 0) { navi.Location.Y = 0 - navi.GetHitBox().Top; navi.Speed.Y = 0;}
-        }
 
+
+            //CollisionMap
+            foreach (StageCollisionTile tile in stage.CollisionMap.Values)
+            {
+                tile.Active = false;
+            }
+
+            //Bottom
+
+            int CenterTile = (int)((navi.Navi_Location().Left + navi.Navi_Location().Width / 2f) / 16f);
+            
+            float CenterPoint = navi.Navi_Location().Left + navi.Navi_Location().Width / 2f;
+            
+            int Top = (int)(navi.Navi_Location().Top / 16);
+            int Bottom = (int)(navi.Navi_Location().Bottom / 16);
+            int Left = (int)(navi.Navi_Location().Left / 16);
+            int Right = (int)(navi.Navi_Location().Right / 16);
+            
+            //always does hightmap on tile colleciton
+            for (int y = Top; y <= Bottom; y++)
+                for (int x = Left; x <= Right; x++)
+                {
+                    RectangleF rct = navi.Navi_Location();
+                    if (stage.CollisionMap.ContainsKey(new Point(x, y)))
+                    {
+                        StageCollisionTile tile = stage.CollisionMap[new Point(x, y)];
+                        tile.Active = true;
+
+                        float point, ratio;
+
+                        //ratio = (CenterPoint - x * 16) / 16;
+                        ratio = (navi.Navi_Location().Right - x * 16) / 16;
+                        
+
+                        if (tile.HeightLeft > tile.HeightRight)
+                            point = (tile.HeightLeft - tile.HeightRight) * ratio;
+                        else
+                            point = 16 - (tile.HeightRight - tile.HeightLeft) * ratio;
+
+                        //just landed
+                        if (navi.Navi_Location().Bottom > ((y + 1) * 16) - point)
+                        {
+                            if (tile.DeathTile)
+                            {
+                                Host_Navi.Location = stage.EntryPoint;
+                                navi.Speed.Y = 0;
+                            }
+                            else
+                            {
+                                navi.Set_LocationY((y + 1) * 16 - point);
+                                navi.Speed.Y = 0;
+                                OnGround = true;
+                            }
+                        }
+
+                        if (navi.Navi_Location().Bottom + 1 > ((y + 1) * 16) - point)
+                        {
+                            OnGround = true;
+                        }
+                    }
+                    navi.OnGround = OnGround;
+                }
+        }
 
         #endregion
 

@@ -93,6 +93,26 @@ namespace Net_Navis {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap HyruleBG {
+            get {
+                object obj = ResourceManager.GetObject("HyruleBG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap HyruleFG {
+            get {
+                object obj = ResourceManager.GetObject("HyruleFG", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Junker {
             get {
                 object obj = ResourceManager.GetObject("Junker", resourceCulture);
