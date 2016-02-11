@@ -274,7 +274,7 @@ namespace Net_Navis
             NaviGL.LostFocus += NaviGL_LostFocus;
             NaviGL.Disposed += NaviGL_Disposed;            
             NaviGL.Show();
-            //NaviGL.Location = new Point(-1920, 0);
+            NaviGL.Location = new Point(0, 0);
             NaviGL.Width = Screen.PrimaryScreen.WorkingArea.Width;
             NaviGL.Height = Screen.PrimaryScreen.WorkingArea.Height;
             GLControl control = new GLControl(new GraphicsMode(32, 24, 8, 0), 3, 0, GraphicsContextFlags.Default);
@@ -290,7 +290,7 @@ namespace Net_Navis
             GL.Viewport(0, 0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             GL.Ortho(0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height, 0, -1, 1);
             Load_Sprite_Sheets();            
-                                    
+
             
             NaviForm.Hide();
             Init_GL = true;
