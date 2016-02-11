@@ -59,7 +59,7 @@ namespace Net_Navis
         private bool Advance_Physics;
 
 
-        private bool Show_CD = false;
+        private bool Show_CD = true;
 
         private PerformanceTimer Physics_Timer = new PerformanceTimer(60.0);
         
@@ -126,7 +126,7 @@ namespace Net_Navis
             Render_Rate = 1000 / 60.0;
             Host_Navi.Program_Step = 0;            
 			//Host_Navi.set_Animation(Animation_Name_Enum.None)
-            stage = new Stage(StageName.Hyrule);
+            stage = new Stage(StageName.Lobby);
             ScreenZoom = 3.0f;
 
             Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;

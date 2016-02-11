@@ -144,7 +144,7 @@ namespace Net_Navis
 
             for (int x = 0; x < 104; x++)
             {
-                s.CollisionMap.Add(new Point(x, 36), new StageCollisionTile());
+                //s.CollisionMap.Add(new Point(x, 36), new StageCollisionTile());
             }
             s.CollisionMap.Add(new Point(10, 35), new StageCollisionTile(16, 8));
             s.CollisionMap.Add(new Point(11, 35), new StageCollisionTile(8, 0));
