@@ -70,6 +70,8 @@ namespace Net_Navis
 
         public StageCollisionTile(bool deathTile = false)
         {
+            HeightLeft = 16;
+            HeightRight = 16;
             DeathTile = deathTile;            
         }
 
@@ -144,22 +146,22 @@ namespace Net_Navis
 
             for (int x = 0; x < 104; x++)
             {
-                //s.CollisionMap.Add(new Point(x, 36), new StageCollisionTile());
+                s.CollisionMap.Add(new Point(x, 36), new StageCollisionTile());
             }
-            s.CollisionMap.Add(new Point(10, 35), new StageCollisionTile(16, 8));
-            s.CollisionMap.Add(new Point(11, 35), new StageCollisionTile(8, 0));
+            s.CollisionMap.Add(new Point(10, 35), new StageCollisionTile(0, 8));
+            s.CollisionMap.Add(new Point(11, 35), new StageCollisionTile(8, 16));
             s.CollisionMap.Add(new Point(12, 35), new StageCollisionTile());
             s.CollisionMap.Add(new Point(13, 35), new StageCollisionTile());
             
-            s.CollisionMap.Add(new Point(14, 34), new StageCollisionTile(0, 0));
-            s.CollisionMap.Add(new Point(15, 34), new StageCollisionTile(0, 0));
-            s.CollisionMap.Add(new Point(16, 34), new StageCollisionTile(0, 0));
-            s.CollisionMap.Add(new Point(17, 34), new StageCollisionTile(0, 0));
+            s.CollisionMap.Add(new Point(14, 34), new StageCollisionTile());
+            s.CollisionMap.Add(new Point(15, 34), new StageCollisionTile());
+            s.CollisionMap.Add(new Point(16, 34), new StageCollisionTile());
+            s.CollisionMap.Add(new Point(17, 34), new StageCollisionTile());
 
-            s.CollisionMap.Add(new Point(18, 32), new StageCollisionTile(0, 0));
-            s.CollisionMap.Add(new Point(19, 32), new StageCollisionTile(0, 0));
-            s.CollisionMap.Add(new Point(20, 32), new StageCollisionTile(0, 0));
-            s.CollisionMap.Add(new Point(21, 32), new StageCollisionTile(0, 0));
+            s.CollisionMap.Add(new Point(18, 32), new StageCollisionTile());
+            s.CollisionMap.Add(new Point(19, 32), new StageCollisionTile());
+            s.CollisionMap.Add(new Point(20, 32), new StageCollisionTile());
+            s.CollisionMap.Add(new Point(21, 32), new StageCollisionTile());
         }
 
 

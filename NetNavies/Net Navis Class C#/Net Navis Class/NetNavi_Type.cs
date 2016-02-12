@@ -20,6 +20,7 @@ namespace Net_Navis
 		public PointF Location;
         public PointF Location_Last;
 		public PointF Speed;
+        public PointF StepMovement;
 		public float Scale = 1;
 		public Point Sprite;
 		public Point OldSprite;
