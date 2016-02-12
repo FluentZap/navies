@@ -164,7 +164,7 @@ namespace Net_Navis
 
 
         public void Draw_CollisionMap()
-        {                        
+        {
             RectangleF r;
             GL.Disable(EnableCap.Texture2D);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -181,8 +181,8 @@ namespace Net_Navis
                 r = new RectangleF(tile.Key.X * 16 - ScreenScroll.X, tile.Key.Y * 16 - ScreenScroll.Y, 16, 16);                
                 GL.Begin(PrimitiveType.Quads);
                 //Top left, Top right, Bottom right, Bottom left                
-                GL.Vertex2(r.X, r.Y + tile.Value.HeightLeft);             
-                GL.Vertex2(r.Right, r.Y + tile.Value.HeightRight);
+                GL.Vertex2(r.X, r.Y + 16 - tile.Value.HeightLeft);             
+                GL.Vertex2(r.Right, r.Y + 16- tile.Value.HeightRight);
                 GL.Vertex2(r.Right, r.Bottom);
                 GL.Vertex2(r.X, r.Bottom);                                                               
                 GL.End();
