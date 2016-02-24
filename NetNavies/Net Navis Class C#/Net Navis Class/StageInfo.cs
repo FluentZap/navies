@@ -144,10 +144,14 @@ namespace Net_Navis
             s.BG.Add(new StageBackground(new Rectangle(new Point(0, 263), SpriteSize(GLBGTextureName.LobbyFG1)), GLBGTextureName.LobbyFG1, 1.0f, true, false));
             s.BG.Add(new StageBackground(new Rectangle(new Point(832, 263), SpriteSize(GLBGTextureName.LobbyFG1)), GLBGTextureName.LobbyFG1, 1.0f, true, false));
 
-            for (int x = 0; x < 104; x++)
+            for (int x = 3; x < 104; x++)
             {
                 s.CollisionMap.Add(new Point(x, 36), new StageCollisionTile());
             }
+            s.CollisionMap.Add(new Point(0, 35), new StageCollisionTile(16, 16));
+            s.CollisionMap.Add(new Point(1, 35), new StageCollisionTile(16, 8));
+            s.CollisionMap.Add(new Point(2, 35), new StageCollisionTile(8, 0));
+
             s.CollisionMap.Add(new Point(10, 35), new StageCollisionTile(0, 8));
             s.CollisionMap.Add(new Point(11, 35), new StageCollisionTile(8, 16));
             s.CollisionMap.Add(new Point(12, 35), new StageCollisionTile());
