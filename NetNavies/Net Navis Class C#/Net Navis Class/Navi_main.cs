@@ -250,7 +250,7 @@ namespace Net_Navis
                     GLOn = true;
                     OnDesktop = true;
                     Host_Navi.Location = stage.EntryPoint;
-                    Host_Navi.Scale = 1;
+                    Host_Navi.Scale = 1F;
                 }
                 else
                 {
@@ -661,14 +661,10 @@ namespace Net_Navis
 
             if (navi.Navi_Location().Bottom > stage.Bounds.Height)
                 navi.Location.Y = stage.Bounds.Height - navi.GetHitBox().Bottom;
-            //Set on ground
             if (navi.Navi_Location().Bottom == stage.Bounds.Height) { OnGround = true; navi.Speed.Y = 0; navi.StepMovement.Y = 0; }
-            //else
-            //navi.OnGround = false;
-
+            
             //Top bounds
             if (navi.Navi_Location().Top < 0) { navi.Location.Y = 0 - navi.GetHitBox().Top; navi.Speed.Y = 0; navi.StepMovement.Y = 0; }
-
 
             //CollisionMap
             foreach (StageCollisionTile tile in stage.CollisionMap.Values)
@@ -676,12 +672,17 @@ namespace Net_Navis
                 tile.Active = false;
             }
 
-            //Bottom
+            Update_Physics_GL_Left(navi);
+            Update_Physics_GL_Right(navi);
 
-            int CenterTile = (int)((navi.Navi_Location().Left + navi.Navi_Location().Width / 2f) / 16f);
+            Update_Physics_GL_Top(navi);
+            Update_Physics_GL_Bottom(navi, OnGround);            
+        }
 
-            float CenterPoint = navi.Navi_Location().Left + navi.Navi_Location().Width / 2f;
 
+        private void Update_Physics_GL_Bottom(NetNavi_Type navi, bool OnGround)
+        {
+            //Bottom            
             int Top = (int)(navi.Navi_Location().Top / 16);
             int Bottom = (int)(navi.Navi_Location().Bottom / 16);
             int Left = (int)(navi.Navi_Location().Left / 16);
@@ -699,6 +700,7 @@ namespace Net_Navis
                         StageCollisionTile tile = stage.CollisionMap[new Point(x, y)];
                         tile.Active = true;
 
+                        //Slope collision with a center tile
                         float point, pointL, pointR, ratioL, ratioR;
                         point = 16;
                         if (x != Left && x != Right)
@@ -706,37 +708,30 @@ namespace Net_Navis
                             if (tile.HeightLeft > tile.HeightRight) point = tile.HeightLeft; else point = tile.HeightRight;
                         }
                         else
+                        //Slope collision with leftmost or rightmost tile
                         {
                             pointL = 16;
                             pointR = 16;
-                            
+
                             ratioR = (navi.Navi_Location().Right - x * 16) / 16;
                             ratioL = (navi.Navi_Location().Left - x * 16) / 16;
                             if (ratioL >= 0 && ratioL <= 1) pointL = tile.HeightLeft + (tile.HeightRight - tile.HeightLeft) * ratioL;
                             if (ratioR >= 0 && ratioR <= 1) pointR = tile.HeightLeft + (tile.HeightRight - tile.HeightLeft) * ratioR;
                             if (pointL < pointR) point = pointL; else point = pointR;
                         }
-                        
-                        /*
-                        if (tile.HeightRight != tile.HeightLeft)
-                                pointL = tile.HeightLeft + (tile.HeightRight - tile.HeightLeft) * ratio;
-                            point = pointL;
-                        
-                            ratio = (navi.Navi_Location().Left - x * 16) / 16;
-                            if (tile.HeightRight != tile.HeightLeft)
-                                pointR = tile.HeightLeft + (tile.HeightRight - tile.HeightLeft) * ratio;
-                            point = pointR;
-                        */
 
-                        //just landed
+                        //set to ground
                         if (rct.Bottom > (y * 16) + 16 - point)
                         {
                             if (rct.Bottom - (y * 16) - (16 - point) <= 4)
                             {
-                                navi.Set_LocationY(y * 16 + (16 - point));
-                                navi.Speed.Y = 0;
-                                navi.StepMovement.Y = 0;
-                                OnGround = true;
+                                if (navi.Navi_Location().Top < (y * 16 + (16 - point)))
+                                {
+                                    navi.Set_LocationY(y * 16 + (16 - point));
+                                    navi.Speed.Y = 0;
+                                    navi.StepMovement.Y = 0;
+                                    OnGround = true;
+                                }
                             }
                         }
 
@@ -748,6 +743,94 @@ namespace Net_Navis
                     }
                     navi.OnGround = OnGround;
                 }
+        }
+
+        private void Update_Physics_GL_Top(NetNavi_Type navi)
+        {
+            //Top
+            int Top = (int)(navi.Navi_Location().Top / 16);            
+            int Left = (int)(navi.Navi_Location().Left / 16);
+            int Right = (int)(navi.Navi_Location().Right / 16);
+
+            //always does hightmap on tile colleciton            
+                for (int x = Left; x <= Right; x++)
+                {                    
+                    RectangleF rct = navi.Navi_Location();
+                    if (stage.CollisionMap.ContainsKey(new Point(x, Top)))
+                    {
+                        StageCollisionTile tile = stage.CollisionMap[new Point(x, Top)];
+                        tile.Active = true;
+                        
+                        //set to Top
+                        if (rct.Top - (Top * 16 + 16) >= -1)
+                        {                            
+                                navi.Set_LocationY(Top * 16 + 16 + navi.Navi_Location().Height);
+                                navi.Speed.Y = 0;
+                                navi.StepMovement.Y = 0;                                                            
+                        }                    
+                    }                    
+                }
+        }
+
+
+        private void Update_Physics_GL_Left(NetNavi_Type navi)
+        {
+            //Top
+            int Top = (int)((navi.Navi_Location().Top + 2) / 16);
+            int Bottom = (int)((navi.Navi_Location().Bottom - 2) / 16);
+            int Left = (int)(navi.Navi_Location().Left / 16);            
+
+            //always does hightmap on tile colleciton    
+            for (int y = Top; y <= Bottom; y++)
+            {
+                RectangleF rct = navi.Navi_Location();
+                if (stage.CollisionMap.ContainsKey(new Point(Left, y)))
+                {
+                    StageCollisionTile tile = stage.CollisionMap[new Point(Left, y)];
+                    tile.Active = true;
+
+                    if (rct.Bottom - (y * 16 + 16 - tile.HeightRight) >= 4)
+                    {
+                        //set to Left
+                        if (rct.Left - (Left * 16 + 16) >= -1)
+                        {
+                            navi.Set_LocationX(Left * 16 + 16);
+                            navi.Speed.X = 0;
+                            navi.StepMovement.X = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void Update_Physics_GL_Right(NetNavi_Type navi)
+        {
+            //Top
+            int Top = (int)((navi.Navi_Location().Top + 2) / 16);
+            int Bottom = (int)((navi.Navi_Location().Bottom - 2) / 16);
+            int Right = (int)(navi.Navi_Location().Right / 16);
+
+            //always does hightmap on tile colleciton    
+            for (int y = Top; y <= Bottom; y++)
+            {
+                RectangleF rct = navi.Navi_Location();
+                if (stage.CollisionMap.ContainsKey(new Point(Right, y)))
+                {
+                    StageCollisionTile tile = stage.CollisionMap[new Point(Right, y)];
+                    tile.Active = true;
+
+                    if (rct.Bottom - (y * 16 + 16 - tile.HeightLeft) >= 4)
+                    {
+                        //set to Left
+                        if (rct.Right > (Right * 16))
+                        {
+                            navi.Set_LocationX(Right * 16 - navi.Navi_Location().Width);
+                            navi.Speed.X = 0;
+                            navi.StepMovement.X = 0;
+                        }
+                    }
+                }
+            }
         }
 
         #endregion
