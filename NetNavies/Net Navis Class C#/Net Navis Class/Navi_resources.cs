@@ -35,7 +35,7 @@ Navi_Name_ID.Junker:
                 case 
 Navi_Name_ID.Raven:
                     N.Navi_Display_Name = "Raven";
-					N.HitBox = new Rectangle(10, 22, 26, 26);
+					N.HitBox = new Rectangle(10, 22, 26, 26);                    
 					N.SpriteSheet = Net_Navis.Resource1.Raven;
                     N.GLSpriteSheetName = GLNaviSpriteName.Raven;
 					N.Icon = Net_Navis.Resource1.Raven_Icon;
