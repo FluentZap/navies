@@ -571,11 +571,11 @@ namespace Net_Navis
             }
 
             //Gravity
-            if (navi.OnGround == false)
-            {
-                navi.Speed.Y = navi.Speed.Y + stage.Gravity.Y;
-                navi.Speed.X = navi.Speed.X + stage.Gravity.X;
-            }
+            //if (navi.OnGround == false)
+            //{
+            navi.Speed.Y = navi.Speed.Y + stage.Gravity.Y;
+            navi.Speed.X = navi.Speed.X + stage.Gravity.X;
+            //}
             //Host_Navi.Speed.Y = Host_Navi.Speed.Y + Gravity.Y
 
             //PointF vector = new PointF(navi.Speed.X * navi.Scale, navi.Speed.Y * navi.Scale);
@@ -689,46 +689,65 @@ namespace Net_Navis
 
             //always does hightmap on tile colleciton
             for (int y = Top; y <= Bottom; y++)
-            //for (int x = Left; x <= Right; x++)
-            {
-                int x;//, y;
-                x = Right;// y = Bottom;
-                RectangleF rct = navi.Navi_Location();
-                if (stage.CollisionMap.ContainsKey(new Point(x, y)))
+                for (int x = Left; x <= Right; x++)
                 {
-                    StageCollisionTile tile = stage.CollisionMap[new Point(x, y)];
-                    tile.Active = true;
-
-                    float point, ratio;
-                    point = 16;
-                    //ratio = (CenterPoint - x * 16) / 16;
-                    
-                        ratio = (navi.Navi_Location().Right - x * 16) / 16;                        
-
-                        if (tile.HeightRight > tile.HeightLeft)
-                            point = tile.HeightLeft + (tile.HeightRight - tile.HeightLeft) * ratio;
-                        //else
-                            //point = 16 - (tile.HeightLeft - tile.HeightRight) * ratio;
-
-                    //just landed
-                    if (navi.Navi_Location().Bottom >= (y * 16))
+                    //int x;//, y;
+                    //x = Right;// y = Bottom;
+                    RectangleF rct = navi.Navi_Location();
+                    if (stage.CollisionMap.ContainsKey(new Point(x, y)))
                     {
-                        if (rct.Bottom - (y * 16) - (16 - point) <= 16)
+                        StageCollisionTile tile = stage.CollisionMap[new Point(x, y)];
+                        tile.Active = true;
+
+                        float point, pointL, pointR, ratioL, ratioR;
+                        point = 16;
+                        if (x != Left && x != Right)
                         {
-                            navi.Set_LocationY(y * 16 + (16 - point));
-                            navi.Speed.Y = 0;
-                            navi.StepMovement.Y = 0;
+                            if (tile.HeightLeft > tile.HeightRight) point = tile.HeightLeft; else point = tile.HeightRight;
+                        }
+                        else
+                        {
+                            pointL = 16;
+                            pointR = 16;
+                            
+                            ratioR = (navi.Navi_Location().Right - x * 16) / 16;
+                            ratioL = (navi.Navi_Location().Left - x * 16) / 16;
+                            if (ratioL >= 0 && ratioL <= 1) pointL = tile.HeightLeft + (tile.HeightRight - tile.HeightLeft) * ratioL;
+                            if (ratioR >= 0 && ratioR <= 1) pointR = tile.HeightLeft + (tile.HeightRight - tile.HeightLeft) * ratioR;
+                            if (pointL < pointR) point = pointL; else point = pointR;
+                        }
+                        
+                        /*
+                        if (tile.HeightRight != tile.HeightLeft)
+                                pointL = tile.HeightLeft + (tile.HeightRight - tile.HeightLeft) * ratio;
+                            point = pointL;
+                        
+                            ratio = (navi.Navi_Location().Left - x * 16) / 16;
+                            if (tile.HeightRight != tile.HeightLeft)
+                                pointR = tile.HeightLeft + (tile.HeightRight - tile.HeightLeft) * ratio;
+                            point = pointR;
+                        */
+
+                        //just landed
+                        if (rct.Bottom > (y * 16) + 16 - point)
+                        {
+                            if (rct.Bottom - (y * 16) - (16 - point) <= 4)
+                            {
+                                navi.Set_LocationY(y * 16 + (16 - point));
+                                navi.Speed.Y = 0;
+                                navi.StepMovement.Y = 0;
+                                OnGround = true;
+                            }
+                        }
+
+                        if (navi.Navi_Location().Bottom + 1 >= (y * 16) + 16 - point)
+                        {
                             OnGround = true;
                         }
-                    }
 
-                    if (navi.Navi_Location().Bottom + 1 >= (y * 16))
-                    {
-                        //OnGround = true;
                     }
+                    navi.OnGround = OnGround;
                 }
-                navi.OnGround = OnGround;
-            }
         }
 
         #endregion
