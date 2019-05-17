@@ -1,6 +1,5 @@
 
- # Net Navies
- <img src="https://bitbucket.org/FastFatToad/navies/raw/3d5a9603d0e8395eebb2abcbb9db7eda2dd5eb66/Shared%20Files/Icons/Raven_Icon.Ico" align="right" title="Net Navi" width="64" height="64">
+# Net Navies 
 
 This project was created to program a Network Navigator inspired by the Mega Man Battle Network games
 
