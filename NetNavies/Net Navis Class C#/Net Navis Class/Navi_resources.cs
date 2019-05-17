@@ -116,6 +116,23 @@ Navi_Name_ID.Zen:
                     N.Acrobatics = 10;
                     N.ShootPoint = new Point(35, 37);
                     break;
+                case
+Navi_Name_ID.DC24:
+                    N.Navi_Display_Name = "DC24";
+                    N.HitBox = new Rectangle(18, 9, 34, 49);
+                    N.SpriteSheet = Net_Navis.Resource1.DC24;
+                    N.GLSpriteSheetName = GLNaviSpriteName.DC24;
+                    N.Icon = Net_Navis.Resource1.DC24_Icon;
+                    N.SpriteSize = new Point(64, 64);
+                    N.HealthMax = 100;
+                    N.EnergyMax = 100;
+                    N.Weight = 15;
+                    N.GroundSpeed = 0.2f;
+                    N.AirSpeed = 0.1f;
+                    N.DashSpeed = 0.3f;
+                    N.Acrobatics = 10;
+                    N.ShootPoint = new Point(51, 29);
+                    break;
 			}
             N.NaviID = Navi_Name;
             N.NAVIEXEID = NAVIEXEID;
@@ -320,7 +337,39 @@ Animation_Name_Enum.Zen_Dash:
                     frames[0] = new Ani_Frame(new Point(5, 0), 0);                    
                     Ani.Frame = frames;
                     Ani.Hold_Index = 0;
+                    break;			
+                            //---------------DC-24--------------
+                case
+Animation_Name_Enum.DC24_Standing:
+                    frames = new Ani_Frame[1];
+                    frames[0] = new Ani_Frame(new Point(0, 0), 0);
+                    Ani.Frame = frames;
+                    Ani.Hold_Index = 0;
                     break;
+                case
+Animation_Name_Enum.DC24_Runing:
+                    frames = new Ani_Frame[8];
+                    
+                    frames[0] = new Ani_Frame(new Point(1, 0), 8);
+                    frames[1] = new Ani_Frame(new Point(2, 0), 8);
+                    frames[2] = new Ani_Frame(new Point(3, 0), 8);
+                    frames[3] = new Ani_Frame(new Point(4, 0), 8);
+                    frames[4] = new Ani_Frame(new Point(5, 0), 8);
+                    frames[5] = new Ani_Frame(new Point(6, 0), 8);
+                    frames[6] = new Ani_Frame(new Point(7, 0), 8);
+                    frames[7] = new Ani_Frame(new Point(8, 0), 8);                                 
+
+                    Ani.Frame = frames;
+                    Ani.RepeatFrame = 0;
+
+                    break;
+                case
+Animation_Name_Enum.DC24_Jumping:
+                    frames = new Ani_Frame[1];
+                    frames[0] = new Ani_Frame(new Point(0, 1), 0);                    
+                    Ani.Frame = frames;
+                    Ani.Hold_Index = 0;
+                    break;                
 			}
 
 			return Ani;
@@ -472,6 +521,29 @@ Navi_Name_ID.Zen:
                             Navi.set_Animation(Animation_Name_Enum.Zen_Jumping);
                     }
 					break;
+
+                case
+Navi_Name_ID.DC24:
+                    if (Navi.OnGround == true)
+                    {
+                        if (Navi.Running == true)
+                        {
+                            if (!(Navi.Current_Animation == Animation_Name_Enum.DC24_Runing))
+                                Navi.set_Animation(Animation_Name_Enum.DC24_Runing);
+                        }
+                        else
+                        {
+                            if (!(Navi.Current_Animation == Animation_Name_Enum.DC24_Standing))
+                                Navi.set_Animation(Animation_Name_Enum.DC24_Standing);
+                        }
+                    }
+                    else
+                    {
+                        if (!(Navi.Current_Animation == Animation_Name_Enum.DC24_Jumping))
+                            Navi.set_Animation(Animation_Name_Enum.DC24_Jumping);
+                    }
+
+                    break;
 			}
 		}
 	}
@@ -490,7 +562,8 @@ Navi_Name_ID.Zen:
         Vex = 2,
         Barnabus = 3,
         Rebel = 4,        
-        Zen = 6
+        Zen = 6,
+        DC24 = 7
     }    
 
 	public enum Animation_Name_Enum
@@ -517,6 +590,9 @@ Navi_Name_ID.Zen:
             Zen_Runing,
             Zen_Jumping,
             Zen_Standing,
-            Zen_Dash,            
+            Zen_Dash,
+            DC24_Runing,
+			DC24_Jumping,
+			DC24_Standing,
 		}
 }

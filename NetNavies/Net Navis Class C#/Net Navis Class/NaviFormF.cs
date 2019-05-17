@@ -10,7 +10,7 @@ using System.Xml.Linq;
 namespace Net_Navis
 {
 	public partial class NaviFormF
-	{
+	{       
 
 	}
 }

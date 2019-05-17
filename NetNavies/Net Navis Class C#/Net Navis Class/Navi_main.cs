@@ -50,7 +50,7 @@ namespace Net_Navis
         private Navi_Network_TCP Net;
 
 
-        bool Direct_Control = true;
+        bool Direct_Control = false;
 
         bool OnDesktop = true;
 
@@ -59,7 +59,7 @@ namespace Net_Navis
         private bool Advance_Physics;
 
 
-        private bool Show_CD = true;
+        private bool Show_CD = false;
 
         private PerformanceTimer Physics_Timer = new PerformanceTimer(60.0);
 
@@ -100,7 +100,6 @@ namespace Net_Navis
             //Create and show forms
             NaviForm = new NaviFormF();
             MenuForm = new MenuForm();
-            NaviForm.Show();
             NaviForm.TopMost = true;
             NaviForm.Width = Convert.ToInt32(Host_Navi.GetSize().X);
             NaviForm.Height = Convert.ToInt32(Host_Navi.GetSize().Y);
@@ -125,30 +124,32 @@ namespace Net_Navis
             Physics_Rate = 1000 / 60.0;
             Render_Rate = 1000 / 60.0;
             Host_Navi.Program_Step = 0;
-            //Host_Navi.set_Animation(Animation_Name_Enum.None)
+            //Host_Navi.set_Animation(Animation_Name_Enum.None);
             stage = new Stage(StageName.Lobby);
             ScreenZoom = 3.0f;
 
             Host_Navi.Location.Y = Screen.PrimaryScreen.WorkingArea.Bottom - Host_Navi.GetSize().Y;
             Host_Navi.Location.X = 0;
-            Host_Navi.Scale = 3;
-
+            Host_Navi.Scale = 2;
+            NaviForm.Show();
+            NaviForm.Visible = true;
             Net = new Navi_Network_TCP(this);
 
             //StartNetwork();
-
-            Thread t = new Thread(ConsoleInput);
-            t.IsBackground = true;
-            t.Start();
+            
+            //Thread t = new Thread(ConsoleInput);
+            //t.IsBackground = true;
+            //t.Start();
+            
         }
 
 
-        public void DoEvents()
+        public bool DoEvents()
         {
             Handle_UI();
             Physics_Timer.Stop(); // doesn't actually stop the timer, just updates it
-            //if (Physics_Rate > Physics_Timer.ElapsedTime)
-            //Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);            
+            if (Physics_Rate > Physics_Timer.ElapsedTime)
+            Thread.Sleep((int)(Physics_Rate - Physics_Timer.ElapsedTime) + 1);            
 
             if (Physics_Timer.ElapsedTime > Physics_Rate)
             //if (Advance_Physics == true)
@@ -156,6 +157,7 @@ namespace Net_Navis
                 //Advance_Physics = false;
                 if (!Net.NetworkHold)
                 {
+                    Random_Stuff();
                     Process_Navi_Commands();
                     Update_Physics();
                     Navi_resources.Set_Correct_Animation(ref Host_Navi);
@@ -177,8 +179,24 @@ namespace Net_Navis
                 //Advance_Physics = true;
                 Render_Timer.Start();
             }
-
+            return Term;
         }
+
+        public int nextaction;
+        public int targetlocation;
+
+        public void Random_Stuff()
+        {
+            Random rnd = new Random(DateTime.Now.Millisecond);
+            nextaction--;
+            if (nextaction <= 0)            
+            {
+                targetlocation = rnd.Next(Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox().Width);
+                nextaction = rnd.Next(500, 1000);
+            }            
+        }
+        public bool Term;
+
 
 
         public void Advance_Clients()
@@ -257,19 +275,13 @@ namespace Net_Navis
                     OnDesktop = false;
                     NaviGL.Dispose();
                 }
-            }
+             }
 
             if (pressedkeys.Contains(Keys.OemQuestion))
                 Host_Navi.Shooting = true;
             else
                 Host_Navi.Shooting = false;
-
-            if (pressedkeys.Contains(Keys.D1) && !prevPressedkeys.Contains(Keys.D1))
-                Net.ConnectToPeer("discojoker.com", 53300);
-            else if (pressedkeys.Contains(Keys.D2) && !prevPressedkeys.Contains(Keys.D2))
-                Net.ConnectToPeer("fastfattoad.com", 53300);
-            else if (pressedkeys.Contains(Keys.D3) && !prevPressedkeys.Contains(Keys.D3))
-                Net.ConnectToPeer("127.0.0.1", 53300);
+            
             //else if (pressedkeys.Contains(Keys.T) && !prevPressedkeys.Contains(Keys.T))
             //    StartNetwork("Jonny Flame");
             //else if (pressedkeys.Contains(Keys.Y) && !prevPressedkeys.Contains(Keys.Y))
@@ -290,6 +302,11 @@ namespace Net_Navis
             //    ConnectToPeer("127.0.0.1", 11997);
             //else if (pressedkeys.Contains(Keys.L) && !prevPressedkeys.Contains(Keys.L))
             //    ConnectToPeer("127.0.0.1", 11998);
+
+            if (pressedkeys.Contains(Keys.Escape))
+                Term = true;
+                
+
 
             prevPressedkeys.Clear();
             foreach (System.Windows.Forms.Keys key in pressedkeys)
@@ -352,21 +369,25 @@ namespace Net_Navis
 
         public void Process_Navi_Commands()
         {
-            /*
+            
             if (Direct_Control == false)
             {
-                Host_Navi.Running = false;
-                if (Host_Navi.Navi_Location().Right <= Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox().Width)
-                {
-                    Host_Navi.FaceLeft = false;
+
+                if (Math.Abs(targetlocation - Host_Navi.Navi_Location().Left) > 100)
                     Host_Navi.Running = true;
+                else
+                    Host_Navi.Running = false;
+
+                if (Host_Navi.Navi_Location().Right <= targetlocation)
+                {
+                    Host_Navi.FaceLeft = false;                    
                 }
-                if (Host_Navi.Navi_Location().Right >= Screen.PrimaryScreen.WorkingArea.Right - Host_Navi.GetHitBox().Width)
+                if (Host_Navi.Navi_Location().Left >= targetlocation)
                 {
                     Host_Navi.FaceLeft = true;
                 }
             }
-            */
+            
 
             #region Movement
             //Move Navies
