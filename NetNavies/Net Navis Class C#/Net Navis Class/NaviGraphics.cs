@@ -290,7 +290,7 @@ namespace Net_Navis
             GL.Viewport(0, 0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             GL.Ortho(0, Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height, 0, -1, 1);
             Load_Sprite_Sheets();            
-
+            
             
             NaviForm.Hide();
             Init_GL = true;
@@ -305,6 +305,7 @@ namespace Net_Navis
             GLNaviTexture.Add((int)GLNaviSpriteName.Rebel, load_sprite(Resource1.Rebelpullsheet));
             GLNaviTexture.Add((int)GLNaviSpriteName.Junker, load_sprite(Resource1.Junker));
             GLNaviTexture.Add((int)GLNaviSpriteName.Zen, load_sprite(Resource1.Zen));
+            GLNaviTexture.Add((int)GLNaviSpriteName.DC24, load_sprite(Resource1.DC24));
 
             //Load projectiles
             GLItemTexture[(int)GLItemTextureName.BasicShot] = load_sprite(Net_Navis.Resource1.Shot2);
@@ -344,7 +345,8 @@ namespace Net_Navis
         Vex,
         Rebel,
         Barabus,
-        Zen
+        Zen,
+        DC24
     }
 
     public enum GLItemTextureName

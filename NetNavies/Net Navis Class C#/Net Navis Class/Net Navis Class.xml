@@ -1,12 +1,17 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>NetNavisClass</name>
+        <name>NetNaviClass</name>
     </assembly>
     <members>
         <member name="M:Net_Navis.Navi_Main.Start_GL">
             <summary>
              OpenGL Start Device
+            </summary>
+        </member>
+        <member name="P:Net_Navis.PerformanceTimer.ElapsedTime">
+            <summary>
+            Returns difference between stop time and start time in milliseconds.
             </summary>
         </member>
         <member name="T:Net_Navis.Resource1">
@@ -40,6 +45,41 @@
               Looks up a localized resource of type System.Drawing.Bitmap.
             </summary>
         </member>
+        <member name="P:Net_Navis.Resource1.DC24">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Net_Navis.Resource1.DC24_Icon">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+            </summary>
+        </member>
+        <member name="P:Net_Navis.Resource1.HyruleBG">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Net_Navis.Resource1.HyruleFG">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Net_Navis.Resource1.Junker">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Net_Navis.Resource1.LobbyBG1">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Net_Navis.Resource1.LobbyFG1">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
         <member name="P:Net_Navis.Resource1.Raven">
             <summary>
               Looks up a localized resource of type System.Drawing.Bitmap.
@@ -65,6 +105,11 @@
               Looks up a localized resource of type System.Drawing.Bitmap.
             </summary>
         </member>
+        <member name="P:Net_Navis.Resource1.Teleporter">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
         <member name="P:Net_Navis.Resource1.Vex">
             <summary>
               Looks up a localized resource of type System.Drawing.Bitmap.
@@ -75,9 +120,14 @@
               Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
             </summary>
         </member>
-        <member name="P:Net_Navis.PerformanceTimer.ElapsedTime">
+        <member name="P:Net_Navis.Resource1.Zen">
             <summary>
-            Returns difference between stop time and start time in milliseconds.
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:Net_Navis.Resource1.Zen_Icon">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
             </summary>
         </member>
     </members>
